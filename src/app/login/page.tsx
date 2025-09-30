@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import {  setUser } from "@/features/auth/authSlice";
+import { setUser } from "@/features/auth/authSlice";
 
 import {
     Card,
@@ -27,6 +27,7 @@ import { AppDispatch } from "@/store/store";
 import { loginApi } from "@/api/authApi";
 import { setCookie } from "@/lib/cookies";
 import { LoginRequest } from "@/features/auth/types";
+import { AxiosError } from "axios";
 
 const loginSchema = z.object({
     email: z.string().email("Enter a valid email"),
@@ -54,8 +55,10 @@ export default function LoginPage() {
 
             dispatch(setUser({ user: data.user, token: data.token }));
             router.push("/dashboard");
-        } catch (err: any) {
-            console.error("Login failed:", err?.response?.data || err.message);
+        } catch (err: unknown) {
+            const error = err as AxiosError<{ message?: string }>;
+            console.error("Login failed:", error.response?.data?.message || error.message);
+
             form.setError("email", { message: "Invalid email or password" });
         }
     };

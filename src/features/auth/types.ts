@@ -1,3 +1,4 @@
+import { Scope } from "../constants/scope";
 
 
 export interface LoginRequest {
@@ -34,7 +35,7 @@ export interface User {
   email: string;
   phone?: string;
   role: UserRole;
-  scope: string[];
+  scope:Scope[];
   avatar?: string;
   createdAt?: string;
   updatedAt?: string;

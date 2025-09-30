@@ -14,13 +14,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { logoutApi } from "@/api/authApi";
 import { clearUser } from "@/features/auth/authSlice";
 import { AppDispatch, RootState } from "@/store/store";
+import Image from "next/image";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
 
-  const user = useSelector((state: RootState) => state.auth.user);
+  // const user = useSelector((state: RootState) => state.auth.user);
 
   const getPageTitle = () => {
     if (!pathname) return "Dashboard";
@@ -53,7 +54,7 @@ export default function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-2 cursor-pointer">
-                <img
+                <Image
                   src={"https://github.com/shadcn.png"}
                   alt="User Avatar"
                   className="h-8 w-8 rounded-full border"
