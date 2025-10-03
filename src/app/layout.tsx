@@ -3,6 +3,7 @@ import './globals.css'
 
 import { ReduxProvider } from "@/providers/ReduxProvider";
 import InitialStateManager from "@/components/common/InitialStateManager";
+import { NotificationProvider } from "@/components/common/NotificationProvider";
 
 // Load Google Fonts
 const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
@@ -21,9 +22,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ReduxProvider>
           {/* 🔑 Hydrates auth + axios headers ONCE at app load */}
           <InitialStateManager />
+          <NotificationProvider>
 
-          {/* Render the actual page */}
-          {children}
+            {/* Render the actual page */}
+            {children}
+          </NotificationProvider>
+
         </ReduxProvider>
       </body>
     </html>

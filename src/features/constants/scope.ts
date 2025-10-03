@@ -12,3 +12,18 @@ export enum Scope {
   RAISE_COMPLAINTS = "raise_complaints",
   UPLOAD_EXCELS = "upload_excels",
 }
+
+
+export const ScopeLabels: Record<Scope, string> = {
+  [Scope.MANAGE_USERS]: "Manage Users",
+  [Scope.MANAGE_ENQUIRIES]: "Manage Enquiries",
+  [Scope.HANDLE_ADMISSIONS]: "Handle Admissions",
+  [Scope.HANDLE_FEES]: "Handle Fees",
+  [Scope.MANAGE_RECEIPTS]: "Manage Receipts",
+  [Scope.UPLOAD_TIMETABLE]: "Upload Timetable",
+  [Scope.UPLOAD_TESTS]: "Upload Tests",
+  [Scope.MANAGE_ATTENDANCE]: "Manage Attendance",
+  [Scope.ADD_NOTES]: "Add Notes",
+  [Scope.RAISE_COMPLAINTS]: "Raise Complaints",
+  [Scope.UPLOAD_EXCELS]: "Upload Excels",
+};

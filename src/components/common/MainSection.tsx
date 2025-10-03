@@ -1,18 +1,20 @@
-import { ReactNode } from "react"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import Navbar from "./Navbar"
-import AppSidebar from "./Sidebar"
+import { ReactNode } from "react";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import Navbar from "./Navbar";
+import AppSidebar from "./Sidebar";
+import { UserRole } from "@/features/constants/roles";
 
 interface MainSectionProps {
-  children: ReactNode
+  children: ReactNode;
+  role?: UserRole; // optional if you want to pass dynamically
 }
 
-export default function MainSection({ children }: MainSectionProps) {
+export default function MainSection({ children, role = UserRole.SUPER_ADMIN }: MainSectionProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-background text-foreground">
-        {/* Sidebar */}
-        <AppSidebar />
+        {/* Sidebar with role */}
+        <AppSidebar role={role} />
 
         {/* Inset wraps Navbar + Content */}
         <SidebarInset className="flex flex-col flex-1 w-full">
@@ -24,5 +26,5 @@ export default function MainSection({ children }: MainSectionProps) {
         </SidebarInset>
       </div>
     </SidebarProvider>
-  )
+  );
 }

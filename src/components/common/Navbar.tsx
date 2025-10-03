@@ -57,6 +57,8 @@ export default function Navbar() {
                 <Image
                   src={"https://github.com/shadcn.png"}
                   alt="User Avatar"
+                  width={200}
+                  height={200}
                   className="h-8 w-8 rounded-full border"
                 />
                 <ChevronDown className="h-4 w-4 text-gray-500" />

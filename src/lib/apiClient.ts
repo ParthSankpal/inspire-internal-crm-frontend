@@ -8,6 +8,7 @@ import { allowClientIdByPass } from "./utils";
 import { removeCookie } from "./cookies";
 import { clearUser } from "@/features/auth/authSlice";
 import { store } from "@/store/store";
+import { API_BASE_URL } from "./env";
 
 const publicPages = [
   "/",
@@ -19,11 +20,11 @@ const publicPages = [
 ];
 
 
-const BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const BASE_API_URL = API_BASE_URL;
 console.log(BASE_API_URL);
 
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: BASE_API_URL,
+  baseURL: "/api",
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });

@@ -1,44 +1,18 @@
 "use client";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarHeader,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Home,
-  Folder,
-  Calendar,
-  FileText,
-  Award,
-  Settings,
-} from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, useSidebar } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Challenges", href: "/challenges", icon: Folder },
-  { name: "Learning Modules", href: "/learning-modules", icon: Calendar },
-  { name: "Leaderboard", href: "/leaderboard", icon: FileText },
-  { name: "Rewards", href: "/rewards", icon: Award },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
+import { getNavigationForRole } from "@/utils/getNavigation";
+import { UserRole } from "@/features/constants/roles";
 
-export default function AppSidebar() {
+export default function AppSidebar({ role }: { role: UserRole }) {
   const pathname = usePathname();
   const { state } = useSidebar();
+
+  const navigation = getNavigationForRole(role);
 
   return (
     <Sidebar collapsible="icon" className="border-r">
