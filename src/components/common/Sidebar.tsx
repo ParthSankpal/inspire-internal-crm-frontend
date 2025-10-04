@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 
 import { getNavigationForRole } from "@/utils/getNavigation";
 import { UserRole } from "@/features/constants/roles";
+import Image from "next/image";
 
 export default function AppSidebar({ role }: { role: UserRole }) {
   const pathname = usePathname();
@@ -19,9 +20,9 @@ export default function AppSidebar({ role }: { role: UserRole }) {
       {/* Header / Logo */}
       <SidebarHeader className="flex items-center justify-center py-4">
         {state === "expanded" ? (
-          <img src={"/cclogo.png"} alt="Logo" className="h-8 w-auto" />
+          <Image src={"/cclogo.png"} alt="Logo" className="h-8 w-auto" width={200} height={200} />
         ) : (
-          <img src={"/cclogoshort.png"} alt="Short Logo" className="h-8 w-auto" />
+          <Image src={"/cclogoshort.png"} alt="Short Logo" className="h-8 w-auto" width={200} height={200} />
         )}
       </SidebarHeader>
 

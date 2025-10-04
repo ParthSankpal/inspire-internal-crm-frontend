@@ -10,10 +10,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDispatch, useSelector } from "react-redux";
-import { logoutApi } from "@/api/authApi";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "@/api/authApi";
 import { clearUser } from "@/features/auth/authSlice";
-import { AppDispatch, RootState } from "@/store/store";
+import { AppDispatch } from "@/store/store";
 import Image from "next/image";
 
 export default function Navbar() {
@@ -35,7 +35,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await logoutApi(); // API + clear cookies
+      await logoutUser(); // API + clear cookies
       dispatch(clearUser()); // Redux reset
       router.push("/");
     } catch (err) {

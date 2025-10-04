@@ -24,7 +24,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { AppDispatch } from "@/store/store";
-import { loginApi } from "@/api/authApi";
+import { loginUser } from "@/api/authApi";
 import { setCookie } from "@/lib/cookies";
 import { LoginRequest } from "@/features/auth/types";
 import { AxiosError } from "axios";
@@ -47,7 +47,7 @@ export default function LoginPage() {
 
     const onSubmit = async (values: LoginFormValues) => {
         try {
-            const data = await loginApi(values as LoginRequest);
+            const data = await loginUser(values as LoginRequest);
 
             // ✅ Save in cookies instead of localStorage
             setCookie("jwt", data.token);

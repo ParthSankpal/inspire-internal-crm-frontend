@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { ConfirmDialog } from "@/components/common/dialogs/ConfirmDialog";
@@ -70,7 +70,8 @@ export default function EnquiriesPage() {
     loadCounselors();
   }, []);
 
-  const loadEnquiries = async () => {
+  // 🟢 useCallback for Enquiries
+  const loadEnquiries = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getAllEnquiries();
@@ -80,30 +81,40 @@ export default function EnquiriesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [notify]);
 
-  const loadCounselors = async () => {
+  // 🟢 useCallback for Counselors
+  const loadCounselors = useCallback(async () => {
     try {
       const allUsers = await getAllUsers();
       setCounselors(allUsers.filter((u) => u.role === "counselor"));
     } catch {
       notify("Failed to load counselors", "error");
     }
-  };
+  }, [notify]);
 
-  // 🟢 Load reminders for an enquiry
-  const openReminderModal = async (row: Enquiry) => {
-    setSelectedEnquiry(row);
-    try {
-      const data = await getReminders(row._id!);
-      setReminders(data);
-    } catch {
-      notify("Failed to load reminders", "error");
-    }
-    resetReminder();
-    setEditingReminderId(null);
-    setReminderOpen(true);
-  };
+  // 🟢 Load data when component mounts
+  useEffect(() => {
+    loadEnquiries();
+    loadCounselors();
+  }, [loadEnquiries, loadCounselors]); // ✅ dependencies fixed
+
+  // 🟢 Load reminders for a given enquiry
+  const openReminderModal = useCallback(
+    async (row: Enquiry) => {
+      setSelectedEnquiry(row);
+      try {
+        const data = await getReminders(row._id!);
+        setReminders(data);
+      } catch {
+        notify("Failed to load reminders", "error");
+      }
+      resetReminder();
+      setEditingReminderId(null);
+      setReminderOpen(true);
+    },
+    [notify]
+  );
 
   const columns = [
     { id: "studentName", label: "Student Name" },

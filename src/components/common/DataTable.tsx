@@ -14,9 +14,9 @@ import {
 interface Column<T> {
   id: string;
   label: string;
-  accessor?: (row: T) => React.ReactNode; 
-  sortKey?: string; 
-  searchKey?: string; 
+  accessor?: (row: T) => React.ReactNode;
+  sortKey?: string;
+  searchKey?: string;
   className?: string;
 }
 
@@ -57,7 +57,8 @@ export function DataTable<T extends { _id?: string }>({
     return data.filter((row) =>
       columns.some((col) => {
         const key = col.searchKey || col.id;
-        const val = (row as any)[key];
+        // const val = (row as any)[key];
+        const val = (row as Record<string, unknown>)[key];
         if (!val) return false;
         return String(val).toLowerCase().includes(searchLower);
       })
@@ -70,20 +71,31 @@ export function DataTable<T extends { _id?: string }>({
 
     return [...filteredData].sort((a, b) => {
       for (const config of sortConfigs) {
-        const aVal = (a as any)[config.key];
-        const bVal = (b as any)[config.key];
+        const aVal = (a as Record<string, unknown>)[config.key];
+        const bVal = (b as Record<string, unknown>)[config.key];
 
         if (aVal == null && bVal == null) continue;
         if (aVal == null) return 1;
         if (bVal == null) return -1;
 
-        let aComp: any = aVal;
-        let bComp: any = bVal;
+        let aComp: number | string = String(aVal);
+        let bComp: number | string = String(bVal);
 
-        if (!isNaN(Date.parse(aVal))) {
+        // ✅ Check if values are date strings
+        if (typeof aVal === "string" && !isNaN(Date.parse(aVal))) {
           aComp = new Date(aVal).getTime();
-          bComp = new Date(bVal).getTime();
-        } else if (!isNaN(aVal) && !isNaN(bVal)) {
+          bComp =
+            typeof bVal === "string" && !isNaN(Date.parse(bVal))
+              ? new Date(bVal).getTime()
+              : 0;
+        }
+        // ✅ Check if both are numeric
+        else if (
+          (typeof aVal === "string" || typeof aVal === "number") &&
+          (typeof bVal === "string" || typeof bVal === "number") &&
+          !isNaN(Number(aVal)) &&
+          !isNaN(Number(bVal))
+        ) {
           aComp = Number(aVal);
           bComp = Number(bVal);
         }
@@ -93,6 +105,7 @@ export function DataTable<T extends { _id?: string }>({
       }
       return 0; // equal across all configs
     });
+
   }, [filteredData, sortConfigs]);
 
   // ---- Handle Pagination ----
@@ -211,7 +224,7 @@ export function DataTable<T extends { _id?: string }>({
           ) : (
             paginatedData.map((row, rowIndex) => (
               <tr
-                key={(row as any)._id || rowIndex}
+                key={(row as Record<string, unknown>)._id?.toString() || rowIndex}
                 className="hover:bg-accent/30 transition-colors"
               >
                 {showIndex && (
@@ -221,13 +234,16 @@ export function DataTable<T extends { _id?: string }>({
                 )}
                 {columns.map((col) => (
                   <td key={col.id} className={cn("p-2 border", col.className)}>
-                    {col.accessor ? col.accessor(row) : (row as any)[col.id]}
+                    {col.accessor
+                      ? col.accessor(row)
+                      : (row as Record<string, unknown>)[col.id] as React.ReactNode}
                   </td>
                 ))}
                 {rowActions && (
                   <td className="p-2 border text-center">{rowActions(row)}</td>
                 )}
               </tr>
+
             ))
           )}
         </tbody>
