@@ -44,19 +44,27 @@ export default function EnquiriesPage() {
   const notify = useNotify();
 
   // ✅ Load data using useCrud hook
-  const {
-    items: enquiries,
-    loading,
-    load,
-    create,
-    update,
-    remove,
-  } = useCrud<Enquiry, EnquiryFormData, EnquiryFormData>({
-    fetchFn: getAllEnquiries,
-    createFn: createEnquiry,
-    updateFn: updateEnquiry,
-    deleteFn: deleteEnquiry,
-  });
+ const {
+  items: enquiries,
+  loading,
+  load,
+  create,
+  update,
+  remove,
+} = useCrud<
+  Enquiry,
+  EnquiryFormData,
+  EnquiryFormData,
+  Enquiry, // CreateReturn
+  Enquiry  // UpdateReturn
+>({
+  fetchFn: getAllEnquiries,
+  createFn: createEnquiry,
+  updateFn: updateEnquiry,
+  deleteFn: deleteEnquiry,
+});
+
+
 
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
