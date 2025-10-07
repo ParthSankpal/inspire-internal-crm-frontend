@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { ConfirmDialog } from "@/components/common/dialogs/ConfirmDialog";
@@ -51,7 +51,7 @@ export default function EnquiriesPage() {
     create,
     update,
     remove,
-  } = useCrud<Enquiry>({
+  } = useCrud<Enquiry, EnquiryFormData, EnquiryFormData>({
     fetchFn: getAllEnquiries,
     createFn: createEnquiry,
     updateFn: updateEnquiry,
@@ -108,20 +108,21 @@ export default function EnquiriesPage() {
     defaultValues: { date: "", message: "" },
   });
 
-  // 🟢 Load data on mount
-  useEffect(() => {
-    load();
-    loadCounselors();
-  }, [load]);
 
-  const loadCounselors = async () => {
+  const loadCounselors = useCallback(async () => {
     try {
       const users = await getAllUsers();
       setCounselors(users.filter((u) => u.role === "counselor"));
     } catch {
       notify("Failed to load counselors", "error");
     }
-  };
+  }, [notify]);
+
+  useEffect(() => {
+    load();
+    loadCounselors();
+  }, [load, loadCounselors]);
+
 
   // 🟢 Reminder modal open
   const openReminderModal = async (row: Enquiry) => {

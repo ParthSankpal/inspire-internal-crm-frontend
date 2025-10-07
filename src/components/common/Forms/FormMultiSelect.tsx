@@ -1,24 +1,28 @@
-// components/common/forms/FormMultiSelect.tsx
 "use client";
-import { Controller, Control } from "react-hook-form";
+import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import Select from "react-select";
 import { FormField } from "./FormField";
 
-interface FormMultiSelectProps {
-  name: string;
+interface Option {
+  value: string;
   label: string;
-  control: Control<any>;
-  options: { value: string; label: string }[];
+}
+
+interface FormMultiSelectProps<T extends FieldValues> {
+  name: Path<T>;
+  label: string;
+  control: Control<T>;
+  options: Option[];
   error?: string;
 }
 
-export const FormMultiSelect = ({
+export const FormMultiSelect = <T extends FieldValues>({
   name,
   label,
   control,
   options,
   error,
-}: FormMultiSelectProps) => (
+}: FormMultiSelectProps<T>) => (
   <Controller
     name={name}
     control={control}
@@ -27,7 +31,7 @@ export const FormMultiSelect = ({
         <Select
           isMulti
           options={options}
-          value={field.value?.map((v: string) => ({ value: v, label: v }))}
+          value={field.value?.map((v: string) => ({ value: v, label: v })) || []}
           onChange={(selected) => field.onChange(selected.map((s) => s.value))}
           placeholder="Select options..."
         />

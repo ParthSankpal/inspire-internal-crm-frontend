@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { User } from "@/features/auth/types";
@@ -28,11 +28,7 @@ export default function UsersPage() {
   const [formData, setFormData] = useState<Partial<User> & { passwordHashed?: string }>({});
   const [scopes, setScopes] = useState<Scope[]>([]);
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  async function loadUsers() {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllUsers();
@@ -42,7 +38,14 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [notify]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+
+
 
   async function handleCreate() {
     try {

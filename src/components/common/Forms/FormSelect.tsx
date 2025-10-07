@@ -7,21 +7,25 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Controller, Control } from "react-hook-form";
+import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import { FormField } from "./FormField";
 
-interface FormSelectProps {
-  name: string;
+interface Option {
+  value: string;
   label: string;
-  control: Control<any>;
-  options: { value: string; label: string }[];
+}
+
+interface FormSelectProps<T extends FieldValues> {
+  name: Path<T>;
+  label: string;
+  control: Control<T>;
+  options: Option[];
   placeholder?: string;
   error?: string;
-  /** Optional custom handler for selection changes */
   onValueChange?: (value: string) => void;
 }
 
-export const FormSelect = ({
+export const FormSelect = <T extends FieldValues>({
   name,
   label,
   control,
@@ -29,7 +33,7 @@ export const FormSelect = ({
   placeholder,
   error,
   onValueChange,
-}: FormSelectProps) => (
+}: FormSelectProps<T>) => (
   <Controller
     name={name}
     control={control}
@@ -39,7 +43,7 @@ export const FormSelect = ({
           value={field.value || ""}
           onValueChange={(val) => {
             field.onChange(val);
-            if (onValueChange) onValueChange(val);
+            onValueChange?.(val);
           }}
         >
           <SelectTrigger>

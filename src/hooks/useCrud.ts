@@ -3,19 +3,19 @@
 import { useState, useCallback } from "react";
 import { useNotify } from "@/components/common/NotificationProvider";
 
-interface UseCrudProps<T> {
+interface UseCrudProps<T, CreateData = T, UpdateData = T> {
   fetchFn: () => Promise<T[]>;
-  createFn: (data: any) => Promise<any>;   
-  updateFn: (id: string, data: any) => Promise<any>;
+  createFn: (data: CreateData) => Promise<any>; 
+  updateFn: (id: string, data: UpdateData) => Promise<any>; 
   deleteFn: (id: string) => Promise<any>; 
 }
 
-export function useCrud<T>({
+export function useCrud<T, CreateData = T, UpdateData = T>({
   fetchFn,
   createFn,
   updateFn,
   deleteFn,
-}: UseCrudProps<T>) {
+}: UseCrudProps<T, CreateData, UpdateData>) {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const notify = useNotify();
@@ -33,7 +33,7 @@ export function useCrud<T>({
     }
   }, [fetchFn, notify]);
 
-  const create = async (data: any) => {
+  const create = async (data: CreateData) => {
     try {
       await createFn(data);
       notify("Created successfully", "success");
@@ -44,7 +44,7 @@ export function useCrud<T>({
     }
   };
 
-  const update = async (id: string, data: any) => {
+  const update = async (id: string, data: UpdateData) => {
     try {
       await updateFn(id, data);
       notify("Updated successfully", "success");
