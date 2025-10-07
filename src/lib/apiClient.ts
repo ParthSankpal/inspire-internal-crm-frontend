@@ -20,16 +20,16 @@ const publicPages = [
 ];
 
 
-const BASE_API_URL = API_BASE_URL;
-console.log(BASE_API_URL);
+console.log(API_BASE_URL);
 
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: "/api",
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
 export const addAuthHeaderToAxios = (authHeader: string | null) => {
+ 
   if (authHeader) {
     axiosClient.defaults.headers.common["Authorization"] = authHeader;
   } else {
