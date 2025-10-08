@@ -43,7 +43,8 @@ axiosClient.interceptors.request.use(
     try {
       if (typeof window !== "undefined") {
         const clientRequestURL = window.location.href.split("#")[0];
-        
+        console.log("Auth Header:", axiosClient.defaults.headers.common["Authorization"]);
+
         // ✅ Set custom header properly
         config.headers.set("client_request_url", clientRequestURL);
 

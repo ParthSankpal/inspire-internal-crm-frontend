@@ -1,6 +1,6 @@
 
 
-import { Home, Users, FileText, Calendar, Receipt, Upload, BookOpen, ClipboardList, NotebookPen, AlertTriangle } from "lucide-react";
+import { Home, Users, FileText, Calendar, Group,Receipt, Upload, BookOpen, ClipboardList, NotebookPen, AlertTriangle } from "lucide-react";
 import { Scope } from "./scope";
 
 export const AppNavigation = [
@@ -21,6 +21,12 @@ export const AppNavigation = [
     href: "/enquiries",
     icon: FileText,
     scopes: [Scope.MANAGE_ENQUIRIES],
+  },
+   {
+    name: "Batches",
+    href: "/batches",
+    icon: Group,
+    scopes: [],
   },
   {
     name: "Admissions",

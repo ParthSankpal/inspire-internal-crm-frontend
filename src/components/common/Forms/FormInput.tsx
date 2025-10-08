@@ -1,7 +1,8 @@
 "use client";
+
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { FormField } from "./FormField";
-import { Controller, Control, FieldValues, Path } from "react-hook-form";
+import { Label } from "@/components/ui/label";
 
 interface FormInputProps<T extends FieldValues> {
   name: Path<T>;
@@ -12,21 +13,36 @@ interface FormInputProps<T extends FieldValues> {
   error?: string;
 }
 
-export const FormInput = <T extends FieldValues>({
+export function FormInput<T extends FieldValues>({
   name,
   label,
   control,
   type = "text",
   placeholder,
   error,
-}: FormInputProps<T>) => (
-  <Controller
-    name={name}
-    control={control}
-    render={({ field }) => (
-      <FormField label={label} error={error}>
-        <Input {...field} type={type} placeholder={placeholder} />
-      </FormField>
-    )}
-  />
-);
+}: FormInputProps<T>) {
+  return (
+    <div className="space-y-1">
+      <Label htmlFor={name}>{label}</Label>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Input
+            id={name}
+            type={type}
+            placeholder={placeholder}
+            {...field}
+            // ✅ Automatically convert to number if type="number"
+            onChange={(e) => {
+              const value =
+                type === "number" ? e.target.valueAsNumber : e.target.value;
+              field.onChange(value);
+            }}
+          />
+        )}
+      />
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+}
