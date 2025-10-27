@@ -51,19 +51,18 @@ export function DataTable<T extends { _id?: string }>({
   const [sortConfigs, setSortConfigs] = useState<SortConfig[]>([]);
 
   // ---- Handle Search ----
+  const safeData = Array.isArray(data) ? data : [];
   const filteredData = useMemo(() => {
-    if (!search) return data;
+    if (!search) return safeData;
     const searchLower = search.toLowerCase();
-    return data.filter((row) =>
+    return safeData.filter((row) =>
       columns.some((col) => {
         const key = col.searchKey || col.id;
-        // const val = (row as any)[key];
         const val = (row as Record<string, unknown>)[key];
-        if (!val) return false;
-        return String(val).toLowerCase().includes(searchLower);
+        return val && String(val).toLowerCase().includes(searchLower);
       })
     );
-  }, [search, data, columns]);
+  }, [search, safeData, columns]);
 
   // ---- Handle Sorting ----
   const sortedData = useMemo(() => {
@@ -109,11 +108,8 @@ export function DataTable<T extends { _id?: string }>({
   }, [filteredData, sortConfigs]);
 
   // ---- Handle Pagination ----
-  const totalPages = Math.ceil(sortedData.length / pageSize) || 1;
-  const paginatedData = sortedData.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const totalPages = Math.ceil(safeData.length / pageSize) || 1;
+  const paginatedData = safeData.slice((page - 1) * pageSize, page * pageSize);
 
   const goToPage = (p: number) => {
     if (p < 1 || p > totalPages) return;

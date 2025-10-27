@@ -16,12 +16,7 @@ import { useNotify } from "@/components/common/NotificationProvider";
 import { Batch, BatchFormData, batchSchema } from "@/features/batches/types";
 import { createBatch, deleteBatch, getAllBatches, updateBatch } from "@/api/batchApi";
 
-/**
- * NOTE:
- * - batchSchema must use z.preprocess for numeric fields (see types file)
- * - We cast zodResolver to Resolver<BatchFormData> to satisfy RHF generics
- *   without losing runtime validation.
- */
+ 
 
 export default function BatchesPage() {
   const notify = useNotify();
@@ -74,6 +69,8 @@ export default function BatchesPage() {
   };
 
   const handleUpdate: SubmitHandler<BatchFormData> = async (data) => {
+    console.log(data);
+    
     if (!selectedBatch?._id) return;
     await update(selectedBatch._id, data);
     notify("Batch updated successfully", "success");

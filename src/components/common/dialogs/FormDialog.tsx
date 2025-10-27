@@ -10,6 +10,8 @@ interface FormDialogProps {
   description?: string;
   children: React.ReactNode;
   submitLabel?: string;
+  showCancel?: boolean;
+  showSubmit?: boolean;
   onSubmit: () => void;
 }
 
@@ -19,6 +21,7 @@ export function FormDialog({
   title,
   description,
   children,
+  showCancel,
   submitLabel = "Save",
   onSubmit,
 }: FormDialogProps) {
@@ -28,6 +31,7 @@ export function FormDialog({
       onOpenChange={onOpenChange}
       title={title}
       description={description}
+      showCancel={showCancel}
       actions={[
         {
           label: submitLabel,

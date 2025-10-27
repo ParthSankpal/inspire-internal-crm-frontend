@@ -38,7 +38,10 @@ const InitialStateManager = () => {
         const jwt = getCookie("jwt");
         const storedUser = getCookie("user");
 
+        console.log(jwt);
         if (jwt) {
+
+          
           // Make sure axios has auth header for the API call if we have a token
           addAuthHeaderToAxios(`Bearer ${jwt}`);
         }

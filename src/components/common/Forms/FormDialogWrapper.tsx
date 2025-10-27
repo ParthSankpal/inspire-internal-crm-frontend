@@ -9,6 +9,8 @@ interface FormDialogWrapperProps {
   title: string;
   onSubmit: () => void;
   submitLabel?: string;
+  showGrid?:boolean;
+  showCancel?:boolean;
   children: ReactNode;
 }
 
@@ -17,6 +19,9 @@ export const FormDialogWrapper = ({
   onOpenChange,
   title,
   onSubmit,
+  showGrid,
+  
+  showCancel,
   submitLabel = "Save",
   children,
 }: FormDialogWrapperProps) => (
@@ -26,7 +31,8 @@ export const FormDialogWrapper = ({
     title={title}
     onSubmit={onSubmit}
     submitLabel={submitLabel}
+    showCancel={showCancel}
   >
-    <div className="grid grid-cols-3 gap-4">{children}</div>
+    <div className={`${ showGrid ?  "grid grid-cols-3 gap-4" : ""}`}>{children}</div>
   </FormDialog>
 );

@@ -35,7 +35,7 @@ export function CustomDialog({
   description,
   children,
   actions = [],
-  showCancel = true,
+  showCancel,
   cancelLabel = "Cancel",
 }: CustomDialogProps) {
   return (

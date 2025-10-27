@@ -29,8 +29,8 @@ export const AppNavigation = [
     scopes: [],
   },
   {
-    name: "Admissions",
-    href: "/admissions",
+    name: "Students",
+    href: "/students",
     icon: BookOpen,
     scopes: [Scope.HANDLE_ADMISSIONS],
   },
