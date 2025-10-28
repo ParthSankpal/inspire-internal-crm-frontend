@@ -1,3 +1,4 @@
+// src/app/students/StudentsTable.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { FormDialogWrapper } from "@/components/common/Forms/FormDialogWrapper";
 import { ConfirmDialog } from "@/components/common/dialogs/ConfirmDialog";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   getAllStudents,
@@ -15,11 +16,7 @@ import {
   restoreStudent,
 } from "@/api/students";
 import { getAllBatches } from "@/api/batchApi";
-import {
-  Student,
-  StudentFormData,
-  studentSchema,
-} from "@/features/students/types";
+import { Student, StudentFormData, studentSchema } from "@/features/students/types";
 import { FormInput } from "@/components/common/Forms/FormInput";
 import { FormSelect } from "@/components/common/Forms/FormSelect";
 import {
@@ -30,19 +27,24 @@ import {
 } from "@/components/ui/accordion";
 import { Batch } from "@/features/batches/types";
 import { useNotify } from "@/components/common/NotificationProvider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const StudentsTable = ({
-  isArchived = false,
-}: {
-  isArchived?: boolean;
-}) => {
+export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) => {
   const [items, setItems] = useState<Student[]>([]);
   const [batches, setBatches] = useState<{ value: string; label: string }[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState<string>("");
   const [selected, setSelected] = useState<Student | null>(null);
   const [openForm, setOpenForm] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    totalItems: 0,
+    totalPages: 1,
+  });
+  const [search, setSearch] = useState("");
 
   const notify = useNotify();
 
@@ -50,9 +52,11 @@ export const StudentsTable = ({
     control,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<StudentFormData>({
-    resolver: zodResolver(studentSchema),
+    resolver: zodResolver(studentSchema) as any,
     defaultValues: {
       firstName: "",
       middleName: "",
@@ -80,44 +84,80 @@ export const StudentsTable = ({
       admissionDate: "",
       status: "Active",
       remarks: "",
+      fees: {
+        baseFees: 0,
+        discountType: "None",
+        discountValue: 0,
+        finalFees: 0,
+        installments: [],
+      },
     },
   });
 
-  // ✅ Fetch Batches
+  // Installments dynamic array
+  const { fields: installments, append, remove } = useFieldArray({
+    control,
+    name: "fees.installments",
+  });
+
+  // Auto compute finalFees = baseFees - discountValue (>= 0)
+  const baseFees = watch("fees.baseFees");
+  const discountValue = watch("fees.discountValue");
+  useEffect(() => {
+    const bf = Number(baseFees || 0);
+    const dv = Number(discountValue || 0);
+    const final = Math.max(bf - dv, 0);
+    setValue("fees.finalFees", final);
+  }, [baseFees, discountValue, setValue]);
+
+  // Fetch batches
   useEffect(() => {
     (async () => {
       try {
         const batchList = await getAllBatches();
         setBatches(
-          batchList.map((b: Batch) => ({
+          batchList.data?.map((b: Batch) => ({
             value: b._id || "",
             label: b.name || "Unnamed Batch",
           }))
         );
-      } catch (err) {
+      } catch {
         notify("Failed to load batches", "error");
       }
     })();
-  }, []);
+  }, [notify]);
 
-  // ✅ Fetch Students
+  // Load students
   const loadStudents = async () => {
     setLoading(true);
     try {
-      const res = await getAllStudents({ isArchived });
+      const res = await getAllStudents({
+        page: pagination.page,
+        limit: pagination.limit,
+        search,
+        batchId: selectedBatch,
+        isArchived,
+      });
       setItems(res.data);
-    } catch (err) {
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.pagination.totalItems,
+        totalPages: res.pagination.totalPages,
+      }));
+    } catch {
       notify("Failed to load students", "error");
     } finally {
       setLoading(false);
     }
   };
 
+
+
   useEffect(() => {
     loadStudents();
-  }, [isArchived]);
+  }, [pagination.page, pagination.limit, search, selectedBatch, isArchived]);
 
-  // ✅ Create Student
+  // Create student
   const handleCreate = async (data: StudentFormData) => {
     try {
       await createStudent(data);
@@ -125,12 +165,12 @@ export const StudentsTable = ({
       setOpenForm(false);
       reset();
       loadStudents();
-    } catch (err) {
-      notify("Failed to create student", "error");
+    } catch (err: any) {
+      notify(err?.message || "Failed to create student", "error");
     }
   };
 
-  // ✅ Update Student
+  // Update student
   const handleUpdate = async (data: StudentFormData) => {
     if (!selected?._id) return;
     try {
@@ -139,12 +179,12 @@ export const StudentsTable = ({
       setEditOpen(false);
       reset();
       loadStudents();
-    } catch (err) {
-      notify("Failed to update student", "error");
+    } catch (err: any) {
+      notify(err?.message || "Failed to update student", "error");
     }
   };
 
-  // ✅ Delete Student
+  // Delete (archive)
   const handleDelete = async () => {
     if (!selected?._id) return;
     try {
@@ -152,23 +192,23 @@ export const StudentsTable = ({
       notify("Student archived 🗃️", "info");
       setDeleteOpen(false);
       loadStudents();
-    } catch (err) {
+    } catch {
       notify("Failed to archive student", "error");
     }
   };
 
-  // ✅ Restore Student
+  // Restore
   const handleRestore = async (id: string) => {
     try {
       await restoreStudent(id);
       notify("Student restored successfully ♻️", "success");
       loadStudents();
-    } catch (err) {
+    } catch {
       notify("Failed to restore student", "error");
     }
   };
 
-  // ✅ Columns
+  // Columns
   const columns = [
     { id: "studentId", label: "ID" },
     {
@@ -181,8 +221,7 @@ export const StudentsTable = ({
     {
       id: "batch",
       label: "Batch",
-      accessor: (r: Student) =>
-        r.batch?.name ? `${r.batch.name}` : "—",
+      accessor: (r: Student) => r.batch?.name || "—",
     },
     { id: "status", label: "Status" },
   ];
@@ -199,6 +238,13 @@ export const StudentsTable = ({
               reset({
                 ...row,
                 batch: row.batch?._id || "",
+                fees: row.fees || {
+                  baseFees: 0,
+                  discountType: "None",
+                  discountValue: 0,
+                  finalFees: 0,
+                  installments: [],
+                },
               });
               setEditOpen(true);
             }}
@@ -224,25 +270,16 @@ export const StudentsTable = ({
     </div>
   );
 
-  // ✅ Reusable Form UI
+  // The form JSX
   const renderStudentForm = () => (
     <Accordion type="single" collapsible className="w-full space-y-2">
+      {/* Personal */}
       <AccordionItem value="personal">
         <AccordionTrigger>👤 Personal Information</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput
-            name="firstName"
-            label="First Name"
-            control={control}
-            error={errors.firstName?.message}
-          />
+          <FormInput name="firstName" label="First Name" control={control} />
           <FormInput name="middleName" label="Middle Name" control={control} />
-          <FormInput
-            name="lastName"
-            label="Last Name"
-            control={control}
-            error={errors.lastName?.message}
-          />
+          <FormInput name="lastName" label="Last Name" control={control} />
           <FormSelect
             name="gender"
             label="Gender"
@@ -253,35 +290,21 @@ export const StudentsTable = ({
               { value: "Other", label: "Other" },
             ]}
           />
-          <FormInput
-            name="dob"
-            label="Date of Birth"
-            type="date"
-            control={control}
-          />
-          <FormInput
-            name="aadhaarNo"
-            label="Aadhaar Number"
-            control={control}
-          />
+          <FormInput name="dob" label="Date of Birth" type="date" control={control} />
+          <FormInput name="aadhaarNo" label="Aadhaar No" control={control} />
         </AccordionContent>
       </AccordionItem>
 
-      {/* 📞 Contact */}
+      {/* Contact */}
       <AccordionItem value="contact">
         <AccordionTrigger>📞 Contact</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput
-            name="contact.phone"
-            label="Phone"
-            control={control}
-            error={errors.contact?.phone?.message}
-          />
+          <FormInput name="contact.phone" label="Phone" control={control} />
           <FormInput name="contact.email" label="Email" control={control} />
         </AccordionContent>
       </AccordionItem>
 
-      {/* 👨‍👩‍👧 Parent Info */}
+      {/* Parent */}
       <AccordionItem value="parent">
         <AccordionTrigger>👨‍👩‍👧 Parent Information</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
@@ -293,29 +316,29 @@ export const StudentsTable = ({
         </AccordionContent>
       </AccordionItem>
 
-      {/* 🏠 Address */}
+      {/* Address */}
       <AccordionItem value="address">
         <AccordionTrigger>🏠 Address</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="address.line1" label="Address Line 1" control={control} />
-          <FormInput name="address.line2" label="Address Line 2" control={control} />
+          <FormInput name="address.line1" label="Line 1" control={control} />
+          <FormInput name="address.line2" label="Line 2" control={control} />
           <FormInput name="address.city" label="City" control={control} />
           <FormInput name="address.state" label="State" control={control} />
           <FormInput name="address.pincode" label="Pincode" control={control} />
         </AccordionContent>
       </AccordionItem>
 
-      {/* 🎓 Academic Info */}
+      {/* Academic */}
       <AccordionItem value="academic">
-        <AccordionTrigger>🎓 Academic Information</AccordionTrigger>
+        <AccordionTrigger>🎓 Academic Info</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="academicInfo.schoolName" label="School Name" control={control} />
+          <FormInput name="academicInfo.schoolName" label="School" control={control} />
           <FormInput name="academicInfo.grade10Marks" label="10th Marks" control={control} />
           <FormInput name="academicInfo.grade10PassingYear" label="10th Passing Year" control={control} />
         </AccordionContent>
       </AccordionItem>
 
-      {/* 🧾 Admission Details */}
+      {/* Admission */}
       <AccordionItem value="admission">
         <AccordionTrigger>🧾 Admission Details</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
@@ -348,23 +371,139 @@ export const StudentsTable = ({
           <FormInput name="remarks" label="Remarks" control={control} />
         </AccordionContent>
       </AccordionItem>
+
+      {/* Fees */}
+      <AccordionItem value="fees">
+        <AccordionTrigger>💰 Fees Details</AccordionTrigger>
+        <AccordionContent className="grid grid-cols-3 gap-4">
+          <FormInput name="fees.baseFees" label="Base Fees" control={control} type="number" />
+          <FormSelect
+            name="fees.discountType"
+            label="Discount Type"
+            control={control}
+            options={[
+              { value: "None", label: "None" },
+              { value: "Onetime", label: "Onetime" },
+              { value: "Installments", label: "Installments" },
+            ]}
+          />
+          <FormInput name="fees.discountValue" label="Discount Value" control={control} type="number" />
+          <FormInput name="fees.finalFees" label="Final Fees" control={control} type="number" readOnly />
+
+          {/* Installments block */}
+          {watch("fees.discountType") === "Installments" && (
+            <div className="col-span-3 mt-4">
+              <h3 className="font-semibold mb-2">Installment Details</h3>
+
+              {installments.length > 0 ? (
+                <div className="space-y-3">
+                  {installments.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="grid grid-cols-5 gap-3 items-end border p-3 rounded-lg bg-muted/10"
+                    >
+                      <FormInput
+                        name={`fees.installments.${index}.installmentNo`}
+                        label="No."
+                        control={control}
+                        type="number"
+                      />
+                      <FormInput
+                        name={`fees.installments.${index}.dueDate`}
+                        label="Due Date"
+                        control={control}
+                        type="date"
+                      />
+                      <FormInput
+                        name={`fees.installments.${index}.amount`}
+                        label="Amount"
+                        control={control}
+                        type="number"
+                      />
+                      <FormSelect
+                        name={`fees.installments.${index}.status`}
+                        label="Status"
+                        control={control}
+                        options={[
+                          { value: "Pending", label: "Pending" },
+                          { value: "Paid", label: "Paid" },
+                          { value: "Overdue", label: "Overdue" },
+                        ]}
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="button"
+                        onClick={() => remove(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 mb-2">No installments added yet.</p>
+              )}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() =>
+                  append({
+                    installmentNo: installments.length + 1,
+                    dueDate: "",
+                    amount: 0,
+                    status: "Pending",
+                  })
+                }
+              >
+                + Add Installment
+              </Button>
+            </div>
+          )}
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-4 items-center justify-end">
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        <div className="w-64">
+          <FormSelect
+            name="batch"
+            label="Batch"
+            control={control}
+            placeholder="Select Batch"
+            options={batches}
+            onValueChange={(value) => setSelectedBatch(value)}
+          />
+
+        </div>
         {!isArchived && (
           <Button onClick={() => setOpenForm(true)}>+ New Admission</Button>
         )}
       </div>
 
-      <DataTable
+
+
+      <DataTable<Student>
         columns={columns}
         data={items}
+        totalItems={pagination.totalItems}
+        page={pagination.page}
+        limit={pagination.limit}
+        serverSide
+        searchable
+        onPaginationChange={(info) =>
+          setPagination((prev) => ({ ...prev, page: info.page, limit: info.limit }))
+        }
+        onSearchChange={(val) => setSearch(val)}
         rowActions={rowActions}
+        emptyMessage={loading ? "Loading..." : "No students found"}
         showIndex
-        emptyMessage="No students found"
       />
 
       <FormDialogWrapper
@@ -398,3 +537,5 @@ export const StudentsTable = ({
     </div>
   );
 };
+
+export default StudentsTable;

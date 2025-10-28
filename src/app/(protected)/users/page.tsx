@@ -18,6 +18,13 @@ import { Scope, ScopeLabels } from "@/features/constants/scope";
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    totalItems: 0,
+    totalPages: 1,
+  });
+  const [search, setSearch] = useState("");
   const notify = useNotify();
 
   // dialogs
@@ -28,24 +35,27 @@ export default function UsersPage() {
   const [formData, setFormData] = useState<Partial<User> & { passwordHashed?: string }>({});
   const [scopes, setScopes] = useState<Scope[]>([]);
 
+  // ✅ Fetch paginated users
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getAllUsers();
-      setUsers(data);
+      const res = await getAllUsers(pagination.page, pagination.limit, search);
+      setUsers(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.pagination.totalItems,
+        totalPages: res.pagination.totalPages,
+      }));
     } catch {
       notify("Failed to fetch users", "error");
     } finally {
       setLoading(false);
     }
-  }, [notify]);
+  }, [pagination.page, pagination.limit, search, notify]);
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
-
-
-
 
   async function handleCreate() {
     try {
@@ -54,11 +64,7 @@ export default function UsersPage() {
         return;
       }
 
-      await createUser({
-        ...formData,
-        scope: scopes,
-      });
-
+      await createUser({ ...formData, scope: scopes });
       notify("User created successfully", "success");
       setOpenCreate(false);
       setFormData({});
@@ -97,14 +103,21 @@ export default function UsersPage() {
         <Button onClick={() => setOpenCreate(true)}>Create User</Button>
       </div>
 
-      {loading ? (
+       {loading ? (
         <p>Loading...</p>
       ) : (
         <DataTable<User>
           columns={columns}
           data={users}
-          showIndex
+          totalItems={pagination.totalItems}
+          page={pagination.page}
+          limit={pagination.limit}
+          serverSide
           searchable
+          onPaginationChange={(info) =>
+            setPagination((prev) => ({ ...prev, page: info.page, limit: info.limit }))
+          }
+          onSearchChange={(val) => setSearch(val)}
           rowActions={(row) => (
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => notify(`Edit ${row.name}`, "info")}>

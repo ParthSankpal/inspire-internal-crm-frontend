@@ -1,11 +1,22 @@
 import { Enquiry, Reminder } from "@/features/enquiries/types";
+import { PaginatedResponse } from "@/features/pagination";
 import { axiosClient } from "@/lib/apiClient";
 
 // ✅ GET all enquiries
-export async function getAllEnquiries(): Promise<Enquiry[]> {
-  const { data } = await axiosClient.get<Enquiry[]>("/enquiries");
-  console.log(data);
-  
+export async function getAllEnquiries(
+  page = 1,
+  limit = 10,
+  search = "",
+  status?: string
+): Promise<PaginatedResponse<Enquiry>> {
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+    search,
+    ...(status ? { status } : {}),
+  }).toString();
+
+  const { data } = await axiosClient.get<PaginatedResponse<Enquiry>>(`/enquiries?${queryParams}`);
   return data;
 }
 

@@ -1,6 +1,84 @@
+// src/features/students/types.ts
 import { z } from "zod";
 
 export type StudentStatus = "Active" | "Left" | "Completed" | "Hold";
+export type DiscountType = "None" | "Onetime" | "Installments";
+export type InstallmentStatus = "Pending" | "Paid" | "Overdue";
+
+export interface Installment {
+  installmentNo: number;
+  dueDate: string; // ISO date (YYYY-MM-DD)
+  amount: number;
+  status: InstallmentStatus;
+}
+
+export interface Fees {
+  baseFees: number;
+  discountType: DiscountType;
+  discountValue: number;
+  finalFees: number;
+  installments: Installment[];
+}
+
+export interface Student {
+  _id?: string;
+  studentId?: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  gender: "Male" | "Female" | "Other";
+  dob: string; // ISO date string in frontend
+  aadhaarNo?: string;
+
+  contact: {
+    email?: string;
+    phone: string;
+  };
+
+  parent: {
+    fatherName: string;
+    motherName: string;
+    fatherPhone?: string;
+    motherPhone?: string;
+    occupation?: string;
+  };
+
+  address: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
+
+  academicInfo: {
+    schoolName: string;
+    grade10Marks?: string;
+    grade10PassingYear?: string;
+  };
+
+  course: string;
+  batch?: { _id?: string; name?: string };
+  targetExam: "IIT JEE" | "NEET" | "MHT-CET" | "Foundation" | "Other";
+  admissionDate: string; // ISO date
+  status: StudentStatus;
+  remarks?: string;
+
+  fees: Fees;
+
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Zod Schema for form validation
+ */
+const installmentSchema = z.object({
+  installmentNo: z.number().min(1),
+  dueDate: z.string().min(1, "Due date is required"),
+  amount: z.number().min(1, "Amount is required"),
+  status: z.enum(["Pending", "Paid", "Overdue"]),
+});
 
 export const studentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -38,52 +116,22 @@ export const studentSchema = z.object({
   }),
 
   course: z.string().min(1, "Course is required"),
-  batch: z.string().min(1, "Batch is required"), // ✅ backend expects ObjectId string
+  batch: z.string().min(1, "Batch is required"),
   targetExam: z.enum(["IIT JEE", "NEET", "MHT-CET", "Foundation", "Other"]),
   admissionDate: z.string().min(1, "Admission date is required"),
   status: z.enum(["Active", "Left", "Completed", "Hold"]),
   remarks: z.string().optional(),
+
+  fees: z.object({
+    baseFees: z.number().min(1, "Base fees required"),
+
+    discountValue: z.preprocess((v) => Number(v) || 0, z.number()),
+    finalFees: z.preprocess((v) => Number(v) || 0, z.number().min(0, "Final fees required")),
+
+    discountType: z.enum(["None", "Onetime", "Installments"]),
+
+    installments: z.array(installmentSchema).optional().default([]),
+  }),
 });
 
 export type StudentFormData = z.infer<typeof studentSchema>;
-
-// full Student type (for fetched data)
-export interface Student {
-  _id?: string;
-  studentId?: string;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  gender: "Male" | "Female" | "Other";
-  dob: string;
-  aadhaarNo?: string;
-  contact: {
-    email?: string;
-    phone: string;
-  };
-  parent: {
-    fatherName: string;
-    motherName: string;
-    fatherPhone?: string;
-    motherPhone?: string;
-    occupation?: string;
-  };
-  address: {
-    line1: string;
-    line2?: string;
-    city: string;
-    state: string;
-    pincode: string;
-  };
-  academicInfo: {
-    schoolName: string;
-    grade10Marks?: string;
-    grade10PassingYear?: string;
-  };
-  course: string;
-  batch?: { _id?: string; name?: string }; // ✅ fetched populated batch
-  targetExam: "IIT JEE" | "NEET" | "MHT-CET" | "Foundation" | "Other";
-  admissionDate: string;
-  status: StudentStatus;
-  remarks?: string;
-}

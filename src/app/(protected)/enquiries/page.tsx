@@ -43,28 +43,43 @@ import { FormField } from "@/components/common/Forms/FormField";
 export default function EnquiriesPage() {
   const notify = useNotify();
 
-  // ✅ Load data using useCrud hook
- const {
-  items: enquiries,
-  loading,
-  load,
-  create,
-  update,
-  remove,
-} = useCrud<
-  Enquiry,
-  EnquiryFormData,
-  EnquiryFormData,
-  Enquiry, // CreateReturn
-  Enquiry  // UpdateReturn
->({
-  fetchFn: getAllEnquiries,
-  createFn: createEnquiry,
-  updateFn: updateEnquiry,
-  deleteFn: deleteEnquiry,
-});
+  // 🧭 Pagination & search states
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    totalItems: 0,
+    totalPages: 1,
+  });
+  const [search, setSearch] = useState("");
 
-
+  // 🧭 CRUD Hook setup
+  const {
+    items: enquiries,
+    loading,
+    load,
+    create,
+    update,
+    remove,
+  } = useCrud<
+    Enquiry,
+    EnquiryFormData,
+    EnquiryFormData,
+    Enquiry,
+    Enquiry
+  >({
+    fetchFn: async () => {
+      const res = await getAllEnquiries(pagination.page, pagination.limit, search);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.pagination.totalItems,
+        totalPages: res.pagination.totalPages,
+      }));
+      return res.data;
+    },
+    createFn: createEnquiry,
+    updateFn: updateEnquiry,
+    deleteFn: deleteEnquiry,
+  });
 
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -75,7 +90,22 @@ export default function EnquiriesPage() {
   const [editingReminderId, setEditingReminderId] = useState<string | null>(null);
   const [counselors, setCounselors] = useState<User[]>([]);
 
-  // 🟢 RHF setup for enquiry form
+  // 🧭 Load counselors for dropdown
+  const loadCounselors = useCallback(async () => {
+    try {
+      const usersRes = await getAllUsers(1, 100);
+      setCounselors(usersRes.data.filter((u) => u.role === "counselor"));
+    } catch {
+      notify("Failed to load counselors", "error");
+    }
+  }, [notify]);
+
+  useEffect(() => {
+    load();
+    loadCounselors();
+  }, [load, loadCounselors]);
+
+  // 🧭 React Hook Form setup
   const {
     control,
     handleSubmit,
@@ -105,7 +135,7 @@ export default function EnquiriesPage() {
     },
   });
 
-  // Reminder form
+  // 🧭 Reminder form
   const {
     register: registerReminder,
     handleSubmit: handleSubmitReminder,
@@ -116,23 +146,7 @@ export default function EnquiriesPage() {
     defaultValues: { date: "", message: "" },
   });
 
-
-  const loadCounselors = useCallback(async () => {
-    try {
-      const users = await getAllUsers();
-      setCounselors(users.filter((u) => u.role === "counselor"));
-    } catch {
-      notify("Failed to load counselors", "error");
-    }
-  }, [notify]);
-
-  useEffect(() => {
-    load();
-    loadCounselors();
-  }, [load, loadCounselors]);
-
-
-  // 🟢 Reminder modal open
+  // 🧭 Reminder modal handlers
   const openReminderModal = async (row: Enquiry) => {
     setSelectedEnquiry(row);
     try {
@@ -146,27 +160,6 @@ export default function EnquiriesPage() {
     setReminderOpen(true);
   };
 
-  // 🟢 CRUD operations
-  const handleCreate = async (data: EnquiryFormData) => {
-    await create(data);
-    setAddOpen(false);
-    reset();
-  };
-
-  const handleUpdate = async (data: EnquiryFormData) => {
-    if (!selectedEnquiry?._id) return;
-    await update(selectedEnquiry._id, data);
-    setEditOpen(false);
-    reset();
-  };
-
-  const handleDelete = async () => {
-    if (!selectedEnquiry?._id) return;
-    await remove(selectedEnquiry._id);
-    setDeleteOpen(false);
-  };
-
-  // 🟢 Reminder CRUD
   const handleSaveReminder = async (data: ReminderFormData) => {
     if (!selectedEnquiry?._id) return;
     try {
@@ -196,7 +189,27 @@ export default function EnquiriesPage() {
     }
   };
 
-  // 🟢 Table columns and actions
+  // 🧭 Enquiry CRUD handlers
+  const handleCreate = async (data: EnquiryFormData) => {
+    await create(data);
+    setAddOpen(false);
+    reset();
+  };
+
+  const handleUpdate = async (data: EnquiryFormData) => {
+    if (!selectedEnquiry?._id) return;
+    await update(selectedEnquiry._id, data);
+    setEditOpen(false);
+    reset();
+  };
+
+  const handleDelete = async () => {
+    if (!selectedEnquiry?._id) return;
+    await remove(selectedEnquiry._id);
+    setDeleteOpen(false);
+  };
+
+  // 🧭 Table setup
   const columns = [
     { id: "studentName", label: "Student Name" },
     { id: "phoneNo", label: "Phone" },
@@ -236,6 +249,7 @@ export default function EnquiriesPage() {
 
   return (
     <div className="p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Enquiries</h1>
         <Button
@@ -248,16 +262,25 @@ export default function EnquiriesPage() {
         </Button>
       </div>
 
-      <DataTable
+      {/* Table */}
+      <DataTable<Enquiry>
         columns={columns}
         data={enquiries}
+        totalItems={pagination.totalItems}
+        page={pagination.page}
+        limit={pagination.limit}
+        serverSide
+        searchable
+        onPaginationChange={(info) =>
+          setPagination((prev) => ({ ...prev, page: info.page, limit: info.limit }))
+        }
+        onSearchChange={(val) => setSearch(val)}
         rowActions={rowActions}
-        showIndex
         emptyMessage={loading ? "Loading..." : "No enquiries found"}
+        showIndex
       />
 
-
-      {/* 🟢 Add Enquiry */}
+      {/* Add Enquiry */}
       <FormDialogWrapper
         open={addOpen}
         onOpenChange={setAddOpen}
@@ -317,14 +340,12 @@ export default function EnquiriesPage() {
           }}
         />
 
-
         <FormInput name="reference" label="Reference" control={control} />
         <FormInput name="address" label="Address" control={control} />
         <FormInput name="note" label="Note" control={control} />
-
       </FormDialogWrapper>
 
-      {/* 🟢 Edit Enquiry */}
+      {/* Edit Enquiry */}
       <FormDialogWrapper
         open={editOpen}
         onOpenChange={setEditOpen}
@@ -385,14 +406,12 @@ export default function EnquiriesPage() {
           }}
         />
 
-
         <FormInput name="reference" label="Reference" control={control} />
         <FormInput name="address" label="Address" control={control} />
         <FormInput name="note" label="Note" control={control} />
-
       </FormDialogWrapper>
 
-      {/* 🟢 Reminder Modal */}
+      {/* Reminder Modal */}
       <FormDialog
         open={reminderOpen}
         onOpenChange={setReminderOpen}
@@ -404,14 +423,9 @@ export default function EnquiriesPage() {
           <div className="space-y-2">
             {reminders.length ? (
               reminders.map((r) => (
-                <div
-                  key={r._id}
-                  className="flex items-center justify-between border p-2 rounded"
-                >
+                <div key={r._id} className="flex items-center justify-between border p-2 rounded">
                   <div>
-                    <p className="text-sm font-medium">
-                      {new Date(r.date).toDateString()}
-                    </p>
+                    <p className="text-sm font-medium">{new Date(r.date).toDateString()}</p>
                     <p className="text-xs text-gray-600">{r.message}</p>
                   </div>
                   <div className="flex gap-2">
@@ -428,11 +442,7 @@ export default function EnquiriesPage() {
                     >
                       Edit
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDeleteReminder(r._id!)}
-                    >
+                    <Button size="sm" variant="destructive" onClick={() => handleDeleteReminder(r._id!)}>
                       Delete
                     </Button>
                   </div>
@@ -457,7 +467,7 @@ export default function EnquiriesPage() {
         </div>
       </FormDialog>
 
-      {/* 🟢 Delete Confirm */}
+      {/* Delete Confirm */}
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}

@@ -1,5 +1,7 @@
+import { PaginatedResponse } from "@/features/pagination";
 import { Student, StudentFormData } from "@/features/students/types";
 import { axiosClient } from "@/lib/apiClient";
+
 
 interface GetStudentsParams {
   page?: number;
@@ -10,13 +12,17 @@ interface GetStudentsParams {
   isArchived?: boolean;
 }
 
-export async function getAllStudents(params: GetStudentsParams = {}): Promise<{
-  data: Student[];
-  page: number;
-  totalPages: number;
-  totalRecords: number;
-}> {
-  const { page = 1, limit = 10, search = "", batchId = "", status = "", isArchived = false } = params;
+export async function getAllStudents(
+  params: GetStudentsParams = {}
+): Promise<PaginatedResponse<Student>> {
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+    batchId = "",
+    status = "",
+    isArchived = false,
+  } = params;
 
   const query = new URLSearchParams({
     page: String(page),
@@ -27,7 +33,7 @@ export async function getAllStudents(params: GetStudentsParams = {}): Promise<{
     isArchived: String(isArchived),
   });
 
-  const { data } = await axiosClient.get(`/students?${query.toString()}`);
+  const { data } = await axiosClient.get<PaginatedResponse<Student>>(`/students?${query}`);
   return data;
 }
 
@@ -45,7 +51,6 @@ export async function updateStudent(id: string, updates: StudentFormData): Promi
   const { data } = await axiosClient.put<Student>(`/students/${id}`, updates);
   return data;
 }
-
 
 export async function deleteStudent(id: string): Promise<{ message: string }> {
   const { data } = await axiosClient.delete(`/students/${id}`);

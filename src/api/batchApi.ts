@@ -1,9 +1,14 @@
 import { Batch } from "@/features/batches/types";
+import { PaginatedResponse } from "@/features/pagination";
 import { axiosClient } from "@/lib/apiClient";
 
-// ✅ GET all batches
-export async function getAllBatches(): Promise<Batch[]> {
-  const { data } = await axiosClient.get<Batch[]>("/batches");
+
+
+
+export async function getAllBatches(page = 1, limit = 10): Promise<PaginatedResponse<Batch>> {
+  const { data } = await axiosClient.get<PaginatedResponse<Batch>>(
+    `/batches?page=${page}&limit=${limit}`
+  );
   return data;
 }
 

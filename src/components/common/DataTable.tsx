@@ -1,15 +1,11 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
 
 interface Column<T> {
   id: string;
@@ -20,15 +16,27 @@ interface Column<T> {
   className?: string;
 }
 
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
+  totalItems?: number; // optional if using server-side pagination
+  page?: number;
+  limit?: number;
+  onPaginationChange?: (info: PaginationInfo) => void;
+  onSearchChange?: (value: string) => void;
   rowActions?: (row: T) => React.ReactNode;
   showIndex?: boolean;
   emptyMessage?: string;
   pageSizeOptions?: number[];
-  defaultPageSize?: number;
   searchable?: boolean;
+  serverSide?: boolean; // true when using API pagination
 }
 
 type SortConfig = { key: string; direction: "asc" | "desc" };
@@ -36,23 +44,39 @@ type SortConfig = { key: string; direction: "asc" | "desc" };
 export function DataTable<T extends { _id?: string }>({
   columns,
   data,
+  totalItems,
+  page: externalPage,
+  limit: externalLimit,
+  onPaginationChange,
+  onSearchChange,
   rowActions,
   showIndex = false,
   emptyMessage = "No data found",
-  pageSizeOptions = [5, 10, 20, 50],
-  defaultPageSize = 10,
+  pageSizeOptions = [1, 5, 10, 20, 50],
   searchable = true,
+  serverSide = false,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(defaultPageSize);
-
-  // MULTI-SORT: keep array of { key, direction }
+  const [page, setPage] = useState(externalPage || 1);
+  const [pageSize, setPageSize] = useState(externalLimit || 10);
   const [sortConfigs, setSortConfigs] = useState<SortConfig[]>([]);
+
+  useEffect(() => {
+    if (onPaginationChange) {
+      const total = totalItems ?? data.length;
+      onPaginationChange({
+        page,
+        limit: pageSize,
+        totalItems: total,
+        totalPages: Math.ceil(total / pageSize) || 1,
+      });
+    }
+  }, [page, pageSize, data.length, totalItems]);
 
   // ---- Handle Search ----
   const safeData = Array.isArray(data) ? data : [];
   const filteredData = useMemo(() => {
+    if (serverSide) return safeData;
     if (!search) return safeData;
     const searchLower = search.toLowerCase();
     return safeData.filter((row) =>
@@ -62,11 +86,11 @@ export function DataTable<T extends { _id?: string }>({
         return val && String(val).toLowerCase().includes(searchLower);
       })
     );
-  }, [search, safeData, columns]);
+  }, [search, safeData, columns, serverSide]);
 
   // ---- Handle Sorting ----
   const sortedData = useMemo(() => {
-    if (sortConfigs.length === 0) return filteredData;
+    if (serverSide || sortConfigs.length === 0) return filteredData;
 
     return [...filteredData].sort((a, b) => {
       for (const config of sortConfigs) {
@@ -80,15 +104,15 @@ export function DataTable<T extends { _id?: string }>({
         let aComp: number | string = String(aVal);
         let bComp: number | string = String(bVal);
 
-        // ✅ Check if values are date strings
+        // ✅ Safely handle date strings
         if (typeof aVal === "string" && !isNaN(Date.parse(aVal))) {
           aComp = new Date(aVal).getTime();
-          bComp =
-            typeof bVal === "string" && !isNaN(Date.parse(bVal))
-              ? new Date(bVal).getTime()
-              : 0;
+          if (typeof bVal === "string" && !isNaN(Date.parse(bVal))) {
+            bComp = new Date(bVal).getTime();
+          }
         }
-        // ✅ Check if both are numeric
+
+        // ✅ Safely handle numeric values
         else if (
           (typeof aVal === "string" || typeof aVal === "number") &&
           (typeof bVal === "string" || typeof bVal === "number") &&
@@ -102,39 +126,34 @@ export function DataTable<T extends { _id?: string }>({
         if (aComp < bComp) return config.direction === "asc" ? -1 : 1;
         if (aComp > bComp) return config.direction === "asc" ? 1 : -1;
       }
-      return 0; // equal across all configs
+      return 0;
     });
 
-  }, [filteredData, sortConfigs]);
+  }, [filteredData, sortConfigs, serverSide]);
 
-  // ---- Handle Pagination ----
-  const totalPages = Math.ceil(safeData.length / pageSize) || 1;
-  const paginatedData = safeData.slice((page - 1) * pageSize, page * pageSize);
+  // ---- Pagination ----
+  const totalRecords = totalItems ?? sortedData.length;
+  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const paginatedData = serverSide
+    ? safeData
+    : sortedData.slice((page - 1) * pageSize, page * pageSize);
 
   const goToPage = (p: number) => {
     if (p < 1 || p > totalPages) return;
     setPage(p);
   };
 
-  // ---- Toggle Sorting ----
+  // ---- Sorting ----
   const toggleSort = (col: Column<T>, isShift: boolean) => {
     const key = col.sortKey || col.id;
     let newConfigs = [...sortConfigs];
     const existing = newConfigs.find((c) => c.key === key);
 
     if (!existing) {
-      // Add new config
-      if (isShift) {
-        newConfigs.push({ key, direction: "asc" });
-      } else {
-        newConfigs = [{ key, direction: "asc" }];
-      }
-    } else if (existing.direction === "asc") {
-      existing.direction = "desc";
-    } else {
-      // remove config
-      newConfigs = newConfigs.filter((c) => c.key !== key);
-    }
+      if (isShift) newConfigs.push({ key, direction: "asc" });
+      else newConfigs = [{ key, direction: "asc" }];
+    } else if (existing.direction === "asc") existing.direction = "desc";
+    else newConfigs = newConfigs.filter((c) => c.key !== key);
 
     setSortConfigs(newConfigs);
   };
@@ -152,6 +171,7 @@ export function DataTable<T extends { _id?: string }>({
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
+              onSearchChange?.(e.target.value);
               setPage(1);
             }}
             className="max-w-sm"
@@ -159,20 +179,25 @@ export function DataTable<T extends { _id?: string }>({
         )}
         <div className="flex items-center gap-2">
           <span className="text-sm">Rows per page:</span>
-          <select
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(val) => {
+              const newLimit = Number(val);
+              setPageSize(newLimit);
               setPage(1);
             }}
-            className="border rounded px-2 py-1 text-sm"
           >
-            {pageSizeOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-[80px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {pageSizeOptions.map((opt) => (
+                <SelectItem key={opt} value={opt.toString()}>
+                  {opt}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -182,22 +207,17 @@ export function DataTable<T extends { _id?: string }>({
           <tr className="bg-muted text-left">
             {showIndex && <th className="p-2 border">#</th>}
             {columns.map((col) => {
-              const key = col.sortKey || col.id;
-              const dir = getSortDirection(key);
-
+              const dir = getSortDirection(col.sortKey || col.id);
               return (
                 <th
                   key={col.id}
-                  className={cn(
-                    "p-2 border font-medium cursor-pointer select-none",
-                    col.className
-                  )}
+                  className={cn("p-2 border font-medium cursor-pointer select-none", col.className)}
                   onClick={(e) => toggleSort(col, e.shiftKey)}
                 >
                   <div className="flex items-center gap-1">
                     {col.label}
-                    {dir === "asc" && <ChevronUp className="w-4 h-4 inline" />}
-                    {dir === "desc" && <ChevronDown className="w-4 h-4 inline" />}
+                    {dir === "asc" && <ChevronUp className="w-4 h-4" />}
+                    {dir === "desc" && <ChevronDown className="w-4 h-4" />}
                   </div>
                 </th>
               );
@@ -209,37 +229,23 @@ export function DataTable<T extends { _id?: string }>({
           {paginatedData.length === 0 ? (
             <tr>
               <td
-                colSpan={
-                  columns.length + (rowActions ? 1 : 0) + (showIndex ? 1 : 0)
-                }
+                colSpan={columns.length + (rowActions ? 1 : 0) + (showIndex ? 1 : 0)}
                 className="p-4 text-center text-gray-500"
               >
                 {emptyMessage}
               </td>
             </tr>
           ) : (
-            paginatedData.map((row, rowIndex) => (
-              <tr
-                key={(row as Record<string, unknown>)._id?.toString() || rowIndex}
-                className="hover:bg-accent/30 transition-colors"
-              >
-                {showIndex && (
-                  <td className="p-2 border">
-                    {(page - 1) * pageSize + rowIndex + 1}
-                  </td>
-                )}
+            paginatedData.map((row, i) => (
+              <tr key={(row as any)._id || i} className="hover:bg-accent/30 transition-colors">
+                {showIndex && <td className="p-2 border">{(page - 1) * pageSize + i + 1}</td>}
                 {columns.map((col) => (
                   <td key={col.id} className={cn("p-2 border", col.className)}>
-                    {col.accessor
-                      ? col.accessor(row)
-                      : (row as Record<string, unknown>)[col.id] as React.ReactNode}
+                    {col.accessor ? col.accessor(row) : (row as any)[col.id]}
                   </td>
                 ))}
-                {rowActions && (
-                  <td className="p-2 border text-center">{rowActions(row)}</td>
-                )}
+                {rowActions && <td className="p-2 border text-center">{rowActions(row)}</td>}
               </tr>
-
             ))
           )}
         </tbody>
@@ -248,8 +254,8 @@ export function DataTable<T extends { _id?: string }>({
       {/* Pagination */}
       <div className="flex justify-between items-center p-2 border-t text-sm">
         <span>
-          Showing {(page - 1) * pageSize + 1}–
-          {Math.min(page * pageSize, sortedData.length)} of {sortedData.length}
+          Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalRecords)} of{" "}
+          {totalRecords}
         </span>
         <div className="flex items-center gap-2">
           <Button

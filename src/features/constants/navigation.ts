@@ -35,8 +35,8 @@ export const AppNavigation = [
     scopes: [Scope.HANDLE_ADMISSIONS],
   },
   {
-    name: "Fees",
-    href: "/fees",
+    name: "Payments",
+    href: "/payments",
     icon: Receipt,
     scopes: [Scope.HANDLE_FEES],
   },

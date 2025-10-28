@@ -1,5 +1,6 @@
 import { axiosClient } from "@/lib/apiClient";
 import { LoginRequest, AuthResponse, User } from "@/features/auth/types";
+import { PaginatedResponse } from "@/features/pagination";
 
 // 🔹 Login user
 export async function loginUser(payload: LoginRequest): Promise<AuthResponse> {
@@ -25,9 +26,11 @@ export async function logoutUser(): Promise<{ message: string }> {
   return data;
 }
 
-// 🔹 Get all users
-export async function getAllUsers(): Promise<User[]> {
-  const { data } = await axiosClient.get<User[]>("/auth/all");
+// ✅ Get all users (Paginated)
+export async function getAllUsers(page = 1, limit = 10, search = ""): Promise<PaginatedResponse<User>> {
+  const { data } = await axiosClient.get<PaginatedResponse<User>>(
+    `/auth/all?page=${page}&limit=${limit}&search=${search}`
+  );
   return data;
 }
 

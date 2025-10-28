@@ -1,8 +1,9 @@
+// src/app/students/StudentsPage.tsx
 "use client";
 
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { StudentsTable } from "./StudentsTable";
+import StudentsTable from "./StudentsTable";
 
 export default function StudentsPage() {
   const [activeTab, setActiveTab] = useState("active");

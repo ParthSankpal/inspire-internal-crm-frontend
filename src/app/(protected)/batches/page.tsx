@@ -6,41 +6,29 @@ import { DataTable } from "@/components/common/DataTable";
 import { ConfirmDialog } from "@/components/common/dialogs/ConfirmDialog";
 import { FormDialogWrapper } from "@/components/common/Forms/FormDialogWrapper";
 import { FormInput } from "@/components/common/Forms/FormInput";
-
 import { useForm, SubmitHandler, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { useCrud } from "@/hooks/useCrud";
 import { useNotify } from "@/components/common/NotificationProvider";
-
 import { Batch, BatchFormData, batchSchema } from "@/features/batches/types";
 import { createBatch, deleteBatch, getAllBatches, updateBatch } from "@/api/batchApi";
-
- 
 
 export default function BatchesPage() {
   const notify = useNotify();
 
-  // useCrud typed for Batch and BatchFormData
-  const { items: batches, loading, load, create, update, remove } = useCrud<
-    Batch,
-    BatchFormData,
-    BatchFormData,
-    Batch,
-    Batch
-  >({
-    fetchFn: getAllBatches,
-    createFn: createBatch,
-    updateFn: updateBatch,
-    deleteFn: deleteBatch,
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    totalItems: 0,
+    totalPages: 1,
   });
+  const [loading, setLoading] = useState(false);
 
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
 
-  // ---- useForm: strongly typed to BatchFormData ----
   const {
     control,
     handleSubmit,
@@ -56,36 +44,55 @@ export default function BatchesPage() {
     },
   });
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  // ✅ Fetch paginated batches
+  const fetchBatches = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllBatches(pagination.page, pagination.limit);
+      setBatches(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.pagination.totalItems,
+        totalPages: res.pagination.totalPages,
+      }));
+    } catch (err) {
+      console.error(err);
+      notify("Failed to fetch batches", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // ---- Handlers typed as SubmitHandler<BatchFormData> ----
+  useEffect(() => {
+    fetchBatches();
+  }, [pagination.page, pagination.limit]);
+
+  // ---- CRUD Actions ----
   const handleCreate: SubmitHandler<BatchFormData> = async (data) => {
-    await create(data);
+    await createBatch(data);
     notify("Batch created successfully", "success");
     setAddOpen(false);
     reset();
+    fetchBatches();
   };
 
   const handleUpdate: SubmitHandler<BatchFormData> = async (data) => {
-    console.log(data);
-    
     if (!selectedBatch?._id) return;
-    await update(selectedBatch._id, data);
+    await updateBatch(selectedBatch._id, data);
     notify("Batch updated successfully", "success");
     setEditOpen(false);
     reset();
+    fetchBatches();
   };
 
   const handleDelete = async () => {
     if (!selectedBatch?._id) return;
-    await remove(selectedBatch._id);
+    await deleteBatch(selectedBatch._id);
     notify("Batch deleted successfully", "success");
     setDeleteOpen(false);
+    fetchBatches();
   };
 
-  // Columns for DataTable
   const columns = [
     { id: "name", label: "Batch Name" },
     { id: "startYear", label: "Start Year" },
@@ -128,7 +135,6 @@ export default function BatchesPage() {
 
   return (
     <div className="p-6">
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Batches</h1>
         <Button
@@ -146,16 +152,27 @@ export default function BatchesPage() {
         </Button>
       </div>
 
-      {/* DataTable */}
-      <DataTable
+      {/* ✅ Paginated DataTable */}
+      <DataTable<Batch>
         columns={columns}
         data={batches}
+        totalItems={pagination.totalItems}
+        page={pagination.page}
+        limit={pagination.limit}
+        serverSide
+        onPaginationChange={(info) =>
+          setPagination((prev) => ({
+            ...prev,
+            page: info.page,
+            limit: info.limit,
+          }))
+        }
         rowActions={rowActions}
         showIndex
         emptyMessage={loading ? "Loading..." : "No batches found"}
       />
 
-      {/* Add Dialog */}
+      {/* ✅ Modals and Confirm Dialog */}
       <FormDialogWrapper
         open={addOpen}
         onOpenChange={setAddOpen}
@@ -163,24 +180,11 @@ export default function BatchesPage() {
         onSubmit={handleSubmit(handleCreate)}
       >
         <FormInput name="name" placeholder="2026 Batch" label="Batch Name" control={control} error={errors.name?.message} />
-        <FormInput
-          name="startYear"
-          label="Start Year"
-          control={control}
-          type="number"
-          error={errors.startYear?.message}
-        />
-        <FormInput
-          name="durationYears"
-          label="Duration (Years)"
-          control={control}
-          type="number"
-          error={errors.durationYears?.message}
-        />
+        <FormInput name="startYear" label="Start Year" control={control} type="number" error={errors.startYear?.message} />
+        <FormInput name="durationYears" label="Duration (Years)" control={control} type="number" error={errors.durationYears?.message} />
         <FormInput name="remarks" label="Remarks" control={control} error={errors.remarks?.message} />
       </FormDialogWrapper>
 
-      {/* Edit Dialog */}
       <FormDialogWrapper
         open={editOpen}
         onOpenChange={setEditOpen}
@@ -189,24 +193,11 @@ export default function BatchesPage() {
         submitLabel="Update"
       >
         <FormInput name="name" label="Batch Name" control={control} error={errors.name?.message} />
-        <FormInput
-          name="startYear"
-          label="Start Year"
-          control={control}
-          type="number"
-          error={errors.startYear?.message}
-        />
-        <FormInput
-          name="durationYears"
-          label="Duration (Years)"
-          control={control}
-          type="number"
-          error={errors.durationYears?.message}
-        />
+        <FormInput name="startYear" label="Start Year" control={control} type="number" error={errors.startYear?.message} />
+        <FormInput name="durationYears" label="Duration (Years)" control={control} type="number" error={errors.durationYears?.message} />
         <FormInput name="remarks" label="Remarks" control={control} error={errors.remarks?.message} />
       </FormDialogWrapper>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}

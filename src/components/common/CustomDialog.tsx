@@ -1,4 +1,4 @@
-// components/common/CustomDialog.tsx
+
 "use client";
 
 import {
@@ -40,7 +40,7 @@ export function CustomDialog({
 }: CustomDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl max-h-[90svh] overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}

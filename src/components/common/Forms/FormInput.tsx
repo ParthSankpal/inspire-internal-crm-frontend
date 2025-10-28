@@ -10,6 +10,7 @@ interface FormInputProps<T extends FieldValues> {
   control: Control<T>;
   type?: string;
   placeholder?: string;
+  readOnly?: boolean;
   error?: string;
 }
 
@@ -19,6 +20,7 @@ export function FormInput<T extends FieldValues>({
   control,
   type = "text",
   placeholder,
+  readOnly,
   error,
 }: FormInputProps<T>) {
   return (
@@ -32,6 +34,7 @@ export function FormInput<T extends FieldValues>({
             id={name}
             type={type}
             placeholder={placeholder}
+            disabled={readOnly}
             {...field}
             // ✅ Automatically convert to number if type="number"
             onChange={(e) => {
