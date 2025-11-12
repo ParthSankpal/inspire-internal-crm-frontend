@@ -52,6 +52,19 @@ export default function EnquiriesPage() {
   });
   const [search, setSearch] = useState("");
 
+
+  const fetchEnquiries = useCallback(async () => {
+    const res = await getAllEnquiries(pagination.page, pagination.limit, search);
+    setPagination(prev => {
+      const next = { ...prev, totalItems: res.pagination.totalItems, totalPages: res.pagination.totalPages };
+      if (prev.totalItems === next.totalItems && prev.totalPages === next.totalPages) return prev;
+      return next;
+    });
+
+    return res.data;
+  }, [pagination.page, pagination.limit, search]);
+
+
   // 🧭 CRUD Hook setup
   const {
     items: enquiries,
@@ -67,19 +80,12 @@ export default function EnquiriesPage() {
     Enquiry,
     Enquiry
   >({
-    fetchFn: async () => {
-      const res = await getAllEnquiries(pagination.page, pagination.limit, search);
-      setPagination((prev) => ({
-        ...prev,
-        totalItems: res.pagination.totalItems,
-        totalPages: res.pagination.totalPages,
-      }));
-      return res.data;
-    },
+    fetchFn: fetchEnquiries,
     createFn: createEnquiry,
     updateFn: updateEnquiry,
     deleteFn: deleteEnquiry,
   });
+
 
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -103,7 +109,7 @@ export default function EnquiriesPage() {
   useEffect(() => {
     load();
     loadCounselors();
-  }, [load, loadCounselors]);
+  }, []);
 
   // 🧭 React Hook Form setup
   const {
@@ -134,6 +140,7 @@ export default function EnquiriesPage() {
       note: "",
     },
   });
+
 
   // 🧭 Reminder form
   const {
