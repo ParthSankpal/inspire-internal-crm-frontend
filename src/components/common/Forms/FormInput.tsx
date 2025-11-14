@@ -24,7 +24,7 @@ export function FormInput<T extends FieldValues>({
   error,
 }: FormInputProps<T>) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <Label htmlFor={name}>{label}</Label>
       <Controller
         name={name}
