@@ -25,13 +25,15 @@ export interface Payment {
   type: PaymentType;
   mode: PaymentMode;
   date: string;
+  batch: string;
+  student: string;
+  installmentNo?: string;
   paymentRef?: string;
   bankAccount: BankAccount | string;
   payerName?: string;
   notes?: string;
   createdAt?: string;
 }
-
 export const bankSchema = z.object({
   name: z.string().min(1, "Bank name is required"),
   type: z.enum(["bank", "cash", "wallet"]),
@@ -41,16 +43,33 @@ export const bankSchema = z.object({
   branch: z.string().optional(),
 });
 
-export type BankFormData = z.infer<typeof bankSchema>;
-
-export const paymentSchema = z.object({
-  amount: z.number().positive("Amount must be positive"),
-  type: z.enum(["credit", "debit"]),
-  mode: z.enum(["cash", "online", "cheque", "upi", "card", "other"]),
-  date: z.string().min(1, "Date is required"),
-  bankAccount: z.string().min(1, "Bank account is required"),
-  payerName: z.string().optional(),
-  notes: z.string().optional(),
-});
+export type BankFormData = z.infer<typeof bankSchema>;export const paymentSchema = z
+  .object({
+    amount: z.number().positive("Amount must be positive"),
+    type: z.enum(["credit", "debit"]),
+    batch: z.string().optional(),
+    student: z.string().optional(),
+    installmentNo: z.string().optional(),
+    mode: z.enum(["cash", "online", "cheque", "upi", "card", "other"]),
+    date: z.string(),
+    bankAccount: z.string().min(1, "Bank is required"),
+    payerName: z.string().optional(),
+    notes: z.string().optional(),
+  })
+  .refine(
+    (d) => {
+      if (d.type === "credit") {
+        return d.batch && d.student && d.installmentNo;
+      }
+      return true;
+    },
+    { message: "Batch, Student & Installment are required for credit payments" }
+  );
 
 export type PaymentFormData = z.infer<typeof paymentSchema>;
+
+export interface PaymentPayload extends PaymentFormData {
+  linkedType?: "student" | "other";
+  linkedId?: string | null;
+  linkedInstallmentNo?: number | null;
+}

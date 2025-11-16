@@ -46,7 +46,8 @@ export const FormSelect = <T extends FieldValues>({
             onValueChange?.(val);
           }}
         >
-          <SelectTrigger>
+          
+          <SelectTrigger className=" w-full">
             <SelectValue placeholder={placeholder || "Select..."} />
           </SelectTrigger>
           <SelectContent>

@@ -1,4 +1,3 @@
-// src/app/payments/transactions/usePayments.ts
 import { useCallback, useEffect, useState } from "react";
 import {
   getAllPayments,
@@ -7,11 +6,21 @@ import {
   deletePayment,
   getAllBanks,
 } from "@/api/payments";
-import { Payment, PaymentFormData, BankAccount } from "@/features/payments/types";
+
+import {
+  Payment,
+  PaymentFormData,
+  PaymentPayload,
+  BankAccount,
+} from "@/features/payments/types";
+
 import { useNotify } from "@/components/common/NotificationProvider";
+import { getAllBatches } from "@/api/batchApi";
+import { Batch } from "@/features/batches/types";
 
 export default function usePayments(initialPage = 1, initialLimit = 10) {
   const notify = useNotify();
+
   const [payments, setPayments] = useState<Payment[]>([]);
   const [pagination, setPagination] = useState({
     page: initialPage,
@@ -19,85 +28,113 @@ export default function usePayments(initialPage = 1, initialLimit = 10) {
     totalItems: 0,
     totalPages: 1,
   });
+
   const [loading, setLoading] = useState(false);
   const [banks, setBanks] = useState<BankAccount[]>([]);
+  const [batches, setBatches] =
+    useState<{ value: string; label: string }[]>([]);
 
   const loadBanks = useCallback(async () => {
-    try {
-      const data = await getAllBanks();
-      setBanks(data);
-    } catch {
-      // silent
-    }
+    const data = await getAllBanks();
+    setBanks(data);
   }, []);
 
-  const loadPayments = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await getAllPayments(pagination.page, pagination.limit);
-      setPayments(res.data);
-      setPagination((prev) => {
-        const next = {
+  const loadBatches = useCallback(async () => {
+    const res = await getAllBatches();
+    setBatches(
+      res.data.map((b: Batch) => ({
+        value: b._id!,
+        label: b.name,
+      }))
+    );
+  }, []);
+
+  const loadPayments = useCallback(
+    async () => {
+      try {
+        setLoading(true);
+        const res = await getAllPayments(pagination.page, pagination.limit);
+        setPayments(res.data);
+
+        setPagination((prev) => ({
           ...prev,
           totalItems: res.pagination.totalItems,
           totalPages: res.pagination.totalPages,
-        };
-        if (prev.totalItems === next.totalItems && prev.totalPages === next.totalPages)
-          return prev;
-        return next;
-      });
-    } catch {
-      notify("Failed to load payments", "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, notify]);
+        }));
+      } catch {
+        notify("Failed to load payments", "error");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pagination.page, pagination.limit]
+  );
 
   useEffect(() => {
     loadBanks();
+    loadBatches();
     loadPayments();
-  }, [loadBanks, loadPayments]);
+  }, []);
 
-  const addPayment = async (payload: PaymentFormData) => {
+  // -----------------------------
+  // ADD PAYMENT
+  // -----------------------------
+  const addPayment = async (d: PaymentFormData) => {
     try {
+      const payload: PaymentPayload = {
+        ...d,
+        linkedType: d.type === "credit" ? "student" : "other",
+        linkedId: d.type === "credit" ? d.student : null,
+        linkedInstallmentNo:
+          d.type === "credit" ? Number(d.installmentNo) : null,
+      };
+
       await createPayment(payload);
-      notify("Payment added successfully 💰", "success");
-      await loadPayments();
+      notify("Payment added successfully", "success");
+      loadPayments();
     } catch {
       notify("Failed to add payment", "error");
-      throw new Error("Failed to add payment");
     }
   };
 
-  const editPayment = async (id: string, payload: PaymentFormData) => {
+  // -----------------------------
+  // EDIT PAYMENT
+  // -----------------------------
+  const editPayment = async (id: string, d: PaymentFormData) => {
     try {
+      const payload: PaymentPayload = {
+        ...d,
+        linkedType: d.type === "credit" ? "student" : "other",
+        linkedId: d.type === "credit" ? d.student : null,
+        linkedInstallmentNo:
+          d.type === "credit" ? Number(d.installmentNo) : null,
+      };
+
       await updatePayment(id, payload);
-      notify("Payment updated successfully ✅", "success");
-      await loadPayments();
+      notify("Payment updated", "success");
+      loadPayments();
     } catch {
       notify("Failed to update payment", "error");
-      throw new Error("Failed to update payment");
     }
   };
 
   const removePayment = async (id: string) => {
     try {
       await deletePayment(id);
-      notify("Payment deleted 🗑️", "info");
-      await loadPayments();
+      notify("Payment deleted", "info");
+      loadPayments();
     } catch {
       notify("Failed to delete payment", "error");
-      throw new Error("Failed to delete payment");
     }
   };
 
   return {
     payments,
     banks,
+    batches,
     pagination,
     loading,
     setPagination,
-    loadPayments,
     addPayment,
     editPayment,
     removePayment,

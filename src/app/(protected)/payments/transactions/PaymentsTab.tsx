@@ -12,6 +12,7 @@ export default function PaymentsTab() {
   const {
     payments,
     banks,
+    batches,
     pagination,
     loading,
     setPagination,
@@ -20,6 +21,7 @@ export default function PaymentsTab() {
     removePayment,
   } = usePayments();
 
+  
   const [selected, setSelected] = useState<Payment | null>(null);
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -95,6 +97,7 @@ export default function PaymentsTab() {
         setDeleteOpen={setDeleteOpen}
         selected={selected}
         banksOptions={bankOptions}
+        batchesOption={batches}
         onAdd={async (d) => {
           await addPayment(d);
           setOpen(false);

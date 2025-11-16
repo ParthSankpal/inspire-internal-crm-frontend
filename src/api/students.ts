@@ -1,5 +1,5 @@
 import { PaginatedResponse } from "@/features/pagination";
-import { Student, StudentFormData } from "@/features/students/types";
+import { Student, StudentFormData, StudentResponse } from "@/features/students/types";
 import { axiosClient } from "@/lib/apiClient";
 
 
@@ -38,8 +38,8 @@ export async function getAllStudents(
 }
 
 export async function getStudentById(id: string): Promise<Student> {
-  const { data } = await axiosClient.get<Student>(`/students/${id}`);
-  return data;
+  const { data } = await axiosClient.get<StudentResponse>(`/students/${id}`);
+  return data.data; // unwrap backend response
 }
 
 export async function createStudent(student: StudentFormData): Promise<Student> {

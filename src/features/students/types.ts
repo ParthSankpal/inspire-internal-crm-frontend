@@ -70,6 +70,11 @@ export interface Student {
   updatedAt?: string;
 }
 
+export interface StudentResponse {
+  success: boolean;
+  data: Student;
+}
+
 /**
  * Zod Schema for form validation
  */
