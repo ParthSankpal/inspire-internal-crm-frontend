@@ -294,62 +294,65 @@ export default function EnquiriesPage() {
         title="Add Enquiry"
         onSubmit={handleSubmit(handleCreate)}
       >
-        <FormInput name="studentName" label="Student Name" control={control} error={errors.studentName?.message} />
-        <FormInput name="phoneNo" label="Phone" control={control} error={errors.phoneNo?.message} />
-        <FormInput name="email" label="Email" control={control} />
-        <FormInput name="schoolName" label="School" control={control} />
-        <FormInput name="standard" label="Standard" control={control} />
-        <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
-        <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
-        <FormInput name="parentNames.motherName" label="Mother Name" control={control} />
-        <FormInput name="parentNames.motherOccupation" label="Mother Occupation" control={control} />
+        <div className="  grid md:grid-cols-2 gap-4">
 
-        <FormMultiSelect
-          name="targetExams"
-          label="Target Exams"
-          control={control}
-          error={errors.targetExams?.message}
-          options={[
-            { value: "NEET", label: "NEET" },
-            { value: "IIT-JEE", label: "IIT-JEE" },
-            { value: "Foundation", label: "Foundation" },
-            { value: "Other", label: "Other" },
-          ]}
-        />
+          <FormInput name="studentName" label="Student Name" control={control} error={errors.studentName?.message} />
+          <FormInput name="phoneNo" label="Phone" control={control} error={errors.phoneNo?.message} />
+          <FormInput name="email" label="Email" control={control} />
+          <FormInput name="schoolName" label="School" control={control} />
+          <FormInput name="standard" label="Standard" control={control} />
+          <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
+          <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
+          <FormInput name="parentNames.motherName" label="Mother Name" control={control} />
+          <FormInput name="parentNames.motherOccupation" label="Mother Occupation" control={control} />
 
-        <FormSelect
-          name="status"
-          label="Status"
-          control={control}
-          options={[
-            { value: "new", label: "New" },
-            { value: "counseling_done", label: "Counseling Done" },
-            { value: "admitted", label: "Admitted" },
-            { value: "dropped", label: "Dropped" },
-          ]}
-        />
+          <FormMultiSelect
+            name="targetExams"
+            label="Target Exams"
+            control={control}
+            error={errors.targetExams?.message}
+            options={[
+              { value: "NEET", label: "NEET" },
+              { value: "IIT-JEE", label: "IIT-JEE" },
+              { value: "Foundation", label: "Foundation" },
+              { value: "Other", label: "Other" },
+            ]}
+          />
 
-        <FormSelect
-          name="counselor.id"
-          label="Counselor"
-          control={control}
-          placeholder="Select counselor"
-          options={counselors.map((c) => ({ value: c._id, label: c.name }))}
-          onValueChange={(val) => {
-            const selected = counselors.find((c) => c._id === val);
-            reset((prev) => ({
-              ...prev,
-              counselor: {
-                id: selected?._id || "",
-                name: selected?.name || "",
-              },
-            }));
-          }}
-        />
+          <FormSelect
+            name="status"
+            label="Status"
+            control={control}
+            options={[
+              { value: "new", label: "New" },
+              { value: "counseling_done", label: "Counseling Done" },
+              { value: "admitted", label: "Admitted" },
+              { value: "dropped", label: "Dropped" },
+            ]}
+          />
 
-        <FormInput name="reference" label="Reference" control={control} />
-        <FormInput name="address" label="Address" control={control} />
-        <FormInput name="note" label="Note" control={control} />
+          <FormSelect
+            name="counselor.id"
+            label="Counselor"
+            control={control}
+            placeholder="Select counselor"
+            options={counselors.map((c) => ({ value: c._id, label: c.name }))}
+            onValueChange={(val) => {
+              const selected = counselors.find((c) => c._id === val);
+              reset((prev) => ({
+                ...prev,
+                counselor: {
+                  id: selected?._id || "",
+                  name: selected?.name || "",
+                },
+              }));
+            }}
+          />
+
+          <FormInput name="reference" label="Reference" control={control} />
+          <FormInput name="address" label="Address" control={control} />
+          <FormInput name="note" label="Note" control={control} />
+        </div>
       </FormDialogWrapper>
 
       {/* Edit Enquiry */}

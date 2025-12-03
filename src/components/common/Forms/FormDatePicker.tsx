@@ -1,10 +1,11 @@
 "use client";
 
+import * as React from "react";
 import { Control, Controller, FieldPath, FieldValues } from "react-hook-form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import { format } from "date-fns";
 
 interface FormDatePickerProps<T extends FieldValues> {
@@ -12,14 +13,18 @@ interface FormDatePickerProps<T extends FieldValues> {
   label: string;
   control: Control<T>;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function FormDatePicker<T extends FieldValues>({
   name,
   label,
   control,
-  placeholder = "Select a date",
+  placeholder = "Select date",
+  disabled = false,
 }: FormDatePickerProps<T>) {
+  const [open, setOpen] = React.useState(false);
+
   return (
     <div className="space-y-1">
       <label className="text-sm font-medium">{label}</label>
@@ -31,27 +36,31 @@ export function FormDatePicker<T extends FieldValues>({
           const selectedDate = field.value ? new Date(field.value) : undefined;
 
           return (
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full justify-start"
+                  disabled={disabled}
+                  className="w-full justify-between font-normal"
                 >
-                  {selectedDate ? format(selectedDate, "dd MMM yyyy") : placeholder}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  {selectedDate
+                    ? format(selectedDate, "dd/MM/yyyy")
+                    : placeholder}
+
+                  <ChevronDownIcon className="h-4 w-4 opacity-60" />
                 </Button>
               </PopoverTrigger>
 
-              <PopoverContent className="p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
+                  captionLayout="dropdown"
                   selected={selectedDate}
-                  onSelect={(date) =>
-                    field.onChange(
-                      date ? date.toISOString().split("T")[0] : ""
-                    )
-                  }
+                  onSelect={(date) => {
+                    field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                    setOpen(false);
+                  }}
                   initialFocus
                 />
               </PopoverContent>

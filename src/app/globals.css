@@ -1,4 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,500;1,500&display=swap');
+
 @import url('https://fonts.googleapis.com/css2?family=Gabarito&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -114,11 +117,21 @@
 }
 
 body{
-  font-family: "Gabarito", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
+  color: #1a1c4a;
   font-weight: 400;
   font-style: normal;
 }
+
+.montserrat-500 {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

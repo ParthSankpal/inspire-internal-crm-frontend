@@ -7,8 +7,11 @@ export type InstallmentStatus = "Pending" | "Paid" | "Overdue";
 
 export interface Installment {
   installmentNo: number;
-  dueDate: string; // ISO date (YYYY-MM-DD)
+  dueDate: Date; // ISO date (YYYY-MM-DD)
   amount: number;
+  paidDate: Date;
+  paidAmount: number;
+  pendingAmount: number;
   status: InstallmentStatus;
 }
 

@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNotify } from "@/components/common/NotificationProvider";
 import { Batch, BatchFormData, batchSchema } from "@/features/batches/types";
 import { createBatch, deleteBatch, getAllBatches, updateBatch } from "@/api/batchApi";
+import { FormSelect } from "@/components/common/Forms/FormSelect";
 
 export default function BatchesPage() {
   const notify = useNotify();
@@ -29,6 +30,17 @@ export default function BatchesPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
 
+
+  const classOptions = [
+    { value: "08", label: "Class 8" },
+    { value: "09", label: "Class 9" },
+    { value: "10", label: "Class 10" },
+    { value: "11", label: "Class 11" },
+    { value: "12", label: "Class 12" },
+  ];
+
+
+
   const {
     control,
     handleSubmit,
@@ -40,8 +52,9 @@ export default function BatchesPage() {
       name: "",
       startYear: new Date().getFullYear(),
       durationYears: 2,
+      class: "08",
       remarks: "",
-    },
+    }
   });
 
   // ✅ Fetch paginated batches
@@ -95,6 +108,7 @@ export default function BatchesPage() {
 
   const columns = [
     { id: "name", label: "Batch Name" },
+    { id: "class", label: "Class" },
     { id: "startYear", label: "Start Year" },
     { id: "endYear", label: "End Year" },
     { id: "durationYears", label: "Duration (Years)" },
@@ -113,6 +127,7 @@ export default function BatchesPage() {
             name: row.name,
             startYear: row.startYear,
             durationYears: row.durationYears,
+            class: row.class,        
             remarks: row.remarks ?? "",
           });
           setEditOpen(true);
@@ -179,10 +194,23 @@ export default function BatchesPage() {
         title="Add Batch"
         onSubmit={handleSubmit(handleCreate)}
       >
-        <FormInput name="name" placeholder="2026 Batch" label="Batch Name" control={control} error={errors.name?.message} />
-        <FormInput name="startYear" label="Start Year" control={control} type="number" error={errors.startYear?.message} />
-        <FormInput name="durationYears" label="Duration (Years)" control={control} type="number" error={errors.durationYears?.message} />
-        <FormInput name="remarks" label="Remarks" control={control} error={errors.remarks?.message} />
+
+        <div className=" space-y-4">
+
+          <FormInput name="name" placeholder="2026 Batch" label="Batch Name" control={control} error={errors.name?.message} />
+          <FormInput name="startYear" label="Start Year" control={control} type="number" error={errors.startYear?.message} />
+          <FormSelect
+            name="class"
+            label="Class"
+            control={control}
+            options={classOptions}
+            placeholder="Select Class"
+            error={errors.class?.message}
+          />
+
+          <FormInput name="durationYears" label="Duration (Years)" control={control} type="number" error={errors.durationYears?.message} />
+          <FormInput name="remarks" label="Remarks" control={control} error={errors.remarks?.message} />
+        </div>
       </FormDialogWrapper>
 
       <FormDialogWrapper
@@ -192,10 +220,22 @@ export default function BatchesPage() {
         onSubmit={handleSubmit(handleUpdate)}
         submitLabel="Update"
       >
-        <FormInput name="name" label="Batch Name" control={control} error={errors.name?.message} />
-        <FormInput name="startYear" label="Start Year" control={control} type="number" error={errors.startYear?.message} />
-        <FormInput name="durationYears" label="Duration (Years)" control={control} type="number" error={errors.durationYears?.message} />
-        <FormInput name="remarks" label="Remarks" control={control} error={errors.remarks?.message} />
+        <div className=" space-y-4">
+
+          <FormInput name="name" label="Batch Name" control={control} error={errors.name?.message} />
+          <FormInput name="startYear" label="Start Year" control={control} type="number" error={errors.startYear?.message} />
+          <FormSelect
+            name="class"
+            label="Class"
+            control={control}
+            options={classOptions}
+            placeholder="Select Class"
+            error={errors.class?.message}
+          />
+
+          <FormInput name="durationYears" label="Duration (Years)" control={control} type="number" error={errors.durationYears?.message} />
+          <FormInput name="remarks" label="Remarks" control={control} error={errors.remarks?.message} />
+        </div>
       </FormDialogWrapper>
 
       <ConfirmDialog

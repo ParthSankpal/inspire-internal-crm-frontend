@@ -28,8 +28,11 @@ import {
 import { Batch } from "@/features/batches/types";
 import { useNotify } from "@/components/common/NotificationProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
+import { FormDatePicker } from "@/components/common/Forms/FormDatePicker";
 
 export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) => {
+  const router = useRouter();
   const [items, setItems] = useState<Student[]>([]);
   const [batches, setBatches] = useState<{ value: string; label: string }[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<string>("");
@@ -228,6 +231,14 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
 
   const rowActions = (row: Student) => (
     <div className="flex gap-2 justify-center">
+
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => router.push(`/students/${row._id}`)}
+      >
+        View
+      </Button>
       {!isArchived ? (
         <>
           <Button
@@ -290,7 +301,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
               { value: "Other", label: "Other" },
             ]}
           />
-          <FormInput name="dob" label="Date of Birth" type="date" control={control} />
+          <FormDatePicker name="dob" label="Date of Birth" control={control} />
           <FormInput name="aadhaarNo" label="Aadhaar No" control={control} />
         </AccordionContent>
       </AccordionItem>
@@ -356,7 +367,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
               { value: "Other", label: "Other" },
             ]}
           />
-          <FormInput name="admissionDate" label="Admission Date" type="date" control={control} />
+          <FormDatePicker name="admissionDate" label="Admission Date" control={control} />
           <FormSelect
             name="status"
             label="Status"
@@ -408,11 +419,10 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
                         control={control}
                         type="number"
                       />
-                      <FormInput
+                      <FormDatePicker
                         name={`fees.installments.${index}.dueDate`}
                         label="Due Date"
                         control={control}
-                        type="date"
                       />
                       <FormInput
                         name={`fees.installments.${index}.amount`}
