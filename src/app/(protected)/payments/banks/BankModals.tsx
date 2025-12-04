@@ -48,7 +48,7 @@ export default function BankModals({
 
   useEffect(() => {
     if (selected) {
-      reset(selected as any);
+      reset(selected as BankAccount);
     } else {
       reset();
     }

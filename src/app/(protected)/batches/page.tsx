@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { ConfirmDialog } from "@/components/common/dialogs/ConfirmDialog";
@@ -58,27 +58,28 @@ export default function BatchesPage() {
   });
 
   // ✅ Fetch paginated batches
-  const fetchBatches = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllBatches(pagination.page, pagination.limit);
-      setBatches(res.data);
-      setPagination((prev) => ({
-        ...prev,
-        totalItems: res.pagination.totalItems,
-        totalPages: res.pagination.totalPages,
-      }));
-    } catch (err) {
-      console.error(err);
-      notify("Failed to fetch batches", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchBatches = useCallback(async () => {
+  try {
+    setLoading(true);
+    const res = await getAllBatches(pagination.page, pagination.limit);
+    setBatches(res.data);
+    setPagination((prev) => ({
+      ...prev,
+      totalItems: res.pagination.totalItems,
+      totalPages: res.pagination.totalPages,
+    }));
+  } catch (err) {
+    console.error(err);
+    notify("Failed to fetch batches", "error");
+  } finally {
+    setLoading(false);
+  }
+}, [pagination.page, pagination.limit, notify]);
 
-  useEffect(() => {
-    fetchBatches();
-  }, [pagination.page, pagination.limit]);
+
+ useEffect(() => {
+  fetchBatches();
+}, [fetchBatches]);
 
   // ---- CRUD Actions ----
   const handleCreate: SubmitHandler<BatchFormData> = async (data) => {

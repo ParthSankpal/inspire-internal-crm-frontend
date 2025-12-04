@@ -19,12 +19,15 @@ export default function useBanks() {
       setLoading(true);
       const data = await getAllBanks();
       setBanks(data);
-    } catch (err) {
-      notify("Failed to load banks", "error");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load banks";
+      notify(message, "error");
     } finally {
       setLoading(false);
     }
   }, [notify]);
+
 
   useEffect(() => {
     loadBanks();

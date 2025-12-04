@@ -55,7 +55,7 @@ export async function getAllPayments(
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
-    ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v)),
+    ...Object.fromEntries(Object.entries(filters).filter(([v]) => v)),
   });
 
   const { data } = await axiosClient.get<PaginatedResponse<Payment>>(`/payments?${params}`);

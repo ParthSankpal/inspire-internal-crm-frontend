@@ -106,10 +106,11 @@ export default function EnquiriesPage() {
     }
   }, [notify]);
 
-  useEffect(() => {
-    load();
-    loadCounselors();
-  }, []);
+useEffect(() => {
+  load();
+  loadCounselors();
+}, [load, loadCounselors]);
+
 
   // 🧭 React Hook Form setup
   const {

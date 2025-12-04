@@ -3,14 +3,12 @@
 
 import { FormInput } from "@/components/common/Forms/FormInput";
 import { FormSelect } from "@/components/common/Forms/FormSelect";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { bankSchema, BankFormData } from "@/features/payments/types";
-import { Control } from "react-hook-form";
+import {  BankFormData } from "@/features/payments/types";
+import { Control, FieldErrors } from "react-hook-form";
 
 type Props = {
   control: Control<BankFormData>;
-  errors?: any;
+  errors?: FieldErrors<BankFormData>;
 };
 
 export default function BankForm({ control, errors }: Props) {
