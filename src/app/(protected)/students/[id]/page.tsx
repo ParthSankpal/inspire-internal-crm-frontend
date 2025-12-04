@@ -30,14 +30,14 @@ export default function StudentDetailsPage() {
     if (!student) return <p className="p-6">Loading...</p>;
 
     const exportPDF = () => {
-        const element = pdfRef.current;
+        // const element = pdfRef.current;
 
-        const options = {
-            filename: `${student.firstName}-${student.lastName}-details.pdf`,
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
-            pagebreak: { mode: ["avoid-all"] },
-        };
+        // const options = {
+        //     filename: `${student.firstName}-${student.lastName}-details.pdf`,
+        //     html2canvas: { scale: 2 },
+        //     jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
+        //     pagebreak: { mode: ["avoid-all"] },
+        // };
 
         // html2pdf().set(options).from(element).save();
     };

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Controller } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,21 +23,21 @@ type Option = {
   label: string;
 };
 
-type Props = {
-  name: string;
+type Props<T extends FieldValues> = {
+  name: Path<T>;
   label?: string;
-  control: any;
+  control: Control<T>;
   options: Option[];
   placeholder?: string;
 };
 
-export function FormCombobox({
+export function FormCombobox<T extends FieldValues>({
   name,
   label,
   control,
   options,
   placeholder = "Select...",
-}: Props) {
+}: Props<T>) {
   return (
     <Controller
       name={name}
@@ -51,10 +51,7 @@ export function FormCombobox({
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                >
+                <Button variant="outline" className="w-full justify-start">
                   {selected ? selected.label : placeholder}
                 </Button>
               </PopoverTrigger>
@@ -68,7 +65,6 @@ export function FormCombobox({
                       {options.map((opt) => (
                         <CommandItem
                           key={opt.value}
-                          value={opt.value}
                           onSelect={() => {
                             field.onChange(opt.value);
                           }}

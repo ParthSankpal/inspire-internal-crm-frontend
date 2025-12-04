@@ -7,19 +7,16 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { allowClientIdByPass } from "./utils";
-import { removeCookie } from "./cookies";
-import { clearUser } from "@/features/auth/authSlice";
-import { store } from "@/store/store";
 import { API_BASE_URL } from "./env";
 
-const publicPages = [
-  "/",
-  "/login",
-  "/privacy-policy",
-  "/terms-conditions",
-  "/signup",
-  "/onboarding",
-];
+// const publicPages = [
+//   "/",
+//   "/login",
+//   "/privacy-policy",
+//   "/terms-conditions",
+//   "/signup",
+//   "/onboarding",
+// ];
 
 // ✅ Create a configured Axios instance
 const axiosClient: AxiosInstance = axios.create({

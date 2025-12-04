@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { FormDialogWrapper } from "@/components/common/Forms/FormDialogWrapper";
 import { ConfirmDialog } from "@/components/common/dialogs/ConfirmDialog";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   getAllStudents,
@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/accordion";
 import { Batch } from "@/features/batches/types";
 import { useNotify } from "@/components/common/NotificationProvider";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
 import { FormDatePicker } from "@/components/common/Forms/FormDatePicker";
 
@@ -59,7 +58,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
     setValue,
     formState: { errors },
   } = useForm<StudentFormData>({
-    resolver: zodResolver(studentSchema) as any,
+    resolver: zodResolver(studentSchema) as Resolver<StudentFormData>,
     defaultValues: {
       firstName: "",
       middleName: "",
@@ -96,6 +95,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       },
     },
   });
+
 
   // Installments dynamic array
   const { fields: installments, append, remove } = useFieldArray({
@@ -168,10 +168,12 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       setOpenForm(false);
       reset();
       loadStudents();
-    } catch (err: any) {
-      notify(err?.message || "Failed to create student", "error");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to create student";
+      notify(msg, "error");
     }
   };
+
 
   // Update student
   const handleUpdate = async (data: StudentFormData) => {
@@ -182,10 +184,12 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       setEditOpen(false);
       reset();
       loadStudents();
-    } catch (err: any) {
-      notify(err?.message || "Failed to update student", "error");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update student";
+      notify(msg, "error");
     }
   };
+
 
   // Delete (archive)
   const handleDelete = async () => {
@@ -195,10 +199,13 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       notify("Student archived 🗃️", "info");
       setDeleteOpen(false);
       loadStudents();
-    } catch {
-      notify("Failed to archive student", "error");
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to archive student";
+      notify(msg, "error");
     }
   };
+
 
   // Restore
   const handleRestore = async (id: string) => {
@@ -246,22 +253,71 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
             variant="outline"
             onClick={() => {
               setSelected(row);
+
               reset({
-                ...row,
-                batch: row.batch?._id || "",
-                fees: row.fees || {
-                  baseFees: 0,
-                  discountType: "None",
-                  discountValue: 0,
-                  finalFees: 0,
-                  installments: [],
+                firstName: row.firstName,
+                middleName: row.middleName ?? "",
+                lastName: row.lastName,
+                gender: row.gender,
+                dob: row.dob?.split("T")[0] ?? "",
+
+                aadhaarNo: row.aadhaarNo ?? "",
+
+                contact: {
+                  phone: row.contact?.phone ?? "",
+                  email: row.contact?.email ?? "",
+                },
+
+                parent: {
+                  fatherName: row.parent?.fatherName ?? "",
+                  motherName: row.parent?.motherName ?? "",
+                  fatherPhone: row.parent?.fatherPhone ?? "",
+                  motherPhone: row.parent?.motherPhone ?? "",
+                  occupation: row.parent?.occupation ?? "",
+                },
+
+                address: {
+                  line1: row.address?.line1 ?? "",
+                  line2: row.address?.line2 ?? "",
+                  city: row.address?.city ?? "",
+                  state: row.address?.state ?? "",
+                  pincode: row.address?.pincode ?? "",
+                },
+
+                academicInfo: {
+                  schoolName: row.academicInfo?.schoolName ?? "",
+                  grade10Marks: row.academicInfo?.grade10Marks ?? "",
+                  grade10PassingYear: row.academicInfo?.grade10PassingYear ?? "",
+                },
+
+                course: row.course ?? "",
+                batch: row.batch?._id ?? "",
+
+                targetExam: row.targetExam,
+                admissionDate: row.admissionDate?.split("T")[0] ?? "",
+                status: row.status ?? "Active",
+                remarks: row.remarks ?? "",
+
+                fees: {
+                  baseFees: row.fees?.baseFees ?? 0,
+                  discountType: row.fees?.discountType ?? "None",
+                  discountValue: row.fees?.discountValue ?? 0,
+                  finalFees: row.fees?.finalFees ?? 0,
+                  installments: row.fees?.installments?.map((ins) => ({
+                    installmentNo: ins.installmentNo,
+                    dueDate: ins.dueDate ? ins.dueDate.toString().split("T")[0] : "",
+                    amount: ins.amount,
+                    status: ins.status,
+                  })) ?? [],
                 },
               });
+
               setEditOpen(true);
             }}
           >
             Edit
           </Button>
+
           <Button
             size="sm"
             variant="destructive"
@@ -284,25 +340,27 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
   // The form JSX
   const renderStudentForm = () => (
     <Accordion type="single" collapsible className="w-full space-y-2">
+
       {/* Personal */}
       <AccordionItem value="personal">
         <AccordionTrigger>👤 Personal Information</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="firstName" label="First Name" control={control} />
-          <FormInput name="middleName" label="Middle Name" control={control} />
-          <FormInput name="lastName" label="Last Name" control={control} />
+          <FormInput name="firstName" label="First Name" control={control} error={errors.firstName?.message} />
+          <FormInput name="middleName" label="Middle Name" control={control} error={errors.middleName?.message} />
+          <FormInput name="lastName" label="Last Name" control={control} error={errors.lastName?.message} />
           <FormSelect
             name="gender"
             label="Gender"
             control={control}
+            error={errors.gender?.message}
             options={[
               { value: "Male", label: "Male" },
               { value: "Female", label: "Female" },
               { value: "Other", label: "Other" },
             ]}
           />
-          <FormDatePicker name="dob" label="Date of Birth" control={control} />
-          <FormInput name="aadhaarNo" label="Aadhaar No" control={control} />
+          <FormDatePicker name="dob" label="Date of Birth" control={control} error={errors.dob?.message} />
+          <FormInput name="aadhaarNo" label="Aadhaar No" control={control} error={errors.aadhaarNo?.message} />
         </AccordionContent>
       </AccordionItem>
 
@@ -310,8 +368,8 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       <AccordionItem value="contact">
         <AccordionTrigger>📞 Contact</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="contact.phone" label="Phone" control={control} />
-          <FormInput name="contact.email" label="Email" control={control} />
+          <FormInput name="contact.phone" label="Phone" control={control} error={errors.contact?.phone?.message} />
+          <FormInput name="contact.email" label="Email" control={control} error={errors.contact?.email?.message} />
         </AccordionContent>
       </AccordionItem>
 
@@ -319,11 +377,11 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       <AccordionItem value="parent">
         <AccordionTrigger>👨‍👩‍👧 Parent Information</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="parent.fatherName" label="Father Name" control={control} />
-          <FormInput name="parent.motherName" label="Mother Name" control={control} />
-          <FormInput name="parent.fatherPhone" label="Father Phone" control={control} />
-          <FormInput name="parent.motherPhone" label="Mother Phone" control={control} />
-          <FormInput name="parent.occupation" label="Occupation" control={control} />
+          <FormInput name="parent.fatherName" label="Father Name" control={control} error={errors.parent?.fatherName?.message} />
+          <FormInput name="parent.motherName" label="Mother Name" control={control} error={errors.parent?.motherName?.message} />
+          <FormInput name="parent.fatherPhone" label="Father Phone" control={control} error={errors.parent?.fatherPhone?.message} />
+          <FormInput name="parent.motherPhone" label="Mother Phone" control={control} error={errors.parent?.motherPhone?.message} />
+          <FormInput name="parent.occupation" label="Occupation" control={control} error={errors.parent?.occupation?.message} />
         </AccordionContent>
       </AccordionItem>
 
@@ -331,11 +389,11 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       <AccordionItem value="address">
         <AccordionTrigger>🏠 Address</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="address.line1" label="Line 1" control={control} />
-          <FormInput name="address.line2" label="Line 2" control={control} />
-          <FormInput name="address.city" label="City" control={control} />
-          <FormInput name="address.state" label="State" control={control} />
-          <FormInput name="address.pincode" label="Pincode" control={control} />
+          <FormInput name="address.line1" label="Line 1" control={control} error={errors.address?.line1?.message} />
+          <FormInput name="address.line2" label="Line 2" control={control} error={errors.address?.line2?.message} />
+          <FormInput name="address.city" label="City" control={control} error={errors.address?.city?.message} />
+          <FormInput name="address.state" label="State" control={control} error={errors.address?.state?.message} />
+          <FormInput name="address.pincode" label="Pincode" control={control} error={errors.address?.pincode?.message} />
         </AccordionContent>
       </AccordionItem>
 
@@ -343,9 +401,9 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       <AccordionItem value="academic">
         <AccordionTrigger>🎓 Academic Info</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="academicInfo.schoolName" label="School" control={control} />
-          <FormInput name="academicInfo.grade10Marks" label="10th Marks" control={control} />
-          <FormInput name="academicInfo.grade10PassingYear" label="10th Passing Year" control={control} />
+          <FormInput name="academicInfo.schoolName" label="School" control={control} error={errors.academicInfo?.schoolName?.message} />
+          <FormInput name="academicInfo.grade10Marks" label="10th Marks" control={control} error={errors.academicInfo?.grade10Marks?.message} />
+          <FormInput name="academicInfo.grade10PassingYear" label="10th Passing Year" control={control} error={errors.academicInfo?.grade10PassingYear?.message} />
         </AccordionContent>
       </AccordionItem>
 
@@ -353,12 +411,13 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       <AccordionItem value="admission">
         <AccordionTrigger>🧾 Admission Details</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="course" label="Course" control={control} />
-          <FormSelect name="batch" label="Batch" control={control} options={batches} />
+          <FormInput name="course" label="Course" control={control} error={errors.course?.message} />
+          <FormSelect name="batch" label="Batch" control={control} options={batches} error={errors.batch?.message} />
           <FormSelect
             name="targetExam"
             label="Target Exam"
             control={control}
+            error={errors.targetExam?.message}
             options={[
               { value: "IIT JEE", label: "IIT JEE" },
               { value: "NEET", label: "NEET" },
@@ -367,11 +426,12 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
               { value: "Other", label: "Other" },
             ]}
           />
-          <FormDatePicker name="admissionDate" label="Admission Date" control={control} />
+          <FormDatePicker name="admissionDate" label="Admission Date" control={control} error={errors.admissionDate?.message} />
           <FormSelect
             name="status"
             label="Status"
             control={control}
+            error={errors.status?.message}
             options={[
               { value: "Active", label: "Active" },
               { value: "Completed", label: "Completed" },
@@ -379,7 +439,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
               { value: "Hold", label: "Hold" },
             ]}
           />
-          <FormInput name="remarks" label="Remarks" control={control} />
+          <FormInput name="remarks" label="Remarks" control={control} error={errors.remarks?.message} />
         </AccordionContent>
       </AccordionItem>
 
@@ -387,21 +447,22 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       <AccordionItem value="fees">
         <AccordionTrigger>💰 Fees Details</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="fees.baseFees" label="Base Fees" control={control} type="number" />
+          <FormInput name="fees.baseFees" label="Base Fees" control={control} type="number" error={errors.fees?.baseFees?.message} />
           <FormSelect
             name="fees.discountType"
             label="Discount Type"
             control={control}
+            error={errors.fees?.discountType?.message}
             options={[
               { value: "None", label: "None" },
               { value: "Onetime", label: "Onetime" },
               { value: "Installments", label: "Installments" },
             ]}
           />
-          <FormInput name="fees.discountValue" label="Discount Value" control={control} type="number" />
-          <FormInput name="fees.finalFees" label="Final Fees" control={control} type="number" readOnly />
+          <FormInput name="fees.discountValue" label="Discount Value" control={control} type="number" error={errors.fees?.discountValue?.message} />
+          <FormInput name="fees.finalFees" label="Final Fees" control={control} type="number" readOnly error={errors.fees?.finalFees?.message} />
 
-          {/* Installments block */}
+          {/* Installment block */}
           {watch("fees.discountType") === "Installments" && (
             <div className="col-span-3 mt-4">
               <h3 className="font-semibold mb-2">Installment Details</h3>
@@ -477,6 +538,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       </AccordionItem>
     </Accordion>
   );
+
 
   return (
     <div className="space-y-6">
