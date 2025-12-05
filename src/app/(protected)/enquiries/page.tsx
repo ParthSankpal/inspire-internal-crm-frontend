@@ -101,7 +101,8 @@ export default function EnquiriesPage() {
     try {
       const usersRes = await getAllUsers(1, 100);
       setCounselors(usersRes.data.filter((u) => u.role === "counselor"));
-    } catch {
+    } catch(err) {
+      console.error("❌ Failed to load counselors", err);
       notify("Failed to load counselors", "error");
     }
   }, [notify]);

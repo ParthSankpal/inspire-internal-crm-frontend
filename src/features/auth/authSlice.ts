@@ -1,4 +1,4 @@
-import {  createSlice } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { AuthState } from "./types";
 // import { getCurrentUser, loginUser, logoutUser } from "@/api/authApi";
 
@@ -35,7 +35,7 @@ const initialState: AuthState = {
 //   }
 // );
 
-// // 🔴 Logout
+// 🔴 Logout
 // export const logout = createAsyncThunk("auth/logout", async () => {
 //   await logoutUser();
 //   return null;

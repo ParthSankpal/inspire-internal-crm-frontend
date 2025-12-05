@@ -20,11 +20,12 @@ export async function getCurrentUser(): Promise<AuthResponse> {
 
 // 🔹 Logout user
 export async function logoutUser(): Promise<{ message: string }> {
-  const { data } = await axiosClient.post<{ message: string }>("/auth/logout", null, {
+  const { data } = await axiosClient.post("/auth/logout", {}, {
     withCredentials: true,
   });
   return data;
 }
+
 
 // ✅ Get all users (Paginated)
 export async function getAllUsers(page = 1, limit = 10, search = ""): Promise<PaginatedResponse<User>> {

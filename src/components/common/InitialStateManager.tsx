@@ -10,7 +10,7 @@ import { getCurrentUser } from "@/api/authApi";
 import { RootState } from "@/store/store";
 
 const publicPages = [
-  "/",
+
   "/privacy-policy",
   "/terms-conditions",
   "/signup",

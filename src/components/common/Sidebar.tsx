@@ -5,19 +5,25 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { getNavigationForRole } from "@/utils/getNavigation";
+import { getNavigationForUser } from "@/utils/getNavigation";
 import { UserRole } from "@/features/constants/roles";
 import Image from "next/image";
+import { Scope } from "@/features/constants/scope";
 
-export default function AppSidebar({ role }: { role: UserRole }) {
+export default function AppSidebar({
+  role,
+  scopes,
+}: {
+  role: UserRole;
+  scopes: Scope[];
+}) {
   const pathname = usePathname();
   const { state } = useSidebar();
-
-  const navigation = getNavigationForRole(role);
-
+  
+  const navigation = getNavigationForUser(role, scopes);
+  
   return (
     <Sidebar collapsible="icon" className="border-r">
-      {/* Header / Logo */}
       <SidebarHeader className="flex items-center justify-center py-4">
         {state === "expanded" ? (
           <Image src={"/cclogo.png"} alt="Logo" className="h-8 w-auto" width={200} height={200} />
@@ -41,10 +47,9 @@ export default function AppSidebar({ role }: { role: UserRole }) {
                             href={item.href}
                             className={`
                               flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors
-                              ${
-                                isActive
-                                  ? "bg-accent text-accent-foreground shadow-sm"
-                                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                              ${isActive
+                                ? "bg-accent text-accent-foreground shadow-sm"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                               }
                             `}
                           >
