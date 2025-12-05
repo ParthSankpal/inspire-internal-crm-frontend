@@ -1,37 +1,34 @@
 // src/app/payments/summary/SummaryTable.tsx
 "use client";
-
-import { DataTable } from "@/components/common/DataTable";
+import { SummaryBankRow, SummaryDayRow } from "@/features/payments/types";
 
 type Props = {
-  data: any[];
+  data: SummaryBankRow[] | SummaryDayRow[];
   groupBy: "bank" | "day";
   loading: boolean;
-  onPaginationChange?: (info: { page: number; limit: number }) => void;
 };
 
-export default function SummaryTable({ data, groupBy, loading, onPaginationChange }: Props) {
-  const columns = groupBy === "bank"
-    ? [
-        { id: "bank.name", label: "Bank" },
-        { id: "totalIn", label: "Total In" },
-        { id: "totalOut", label: "Total Out" },
-        { id: "balance", label: "Balance" },
-      ]
-    : [
-        { id: "day", label: "Date" },
-        { id: "totalIn", label: "Total In" },
-        { id: "totalOut", label: "Total Out" },
-        { id: "balance", label: "Balance" },
-      ];
+export default function SummaryTable({ data, groupBy, loading }: Props) {
+  const columns =
+    groupBy === "bank"
+      ? [
+          { id: "bank.name", label: "Bank" },
+          { id: "totalIn", label: "Total In" },
+          { id: "totalOut", label: "Total Out" },
+          { id: "balance", label: "Balance" },
+        ]
+      : [
+          { id: "day", label: "Date" },
+          { id: "totalIn", label: "Total In" },
+          { id: "totalOut", label: "Total Out" },
+          { id: "balance", label: "Balance" },
+        ];
 
+        console.log(columns, data,loading);
+        
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      showIndex
-      emptyMessage={loading ? "Loading..." : "No summary data"}
-      onPaginationChange={onPaginationChange}
-    />
+    <div>
+      hello
+    </div>
   );
 }

@@ -14,6 +14,7 @@ import {
 } from "@/features/payments/types";
 
 import { getAllStudents, getStudentById } from "@/api/students";
+import { Installment, Student } from "@/features/students/types";
 
 type Props = {
   open: boolean;
@@ -64,16 +65,32 @@ export default function PaymentModals({
     { value: string; label: string }[]
   >([]);
 
-  // Prefill on edit
+  // ---------------------------
+  // Prefill on Edit
+  // ---------------------------
   useEffect(() => {
     if (selected) {
       reset({
-        ...selected,
+        amount: selected.amount,
+        type: selected.type,
+        batch:
+          typeof selected.batch === "string"
+            ? selected.batch
+            : selected.batch ?? "",
+        student:
+          typeof selected.student === "string"
+            ? selected.student
+            : selected.student ?? "",
+        installmentNo: String(selected.installmentNo ?? ""),
+        mode: selected.mode,
+        date: selected.date?.split("T")[0] ?? "",
         bankAccount:
           typeof selected.bankAccount === "string"
             ? selected.bankAccount
-            : selected.bankAccount?._id || "",
-      } as any);
+            : selected.bankAccount?._id ?? "",
+        payerName: selected.payerName ?? "",
+        notes: selected.notes ?? "",
+      });
     } else {
       reset();
       setStudents([]);
@@ -84,7 +101,9 @@ export default function PaymentModals({
   const selectedBatch = watch("batch");
   const selectedStudent = watch("student");
 
-  // Load students when batch changes
+  // ---------------------------
+  // Load Students when Batch changes
+  // ---------------------------
   useEffect(() => {
     if (!selectedBatch) {
       setStudents([]);
@@ -94,17 +113,24 @@ export default function PaymentModals({
 
     const load = async () => {
       const res = await getAllStudents({ batchId: selectedBatch });
-      const mapped = res.data.map((s: any) => ({
-        value: s._id,
-        label: `${s.firstName} ${s.lastName} (${s.studentId})`,
-      }));
+
+      const mapped = res.data
+        .filter((s: Student) => !!s._id)
+        .map((s: Student) => ({
+          value: s._id!,
+          label: `${s.firstName} ${s.lastName} (${s.studentId})`,
+        }));
+
+
       setStudents(mapped);
     };
 
     load();
-  }, [selectedBatch]);
+  }, [selectedBatch, setValue]);
 
-  // Load installments when student changes
+  // ---------------------------
+  // Load Installments when Student changes
+  // ---------------------------
   useEffect(() => {
     if (!selectedStudent) {
       setInstallments([]);
@@ -114,9 +140,8 @@ export default function PaymentModals({
 
     const loadInstallments = async () => {
       const student = await getStudentById(selectedStudent);
-      
 
-      const mapped = student.fees.installments.map((i: any) => ({
+      const mapped = student.fees.installments.map((i: Installment) => ({
         value: String(i.installmentNo),
         label: `Installment ${i.installmentNo} - ₹${i.amount} (${i.status})`,
       }));
@@ -124,10 +149,12 @@ export default function PaymentModals({
       setInstallments(mapped);
     };
 
-
     loadInstallments();
-  }, [selectedStudent]);
+  }, [selectedStudent, setValue]);
 
+  // ---------------------------
+  // Component Return
+  // ---------------------------
   return (
     <>
       <FormDialogWrapper

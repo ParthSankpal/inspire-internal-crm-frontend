@@ -3,14 +3,14 @@
 import { FormInput } from "@/components/common/Forms/FormInput";
 import { FormSelect } from "@/components/common/Forms/FormSelect";
 import { FormCombobox } from "@/components/common/Forms/FormCombobox";
-import { Control, useWatch } from "react-hook-form";
+import { Control, FieldErrors, useWatch } from "react-hook-form";
 import { PaymentFormData } from "@/features/payments/types";
 
 type Option = { value: string; label: string };
 
 type Props = {
   control: Control<PaymentFormData>;
-  errors?: any;
+  errors?: FieldErrors<PaymentFormData>;
   banks: Option[];
   batches: Option[];
   students: Option[];

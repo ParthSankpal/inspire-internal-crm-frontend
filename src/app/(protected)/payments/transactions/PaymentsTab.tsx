@@ -6,7 +6,7 @@ import { DataTable } from "@/components/common/DataTable";
 import { Button } from "@/components/ui/button";
 import PaymentModals from "./PaymentModals";
 import { useState } from "react";
-import { Payment } from "@/features/payments/types";
+import { BankAccount, Payment } from "@/features/payments/types";
 
 export default function PaymentsTab() {
   const {
@@ -39,7 +39,7 @@ export default function PaymentsTab() {
       label: "Bank",
       accessor: (row: Payment) => {
         if (!row.bankAccount) return "-";
-        if (typeof row.bankAccount === "object") return (row.bankAccount as any).name ?? "-";
+        if (typeof row.bankAccount === "object") return (row.bankAccount as BankAccount).name ?? "-";
         return banks.find((b) => b._id === row.bankAccount)?.name ?? "-";
       },
     },

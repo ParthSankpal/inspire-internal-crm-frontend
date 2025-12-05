@@ -73,3 +73,28 @@ export interface PaymentPayload extends PaymentFormData {
   linkedId?: string | null;
   linkedInstallmentNo?: number | null;
 }
+
+
+export interface SummaryFilters {
+  startDate: string;
+  endDate: string;
+  groupBy: "bank" | "day";
+  mode: "" | "cash" | "online" | "upi" | "card" | "cheque";
+  bankAccount: string;
+}
+
+export interface SummaryBankRow {
+  bank: { _id: string; name: string } | null;
+  totalIn: number;
+  totalOut: number;
+  balance: number;
+}
+
+export interface SummaryDayRow {
+  day: string;
+  totalIn: number;
+  totalOut: number;
+  balance: number;
+}
+
+export type SummaryRawResponse = SummaryBankRow[] | SummaryDayRow[];

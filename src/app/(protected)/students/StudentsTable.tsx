@@ -1,7 +1,7 @@
 // src/app/students/StudentsTable.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { FormDialogWrapper } from "@/components/common/Forms/FormDialogWrapper";
@@ -131,34 +131,38 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
   }, [notify]);
 
   // Load students
-  const loadStudents = async () => {
-    setLoading(true);
-    try {
-      const res = await getAllStudents({
-        page: pagination.page,
-        limit: pagination.limit,
-        search,
-        batchId: selectedBatch,
-        isArchived,
-      });
-      setItems(res.data);
-      setPagination((prev) => ({
-        ...prev,
-        totalItems: res.pagination.totalItems,
-        totalPages: res.pagination.totalPages,
-      }));
-    } catch {
-      notify("Failed to load students", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+ const loadStudents = useCallback(async () => {
+  setLoading(true);
+  try {
+    const res = await getAllStudents({
+      page: pagination.page,
+      limit: pagination.limit,
+      search,
+      batchId: selectedBatch,
+      isArchived,
+    });
+
+    setItems(res.data);
+    setPagination((prev) => ({
+      ...prev,
+      totalItems: res.pagination.totalItems,
+      totalPages: res.pagination.totalPages,
+    }));
+
+  } catch {
+    notify("Failed to load students", "error");
+  } finally {
+    setLoading(false);
+  }
+}, [pagination.page, pagination.limit, search, selectedBatch, isArchived, notify]);
 
 
 
-  useEffect(() => {
-    loadStudents();
-  }, [pagination.page, pagination.limit, search, selectedBatch, isArchived]);
+
+useEffect(() => {
+  loadStudents();
+}, [loadStudents]);
+
 
   // Create student
   const handleCreate = async (data: StudentFormData) => {

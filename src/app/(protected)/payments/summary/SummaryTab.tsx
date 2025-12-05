@@ -4,16 +4,18 @@
 import SummaryFilters from "./SummaryFilters";
 import SummaryTable from "./SummaryTable";
 import useSummary from "./useSummary";
-import usePayments from "../transactions/usePayments"; // reuse to fetch banks
+import usePayments from "../transactions/usePayments";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { SummaryFilters as SummaryFilterType } from "@/features/payments/types";
 
 export default function SummaryTab() {
   const { summary, loading, loadSummary } = useSummary();
-  const { banks } = usePayments(); // to show bank dropdown options
+  const { banks } = usePayments();
+
   const bankOptions = banks.map((b) => ({ value: b._id!, label: b.name }));
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<SummaryFilterType>({
     startDate: "",
     endDate: "",
     groupBy: "bank",
@@ -28,12 +30,13 @@ export default function SummaryTab() {
         <Button onClick={() => loadSummary(filters)}>Apply Filters</Button>
       </div>
 
-      <SummaryFilters
-        onChange={(v) => setFilters(v)}
-        banks={bankOptions}
-      />
+      <SummaryFilters onChange={setFilters} banks={bankOptions} />
 
-      <SummaryTable data={summary} loading={loading} groupBy={filters.groupBy as any} />
+      <SummaryTable
+        data={summary}
+        loading={loading}
+        groupBy={filters.groupBy}
+      />
     </div>
   );
 }

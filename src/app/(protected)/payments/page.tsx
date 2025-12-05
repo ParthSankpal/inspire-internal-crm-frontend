@@ -13,7 +13,10 @@ export default function PaymentsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as "banks" | "transactions" | "summary")}
+      >
         <TabsList className="mb-4">
           <TabsTrigger value="banks">Banks</TabsTrigger>
           <TabsTrigger value="transactions">Payments</TabsTrigger>
@@ -35,3 +38,4 @@ export default function PaymentsPage() {
     </div>
   );
 }
+

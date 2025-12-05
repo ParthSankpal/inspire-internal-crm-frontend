@@ -34,21 +34,31 @@ export default function usePayments(initialPage = 1, initialLimit = 10) {
   const [batches, setBatches] =
     useState<{ value: string; label: string }[]>([]);
 
+  // -----------------------
+  // LOAD BANKS
+  // -----------------------
   const loadBanks = useCallback(async () => {
     const data = await getAllBanks();
     setBanks(data);
   }, []);
 
+  // -----------------------
+  // LOAD BATCHES
+  // -----------------------
   const loadBatches = useCallback(async () => {
     const res = await getAllBatches();
+
     setBatches(
       res.data.map((b: Batch) => ({
-        value: b._id!,
+        value: b._id ?? "",
         label: b.name,
       }))
     );
   }, []);
 
+  // -----------------------
+  // LOAD PAYMENTS
+  // -----------------------
   const loadPayments = useCallback(
     async () => {
       try {
@@ -67,14 +77,21 @@ export default function usePayments(initialPage = 1, initialLimit = 10) {
         setLoading(false);
       }
     },
-    [pagination.page, pagination.limit]
+    [pagination.page, pagination.limit, notify]
   );
 
+  // -----------------------
+  // INITIAL LOAD + REFRESH
+  // -----------------------
   useEffect(() => {
     loadBanks();
     loadBatches();
+  }, [loadBanks, loadBatches]);
+
+  // Load payments whenever pagination changes
+  useEffect(() => {
     loadPayments();
-  }, []);
+  }, [loadPayments]);
 
   // -----------------------------
   // ADD PAYMENT
