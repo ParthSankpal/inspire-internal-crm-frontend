@@ -6,7 +6,7 @@ import { DataTable } from "@/components/common/DataTable";
 import { Button } from "@/components/ui/button";
 import PaymentModals from "./PaymentModals";
 import { useState } from "react";
-import { BankAccount, Payment } from "@/features/payments/types";
+import { Payment } from "@/features/payments/types";
 import { Column } from "@/features/pagination";
 
 export default function PaymentsTab() {

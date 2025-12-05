@@ -161,6 +161,32 @@ export function DataTable<T extends { _id?: string }>({
   const getSortDirection = (key: string) =>
     sortConfigs.find((c) => c.key === key)?.direction;
 
+  // Add inside component, before return
+  function getValue(r: T, key: string): unknown {
+    return (r as Record<string, unknown>)[key];
+  }
+
+  function safeRender(val: unknown): React.ReactNode {
+    if (val == null) return "";
+
+    if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+      return String(val);
+    }
+
+    if (val instanceof Date) return val.toISOString().slice(0, 10);
+
+    if (Array.isArray(val)) return val.map((v) => safeRender(v)).join(", ");
+
+    if (React.isValidElement(val)) return val;
+
+    try {
+      return JSON.stringify(val);
+    } catch {
+      return "";
+    }
+  }
+
+
   return (
     <div className="w-full border rounded-lg overflow-hidden">
       {/* Toolbar */}
@@ -237,12 +263,13 @@ export function DataTable<T extends { _id?: string }>({
             </tr>
           ) : (
             paginatedData.map((row, i) => (
-              <tr key={(row as any)._id || i} className="hover:bg-accent/30 transition-colors">
+              <tr key={row._id ?? i} className="hover:bg-accent/30 transition-colors">
                 {showIndex && <td className="p-2 border">{(page - 1) * pageSize + i + 1}</td>}
                 {columns.map((col) => (
                   <td key={col.id} className={cn("p-2 border", col.className)}>
-                    {col.accessor ? col.accessor(row) : (row as any)[col.id]}
+                    {safeRender(col.accessor ? col.accessor(row) : getValue(row, col.id))}
                   </td>
+
                 ))}
                 {rowActions && <td className="p-2 border text-center">{rowActions(row)}</td>}
               </tr>
