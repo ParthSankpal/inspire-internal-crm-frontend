@@ -274,23 +274,43 @@ export function DataTable<T extends { _id?: string }>({
 
                 {columns.map((col) => (
                   <td key={col.id} className={cn("p-2 border", col.className)}>
-                    {col.accessor
-                      ? col.accessor(row)
-                      : (() => {
-                        const raw = (row as Record<string, unknown>)[col.id];
+                    {(() => {
+                      const raw = col.accessor ? col.accessor(row) : (row as Record<string, unknown>)[col.id];
 
-                        if (raw === null || raw === undefined) return "";
-                        if (React.isValidElement(raw)) return raw;
-                        if (typeof raw === "object")
-                          return typeof raw === "object" && raw !== null
-                            ? JSON.stringify(raw, null, 2)
-                            : String(raw);
+                      // 1️⃣ Empty / null / undefined
+                      if (raw == null) return "";
 
-
+                      // 2️⃣ Already a valid ReactNode
+                      if (React.isValidElement(raw)) return raw;
+                      if (typeof raw === "string" || typeof raw === "number" || typeof raw === "boolean")
                         return String(raw);
-                      })()
-                    }
+
+                      // 3️⃣ Date object → format safely
+                      if (raw instanceof Date) return raw.toISOString().slice(0, 10);
+
+                      // 4️⃣ Array → convert to readable string
+                      if (Array.isArray(raw)) {
+                        try {
+                          return raw.length > 0 ? raw.join(", ") : "";
+                        } catch {
+                          return "";
+                        }
+                      }
+
+                      // 5️⃣ Object → DO NOT RENDER (React 185 prevention)
+                      if (typeof raw === "object") {
+                        try {
+                          return JSON.stringify(raw); // safe fallback
+                        } catch {
+                          return "";
+                        }
+                      }
+
+                      // 6️⃣ Fallback
+                      return String(raw);
+                    })()}
                   </td>
+
 
                 ))}
 
