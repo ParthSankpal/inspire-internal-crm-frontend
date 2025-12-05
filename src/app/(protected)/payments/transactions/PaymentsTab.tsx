@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import PaymentModals from "./PaymentModals";
 import { useState } from "react";
 import { BankAccount, Payment } from "@/features/payments/types";
+import { Column } from "@/features/pagination";
 
 export default function PaymentsTab() {
   const {
@@ -28,22 +29,31 @@ export default function PaymentsTab() {
 
   const bankOptions = banks.map((b) => ({ value: b._id!, label: b.name }));
 
-  const columns = [
-    { id: "date", label: "Date" },
-    { id: "amount", label: "Amount" },
-    { id: "type", label: "Type" },
-    { id: "mode", label: "Mode" },
-    { id: "payerName", label: "Payer" },
-    {
-      id: "bankAccount",
-      label: "Bank",
-      accessor: (row: Payment) => {
-        if (!row.bankAccount) return "-";
-        if (typeof row.bankAccount === "object") return (row.bankAccount as BankAccount).name ?? "-";
-        return banks.find((b) => b._id === row.bankAccount)?.name ?? "-";
-      },
-    },
-  ];
+const columns: Column<Payment>[] = [
+  {
+    id: "date",
+    label: "Date",
+    accessor: (p: Payment) => p.date?.slice(0, 10) ?? "-",
+  },
+  {
+    id: "amount",
+    label: "Amount",
+    accessor: (p: Payment) => `₹ ${p.amount}`,
+  },
+  { id: "type", label: "Type" },
+  { id: "mode", label: "Mode" },
+  { id: "payerName", label: "Payer" },
+  {
+    id: "bankAccount",
+    label: "Bank",
+    accessor: (p: Payment) =>
+      typeof p.bankAccount === "object"
+        ? p.bankAccount?.name ?? "-"
+        : p.bankAccount ?? "-",
+  },
+];
+
+
 
   const rowActions = (row: Payment) => (
     <div className="flex gap-2 justify-center">

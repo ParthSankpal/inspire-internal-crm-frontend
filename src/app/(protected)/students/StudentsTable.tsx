@@ -223,22 +223,23 @@ useEffect(() => {
   };
 
   // Columns
-  const columns = [
-    { id: "studentId", label: "ID" },
-    {
-      id: "firstName",
-      label: "Name",
-      accessor: (r: Student) => `${r.firstName} ${r.lastName}`,
-    },
-    { id: "course", label: "Course" },
-    { id: "targetExam", label: "Exam" },
-    {
-      id: "batch",
-      label: "Batch",
-      accessor: (r: Student) => r.batch?.name || "—",
-    },
-    { id: "status", label: "Status" },
-  ];
+const columns = [
+  { id: "studentId", label: "ID" },
+  {
+    id: "firstName",
+    label: "Name",
+    accessor: (r: Student) => `${r.firstName} ${r.lastName}`,
+  },
+  { id: "course", label: "Course" },
+  { id: "targetExam", label: "Exam" },
+  {
+    id: "batch",
+    label: "Batch",
+    accessor: (r: Student) => r.batch?.name ?? "—",
+  },
+  { id: "status", label: "Status" },
+];
+
 
   const rowActions = (row: Student) => (
     <div className="flex gap-2 justify-center">

@@ -217,14 +217,14 @@ useEffect(() => {
     setDeleteOpen(false);
   };
 
-  // 🧭 Table setup
-  const columns = [
-    { id: "studentName", label: "Student Name" },
-    { id: "phoneNo", label: "Phone" },
-    { id: "schoolName", label: "School" },
-    { id: "standard", label: "Standard" },
-    { id: "status", label: "Status" },
-  ];
+ const columns = [
+  { id: "studentName", label: "Student Name" },
+  { id: "phoneNo", label: "Phone" },
+  { id: "schoolName", label: "School" },
+  { id: "standard", label: "Standard" },
+  { id: "status", label: "Status" },
+];
+
 
   const rowActions = (row: Enquiry) => (
     <div className="flex gap-2 justify-center">

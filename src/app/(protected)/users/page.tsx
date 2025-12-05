@@ -86,15 +86,17 @@ export default function UsersPage() {
   }
 
   const columns = [
-    { id: "name", label: "Name", searchKey: "name" },
-    { id: "email", label: "Email", searchKey: "email" },
-    { id: "role", label: "Role" },
-    {
-      id: "createdAt",
-      label: "Created",
-      accessor: (row: User) => new Date(row.createdAt!).toLocaleDateString(),
-    },
-  ];
+  { id: "name", label: "Name", searchKey: "name" },
+  { id: "email", label: "Email", searchKey: "email" },
+  { id: "role", label: "Role" },
+  {
+    id: "createdAt",
+    label: "Created",
+    accessor: (row: User) =>
+      row.createdAt ? row.createdAt.slice(0, 10) : "—",
+  },
+];
+
 
   return (
     <div className="p-6">

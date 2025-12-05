@@ -108,14 +108,15 @@ const fetchBatches = useCallback(async () => {
   };
 
   const columns = [
-    { id: "name", label: "Batch Name" },
-    { id: "class", label: "Class" },
-    { id: "startYear", label: "Start Year" },
-    { id: "endYear", label: "End Year" },
-    { id: "durationYears", label: "Duration (Years)" },
-    { id: "totalStudents", label: "Total Students" },
-    { id: "remarks", label: "Remarks" },
-  ];
+  { id: "name", label: "Batch Name" },
+  { id: "class", label: "Class" },
+  { id: "startYear", label: "Start Year" },
+  { id: "endYear", label: "End Year" },
+  { id: "durationYears", label: "Duration (Years)" },
+  { id: "totalStudents", label: "Total Students" },
+  { id: "remarks", label: "Remarks" },
+];
+
 
   const rowActions = (row: Batch) => (
     <div className="flex gap-2 justify-center">
