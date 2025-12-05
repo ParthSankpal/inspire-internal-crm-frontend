@@ -281,7 +281,11 @@ export function DataTable<T extends { _id?: string }>({
 
                         if (raw === null || raw === undefined) return "";
                         if (React.isValidElement(raw)) return raw;
-                        if (typeof raw === "object") return JSON.stringify(raw);
+                        if (typeof raw === "object")
+                          return typeof raw === "object" && raw !== null
+                            ? JSON.stringify(raw, null, 2)
+                            : String(raw);
+
 
                         return String(raw);
                       })()
