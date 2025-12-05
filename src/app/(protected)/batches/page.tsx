@@ -58,28 +58,28 @@ export default function BatchesPage() {
   });
 
   // ✅ Fetch paginated batches
-const fetchBatches = useCallback(async () => {
-  try {
-    setLoading(true);
-    const res = await getAllBatches(pagination.page, pagination.limit);
-    setBatches(res.data);
-    setPagination((prev) => ({
-      ...prev,
-      totalItems: res.pagination.totalItems,
-      totalPages: res.pagination.totalPages,
-    }));
-  } catch (err) {
-    console.error(err);
-    notify("Failed to fetch batches", "error");
-  } finally {
-    setLoading(false);
-  }
-}, [pagination.page, pagination.limit, notify]);
+  const fetchBatches = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getAllBatches(pagination.page, pagination.limit);
+      setBatches(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.pagination.totalItems,
+        totalPages: res.pagination.totalPages,
+      }));
+    } catch (err) {
+      console.error(err);
+      notify("Failed to fetch batches", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.page, pagination.limit, notify]);
 
 
- useEffect(() => {
-  fetchBatches();
-}, [fetchBatches]);
+  useEffect(() => {
+    fetchBatches();
+  }, [fetchBatches]);
 
   // ---- CRUD Actions ----
   const handleCreate: SubmitHandler<BatchFormData> = async (data) => {
@@ -108,14 +108,43 @@ const fetchBatches = useCallback(async () => {
   };
 
   const columns = [
-    { id: "name", label: "Batch Name" },
-    { id: "class", label: "Class" },
-    { id: "startYear", label: "Start Year" },
-    { id: "endYear", label: "End Year" },
-    { id: "durationYears", label: "Duration (Years)" },
-    { id: "totalStudents", label: "Total Students" },
-    { id: "remarks", label: "Remarks" },
+    {
+      id: "name",
+      label: "Batch Name",
+      accessor: (row: Batch) => row.name,
+    },
+    {
+      id: "class",
+      label: "Class",
+      accessor: (row: Batch) => row.class,
+    },
+    {
+      id: "startYear",
+      label: "Start Year",
+      accessor: (row: Batch) => row.startYear,
+    },
+    {
+      id: "endYear",
+      label: "End Year",
+      accessor: (row: Batch) => row.startYear + row.durationYears,
+    },
+    {
+      id: "durationYears",
+      label: "Duration (Years)",
+      accessor: (row: Batch) => row.durationYears,
+    },
+    {
+      id: "totalStudents",
+      label: "Total Students",
+      accessor: (row: Batch) => row.totalStudents ?? 0,
+    },
+    {
+      id: "remarks",
+      label: "Remarks",
+      accessor: (row: Batch) => row.remarks ?? "",
+    },
   ];
+
 
   const rowActions = (row: Batch) => (
     <div className="flex gap-2 justify-center">
@@ -128,7 +157,7 @@ const fetchBatches = useCallback(async () => {
             name: row.name,
             startYear: row.startYear,
             durationYears: row.durationYears,
-            class: row.class,        
+            class: row.class,
             remarks: row.remarks ?? "",
           });
           setEditOpen(true);

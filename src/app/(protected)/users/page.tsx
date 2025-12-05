@@ -85,16 +85,42 @@ export default function UsersPage() {
     }
   }
 
-  const columns = [
-    { id: "name", label: "Name", searchKey: "name" },
-    { id: "email", label: "Email", searchKey: "email" },
-    { id: "role", label: "Role" },
-    {
-      id: "createdAt",
-      label: "Created",
-      accessor: (row: User) => new Date(row.createdAt!).toLocaleDateString(),
+ const columns = [
+  {
+    id: "name",
+    label: "Name",
+    searchKey: "name",
+    accessor: (row: User) => row.name ?? "—",
+  },
+  {
+    id: "email",
+    label: "Email",
+    searchKey: "email",
+    accessor: (row: User) => row.email ?? "—",
+  },
+  {
+    id: "role",
+    label: "Role",
+    accessor: (row: User) => row.role ?? "—",
+  },
+  {
+    id: "createdAt",
+    label: "Created",
+    accessor: (row: User) => {
+      if (!row.createdAt) return "—";
+
+      const date = new Date(row.createdAt);
+      if (isNaN(date.getTime())) return "—";
+
+      return date.toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
     },
-  ];
+  },
+];
+
 
   return (
     <div className="p-6">

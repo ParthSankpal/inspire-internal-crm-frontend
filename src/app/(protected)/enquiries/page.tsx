@@ -218,13 +218,42 @@ useEffect(() => {
   };
 
   // 🧭 Table setup
-  const columns = [
-    { id: "studentName", label: "Student Name" },
-    { id: "phoneNo", label: "Phone" },
-    { id: "schoolName", label: "School" },
-    { id: "standard", label: "Standard" },
-    { id: "status", label: "Status" },
-  ];
+const columns = [
+  {
+    id: "studentName",
+    label: "Student Name",
+    accessor: (row: Enquiry) => row.studentName,
+  },
+  {
+    id: "phoneNo",
+    label: "Phone",
+    accessor: (row: Enquiry) => row.phoneNo,
+  },
+  {
+    id: "schoolName",
+    label: "School",
+    accessor: (row: Enquiry) => row.schoolName ?? "",
+  },
+  {
+    id: "standard",
+    label: "Standard",
+    accessor: (row: Enquiry) => row.standard ?? "",
+  },
+  {
+    id: "status",
+    label: "Status",
+    accessor: (row: Enquiry) => {
+      const labelMap: Record<string, string> = {
+        new: "New",
+        counseling_done: "Counseling Done",
+        admitted: "Admitted",
+        dropped: "Dropped",
+      };
+      return labelMap[row.status] ?? row.status;
+    },
+  },
+];
+
 
   const rowActions = (row: Enquiry) => (
     <div className="flex gap-2 justify-center">

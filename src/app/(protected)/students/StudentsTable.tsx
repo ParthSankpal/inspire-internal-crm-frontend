@@ -223,22 +223,52 @@ useEffect(() => {
   };
 
   // Columns
-  const columns = [
-    { id: "studentId", label: "ID" },
-    {
-      id: "firstName",
-      label: "Name",
-      accessor: (r: Student) => `${r.firstName} ${r.lastName}`,
+const columns = [
+  {
+    id: "studentId",
+    label: "ID",
+    accessor: (r: Student) => r.studentId ?? "—",
+  },
+  {
+    id: "firstName",
+    label: "Name",
+    accessor: (r: Student) =>
+      `${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || "—",
+  },
+  {
+    id: "course",
+    label: "Course",
+    accessor: (r: Student) => r.course || "—",
+  },
+  {
+    id: "targetExam",
+    label: "Exam",
+    accessor: (r: Student) => r.targetExam || "—",
+  },
+  {
+    id: "batch",
+    label: "Batch",
+    accessor: (r: Student) => {
+      // Case 1: populated batch object
+      if (typeof r.batch === "object" && r.batch !== null) {
+        return r.batch.name ?? "—";
+      }
+
+      // Case 2: only batch ID string returned
+      if (typeof r.batch === "string") {
+        return "Loading…"; // You can replace this with lookup if needed
+      }
+
+      return "—";
     },
-    { id: "course", label: "Course" },
-    { id: "targetExam", label: "Exam" },
-    {
-      id: "batch",
-      label: "Batch",
-      accessor: (r: Student) => r.batch?.name || "—",
-    },
-    { id: "status", label: "Status" },
-  ];
+  },
+  {
+    id: "status",
+    label: "Status",
+    accessor: (r: Student) => r.status ?? "—",
+  },
+];
+
 
   const rowActions = (row: Student) => (
     <div className="flex gap-2 justify-center">
