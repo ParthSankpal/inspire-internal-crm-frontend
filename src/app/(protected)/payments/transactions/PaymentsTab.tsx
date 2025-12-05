@@ -28,52 +28,22 @@ export default function PaymentsTab() {
 
   const bankOptions = banks.map((b) => ({ value: b._id!, label: b.name }));
 
-const columns = [
-  {
-    id: "date",
-    label: "Date",
-    accessor: (row: Payment) =>
-      row.date ? new Date(row.date).toLocaleDateString("en-IN") : "-",
-  },
-  {
-    id: "amount",
-    label: "Amount",
-    accessor: (row: Payment) => `₹ ${row.amount}`,
-  },
-  {
-    id: "type",
-    label: "Type",
-    accessor: (row: Payment) => row.type.toUpperCase(),
-  },
-  {
-    id: "mode",
-    label: "Mode",
-    accessor: (row: Payment) => row.mode.toUpperCase(),
-  },
-  {
-    id: "payerName",
-    label: "Payer",
-    accessor: (row: Payment) => row.payerName ?? "-",
-  },
-  {
-    id: "bankAccount",
-    label: "Bank",
-    accessor: (row: Payment) => {
-      if (!row.bankAccount) return "-";
-
-      // If populated from backend with full object
-      if (typeof row.bankAccount === "object") {
-        const bank = row.bankAccount as BankAccount;
-        return bank.name ?? "-";
-      }
-
-      // If only ID is provided (string)
-      const bank = banks.find((b) => b._id === row.bankAccount);
-      return bank?.name ?? "-";
+  const columns = [
+    { id: "date", label: "Date" },
+    { id: "amount", label: "Amount" },
+    { id: "type", label: "Type" },
+    { id: "mode", label: "Mode" },
+    { id: "payerName", label: "Payer" },
+    {
+      id: "bankAccount",
+      label: "Bank",
+      accessor: (row: Payment) => {
+        if (!row.bankAccount) return "-";
+        if (typeof row.bankAccount === "object") return (row.bankAccount as BankAccount).name ?? "-";
+        return banks.find((b) => b._id === row.bankAccount)?.name ?? "-";
+      },
     },
-  },
-];
-
+  ];
 
   const rowActions = (row: Payment) => (
     <div className="flex gap-2 justify-center">

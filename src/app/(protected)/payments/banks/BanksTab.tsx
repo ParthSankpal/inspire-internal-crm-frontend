@@ -15,34 +15,13 @@ export default function BanksTab() {
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
-const columns = [
-  {
-    id: "name",
-    label: "Name",
-    accessor: (row: BankAccount) => row.name,
-  },
-  {
-    id: "type",
-    label: "Type",
-    accessor: (row: BankAccount) => row.type?.toUpperCase(),
-  },
-  {
-    id: "bankName",
-    label: "Bank Name",
-    accessor: (row: BankAccount) => row.bankName ?? "—",
-  },
-  {
-    id: "accountNumber",
-    label: "Account Number",
-    accessor: (row: BankAccount) => row.accountNumber ?? "—",
-  },
-  {
-    id: "ifsc",
-    label: "IFSC",
-    accessor: (row: BankAccount) => row.ifsc ?? "—",
-  },
-];
-
+  const columns = [
+    { id: "name", label: "Name" },
+    { id: "type", label: "Type" },
+    { id: "bankName", label: "Bank Name" },
+    { id: "accountNumber", label: "Account Number" },
+    { id: "ifsc", label: "IFSC" },
+  ];
 
   const rowActions = (row: BankAccount) => (
     <div className="flex gap-2 justify-center">
