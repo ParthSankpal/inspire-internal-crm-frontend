@@ -160,8 +160,8 @@ export default function StudentDetailsPage() {
                         <p className="col-span-3">
                             <b>Total Paid:</b> ₹{totalPaid}
                         </p>
-                        <p className="col-span-3 text-red-600 font-semibold">
-                            <b>Pending Amount:</b> ₹{pending}
+                        <p className="col-span-3  font-semibold">
+                            <b>Pending Amount:</b>₹ <span className=" text-red-600">{pending} </span> 
                         </p>
                     </CardContent>
                 </Card>

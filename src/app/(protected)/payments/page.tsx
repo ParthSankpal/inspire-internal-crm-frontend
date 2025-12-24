@@ -20,7 +20,7 @@ export default function PaymentsPage() {
         <TabsList className="mb-4">
           <TabsTrigger value="banks">Banks</TabsTrigger>
           <TabsTrigger value="transactions">Payments</TabsTrigger>
-          <TabsTrigger value="summary">Summary</TabsTrigger>
+          {/* <TabsTrigger value="summary">Summary</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="banks">
@@ -31,9 +31,9 @@ export default function PaymentsPage() {
           <PaymentsTab />
         </TabsContent>
 
-        <TabsContent value="summary">
+        {/* <TabsContent value="summary">
           <SummaryTab />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );

@@ -27,7 +27,7 @@ export function FormDatePicker<T extends FieldValues>({
   error,
 }: FormDatePickerProps<T>) {
   const [open, setOpen] = React.useState(false);
-
+const currentYear = new Date().getFullYear();
   return (
     <div className="space-y-1">
       <label className="text-sm font-medium">{label}</label>
@@ -35,6 +35,7 @@ export function FormDatePicker<T extends FieldValues>({
       <Controller
         name={name}
         control={control}
+
         render={({ field }) => {
           const selectedDate = field.value ? new Date(field.value) : undefined;
 
@@ -60,16 +61,21 @@ export function FormDatePicker<T extends FieldValues>({
                 </PopoverTrigger>
 
                 <PopoverContent className="w-auto p-0" align="start">
+                  
+
                   <Calendar
                     mode="single"
                     captionLayout="dropdown"
+                    fromYear={currentYear - 10}
+                    toYear={currentYear + 10} // admissions / payments / planning
                     selected={selectedDate}
+                    // disabled={{ before: new Date() }}
                     onSelect={(date) => {
                       field.onChange(date ? format(date, "yyyy-MM-dd") : "");
                       setOpen(false);
                     }}
-                    initialFocus
                   />
+
                 </PopoverContent>
               </Popover>
 

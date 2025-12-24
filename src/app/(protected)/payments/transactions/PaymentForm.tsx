@@ -5,6 +5,7 @@ import { FormSelect } from "@/components/common/Forms/FormSelect";
 import { FormCombobox } from "@/components/common/Forms/FormCombobox";
 import { Control, FieldErrors, useWatch } from "react-hook-form";
 import { PaymentFormData } from "@/features/payments/types";
+import { FormDatePicker } from "@/components/common/Forms/FormDatePicker";
 
 type Option = { value: string; label: string };
 
@@ -94,7 +95,8 @@ export default function PaymentForm({
         options={banks}
       />
 
-      <FormInput name="date" label="Date" control={control} type="date" />
+      <FormDatePicker name="date" label="Payment Date" control={control} />
+
 
       {/* Payer for debit OR optional for credit */}
       <FormInput name="payerName" label="Payer" control={control} />
