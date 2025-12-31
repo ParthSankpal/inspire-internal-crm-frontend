@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import BanksTab from "./banks/BanksTab";
 import PaymentsTab from "./transactions/PaymentsTab";
-import SummaryTab from "./summary/SummaryTab";
 
 
 export default function PaymentsPage() {

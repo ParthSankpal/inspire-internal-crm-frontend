@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label";
 
 interface FormFieldProps {
-  label: string;
+  label: string | undefined;
   error?: string;
   children: React.ReactNode;
 }

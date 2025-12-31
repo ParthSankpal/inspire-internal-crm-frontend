@@ -10,55 +10,72 @@ import {
 import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import { FormField } from "./FormField";
 
-interface Option {
-  value: string;
+interface Option<T = string | number> {
+  value: T;
   label: string;
 }
 
-interface FormSelectProps<T extends FieldValues> {
+interface FormSelectProps<T extends FieldValues, V = string | number> {
   name: Path<T>;
-  label: string;
   control: Control<T>;
-  options: Option[];
+  options: Option<V>[];
+  label?: string;
   placeholder?: string;
   error?: string;
-  onValueChange?: (value: string) => void;
+  disabled?: boolean;
+  onValueChange?: (value: V) => void;
 }
 
-export const FormSelect = <T extends FieldValues>({
+export const FormSelect = <
+  T extends FieldValues,
+  V extends string | number = string
+>({
   name,
-  label,
   control,
   options,
+  label,
   placeholder,
   error,
+  disabled = false,
   onValueChange,
-}: FormSelectProps<T>) => (
-  <Controller
-    name={name}
-    control={control}
-    render={({ field }) => (
-      <FormField label={label} error={error}>
-        <ShadcnSelect
-          value={field.value || ""}
-          onValueChange={(val) => {
-            field.onChange(val);
-            onValueChange?.(val);
-          }}
-        >
-          
-          <SelectTrigger className=" w-full">
-            <SelectValue placeholder={placeholder || "Select..."} />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </ShadcnSelect>
-      </FormField>
-    )}
-  />
-);
+}: FormSelectProps<T, V>) => {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => {
+        const isNumber = typeof field.value === "number";
+
+        return (
+          <FormField label={label} error={error}>
+            <ShadcnSelect
+              disabled={disabled}
+              value={
+                field.value !== undefined && field.value !== null
+                  ? String(field.value)
+                  : ""
+              }
+              onValueChange={(val) => {
+                const parsedValue = isNumber ? Number(val) : val;
+                field.onChange(parsedValue);
+                onValueChange?.(parsedValue as V);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={placeholder || "Select..."} />
+              </SelectTrigger>
+
+              <SelectContent>
+                {options.map((opt) => (
+                  <SelectItem key={String(opt.value)} value={String(opt.value)}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </ShadcnSelect>
+          </FormField>
+        );
+      }}
+    />
+  );
+};

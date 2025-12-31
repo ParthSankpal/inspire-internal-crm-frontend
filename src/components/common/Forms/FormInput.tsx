@@ -1,51 +1,65 @@
 "use client";
 
-import { Control, Controller, FieldValues, Path } from "react-hook-form";
+import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FormField } from "./FormField";
 
 interface FormInputProps<T extends FieldValues> {
   name: Path<T>;
-  label: string;
   control: Control<T>;
+  label?: string;
   type?: string;
   placeholder?: string;
-  readOnly?: boolean;
   error?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
 }
 
-export function FormInput<T extends FieldValues>({
+export const FormInput = <T extends FieldValues>({
   name,
-  label,
   control,
+  label,
   type = "text",
   placeholder,
-  readOnly,
   error,
-}: FormInputProps<T>) {
+  disabled = false,
+  readOnly = false,
+}: FormInputProps<T>) => {
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={name}>{label}</Label>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <Input
-            id={name}
-            type={type}
-            placeholder={placeholder}
-            disabled={readOnly}
-            {...field}
-            // ✅ Automatically convert to number if type="number"
-            onChange={(e) => {
-              const value =
-                type === "number" ? e.target.valueAsNumber : e.target.value;
-              field.onChange(value);
-            }}
-          />
-        )}
-      />
-      {error && <p className="text-sm text-red-500">{error}</p>}
-    </div>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => {
+        const isNumber = typeof field.value === "number";
+
+        return (
+          <FormField label={label} error={error}>
+            <Input
+              id={name}
+              type={type}
+              placeholder={placeholder}
+              disabled={disabled || readOnly}
+              value={
+                field.value !== undefined && field.value !== null
+                  ? String(field.value)
+                  : ""
+              }
+              onChange={(e) => {
+                const raw = e.target.value;
+
+                const parsedValue =
+                  isNumber || type === "number"
+                    ? raw === ""
+                      ? undefined
+                      : Number(raw)
+                    : raw;
+
+                field.onChange(parsedValue);
+              }}
+            />
+          </FormField>
+        );
+      }}
+    />
   );
-}
+};
