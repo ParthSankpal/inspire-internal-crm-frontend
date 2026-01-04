@@ -1,6 +1,6 @@
 import { axiosClient } from "@/lib/apiClient";
 import { PaginatedResponse } from "@/features/pagination";
-import { Test } from "@/features/test/types";
+import { ImportTestResultsResponse, Test } from "@/features/test/types";
 
 interface GetTestsParams {
   page?: number;
@@ -44,4 +44,17 @@ export async function publishTest(id: string): Promise<Test> {
 export async function unpublishTest(id: string): Promise<Test> {
   const { data } = await axiosClient.patch(`/tests/${id}/unpublish`);
   return data.data;
+}
+
+
+
+export async function importTestResults(
+  testId: string,
+  rows: any[]
+): Promise<ImportTestResultsResponse> {
+  const { data } = await axiosClient.post(
+    `/analytics/results/import/${testId}`,
+    rows
+  );
+  return data;
 }

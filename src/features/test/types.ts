@@ -215,3 +215,12 @@ export const testSchema = z.object({
 });
 
 export type TestFormData = z.infer<typeof testSchema>;
+
+
+export interface ImportTestResultsResponse {
+  success: boolean;
+  total: number;
+  verified: number;
+  rejected: number;
+  message: string;
+}

@@ -4,7 +4,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Resolver, useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -19,15 +19,16 @@ import { getTestById, saveQuestionConfig } from "@/api/questionApi";
 import { Test } from "@/features/test/types";
 import { QuestionFormData, questionSchema } from "@/features/question/types";
 import { IsoDate } from "@/components/common/IsoDate";
+import UploadResultsDialog from "../UploadResultsDialog";
 
 /* ----------------------------------------------------
    Helpers
 ---------------------------------------------------- */
 
 function getQuestionCount(examType: Test["examType"]) {
-  if (examType === "JEE") return 75; 
+  if (examType === "JEE") return 75;
   if (examType === "NEET") return 180;
-  return 0; 
+  return 0;
 }
 
 function isFixedQuestionExam(examType: Test["examType"]) {
@@ -41,7 +42,7 @@ function isQuestionConfigured(q: QuestionFormData | undefined) {
 
 const createEmptyQuestion = (classLevel: 8 | 9 | 10 | 11 | 12): QuestionFormData => ({
   subject: "Physics",
-  classLevel ,
+  classLevel,
   chapter: "",
   topic: "",
   difficulty: "Easy",
@@ -81,8 +82,9 @@ export default function TestBuilderManualPage() {
   const [test, setTest] = useState<Test | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
+  const [openUpload, setOpenUpload] = useState(false);
   const editable = test?.status === "Draft";
+    const router = useRouter();
 
   const { control, reset, watch, getValues } = useForm<TestConfigForm>({
     resolver: zodResolver(
@@ -412,7 +414,7 @@ export default function TestBuilderManualPage() {
       </div>
 
       {/* ================= Actions ================= */}
-      {editable ? (
+      {/* {editable ? (
         <div className="flex justify-end gap-3">
           <Button
             variant="outline"
@@ -440,7 +442,66 @@ export default function TestBuilderManualPage() {
         >
           Unpublish
         </Button>
+      )} */}
+
+      {editable ? (
+        <div className="flex justify-end gap-3">
+          <Button
+            variant="outline"
+            disabled={saving || !canSaveOrPublish}
+            onClick={saveConfig}
+          >
+            Save Draft
+          </Button>
+
+          <Button
+            disabled={saving || !canSaveOrPublish}
+            onClick={publish}
+          >
+            Publish Test
+          </Button>
+        </div>
+      ) : (
+        <div className="flex justify-end gap-3">
+          {/* 🔥 Upload Results */}
+          {test.status === "Published" && (
+            <Button onClick={() => setOpenUpload(true)}>
+              Upload Results
+            </Button>
+          )}
+
+          {/* Unpublish */}
+          <Button
+            variant="outline"
+            onClick={async () => {
+              const updated = await unpublishTest(test._id!);
+              setTest(updated);
+              notify("Test reverted to Draft", "info");
+            }}
+          >
+            Unpublish
+          </Button>
+        </div>
       )}
+
+      {test.status === "Completed" && (
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/tests/${test._id}/analytics`)}
+        >
+          View Analytics
+        </Button>
+      )}
+
+
+
+      <UploadResultsDialog
+        open={openUpload}
+        testId={test._id!}
+        onOpenChange={setOpenUpload}
+      />
+
+
     </div>
   );
 }
