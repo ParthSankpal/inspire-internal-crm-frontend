@@ -58,3 +58,15 @@ export async function importTestResults(
   );
   return data;
 }
+
+
+export async function getTestResponses(
+  testId: string,
+  params: { page: number; limit: number; search?: string }
+) {
+  const res = await fetch(
+    `/api/tests/${testId}/responses?page=${params.page}&limit=${params.limit}&search=${params.search ?? ""}`
+  );
+  const json = await res.json();
+  return json;
+}

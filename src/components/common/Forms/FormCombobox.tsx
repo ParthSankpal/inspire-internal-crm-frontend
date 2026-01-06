@@ -38,6 +38,8 @@ export function FormCombobox<T extends FieldValues>({
   options,
   placeholder = "Select...",
 }: Props<T>) {
+  const [open, setOpen] = React.useState(false);
+
   return (
     <Controller
       name={name}
@@ -49,9 +51,13 @@ export function FormCombobox<T extends FieldValues>({
           <div className="flex flex-col gap-1 w-full">
             {label && <label className="text-sm font-medium">{label}</label>}
 
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  type="button"
+                >
                   {selected ? selected.label : placeholder}
                 </Button>
               </PopoverTrigger>
@@ -61,12 +67,14 @@ export function FormCombobox<T extends FieldValues>({
                   <CommandInput placeholder={placeholder} />
                   <CommandList>
                     <CommandEmpty>No results found.</CommandEmpty>
+
                     <CommandGroup>
                       {options.map((opt) => (
                         <CommandItem
                           key={opt.value}
                           onSelect={() => {
                             field.onChange(opt.value);
+                            setOpen(false); 
                           }}
                         >
                           {opt.label}

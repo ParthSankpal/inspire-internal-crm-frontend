@@ -1,6 +1,5 @@
 
 
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FormInput } from "@/components/common/Forms/FormInput";
+
 import { FormSelect } from "@/components/common/Forms/FormSelect";
 import { useNotify } from "@/components/common/NotificationProvider";
 
@@ -20,13 +19,15 @@ import { Test } from "@/features/test/types";
 import { QuestionFormData, questionSchema } from "@/features/question/types";
 import { IsoDate } from "@/components/common/IsoDate";
 import UploadResultsDialog from "../UploadResultsDialog";
+import QuestionRow from "./QuestionRow";
+
 
 /* ----------------------------------------------------
    Helpers
 ---------------------------------------------------- */
 
 function getQuestionCount(examType: Test["examType"]) {
-  if (examType === "JEE") return 75;
+  if (examType === "JEE") return 2;
   if (examType === "NEET") return 180;
   return 0;
 }
@@ -37,10 +38,12 @@ function isFixedQuestionExam(examType: Test["examType"]) {
 
 function isQuestionConfigured(q: QuestionFormData | undefined) {
   if (!q) return false;
-  return Boolean(q.chapter && q.topic && q.correctOption);
+  return Boolean(q.subject && q.chapter && q.topic && q.correctOption);
 }
 
-const createEmptyQuestion = (classLevel: 8 | 9 | 10 | 11 | 12): QuestionFormData => ({
+const createEmptyQuestion = (
+  classLevel: 8 | 9 | 10 | 11 | 12
+): QuestionFormData => ({
   subject: "Physics",
   classLevel,
   chapter: "",
@@ -52,15 +55,6 @@ const createEmptyQuestion = (classLevel: 8 | 9 | 10 | 11 | 12): QuestionFormData
   marks: 4,
   negativeMarks: -1,
 });
-
-const CHAPTERS = [
-  "Units & Dimensions",
-  "Kinematics",
-  "Laws of Motion",
-  "Work Energy Power",
-  "Current Electricity",
-  "Electrostatics",
-];
 
 /* ----------------------------------------------------
    Types
@@ -78,23 +72,25 @@ type TestConfigForm = {
 export default function TestBuilderManualPage() {
   const { testId } = useParams<{ testId: string }>();
   const notify = useNotify();
+  const router = useRouter();
 
   const [test, setTest] = useState<Test | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [openUpload, setOpenUpload] = useState(false);
-  const editable = test?.status === "Draft";
-    const router = useRouter();
 
-  const { control, reset, watch, getValues } = useForm<TestConfigForm>({
-    resolver: zodResolver(
-      questionSchema.array()
-    ) as unknown as Resolver<TestConfigForm>,
-    defaultValues: {
-      classLevel: 11,
-      questions: [],
-    },
-  });
+  const editable = test?.status === "Draft";
+
+  const { control, reset, watch, getValues, setValue } =
+    useForm<TestConfigForm>({
+      resolver: zodResolver(
+        questionSchema.array()
+      ) as unknown as Resolver<TestConfigForm>,
+      defaultValues: {
+        classLevel: 11,
+        questions: [],
+      },
+    });
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -152,7 +148,7 @@ export default function TestBuilderManualPage() {
   }
 
   /* ----------------------------------------------------
-     Derived state (real-time)
+     Derived state
   ---------------------------------------------------- */
 
   const watchedQuestions = watch("questions");
@@ -237,12 +233,16 @@ export default function TestBuilderManualPage() {
 
           <div>
             <p className="text-muted-foreground">Date</p>
-            <p className="font-medium">  <IsoDate value={test.date} /></p>
+            <p className="font-medium">
+              <IsoDate value={test.date} />
+            </p>
           </div>
+
           <div>
             <p className="text-muted-foreground">Duration</p>
             <p className="font-medium">{test.durationMinutes} mins</p>
           </div>
+
           <div>
             <p className="text-muted-foreground">Total Questions</p>
             <p className="font-medium">{requiredCount}</p>
@@ -258,7 +258,7 @@ export default function TestBuilderManualPage() {
         </div>
       </div>
 
-      {/* ================= Add Question (Foundation only) ================= */}
+      {/* ================= Add Question ================= */}
       {!isFixed && editable && (
         <div className="flex justify-end">
           <Button
@@ -271,6 +271,18 @@ export default function TestBuilderManualPage() {
           </Button>
         </div>
       )}
+
+      {test.status === "Completed" && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/tests/${test._id}/analytics`)}
+          >
+            View Analytics
+          </Button>
+        </div>
+      )}
+
 
       {/* ================= Config Table ================= */}
       <div className="border rounded-lg overflow-auto max-h-[70vh]">
@@ -290,160 +302,27 @@ export default function TestBuilderManualPage() {
             </tr>
           </thead>
 
+
+
           <tbody>
-            {fields.map((_, i) => {
-              const q = watchedQuestions[i];
-              const incomplete = !isQuestionConfigured(q);
-
-              return (
-                <tr
-                  key={i}
-                  className={incomplete ? "bg-red-50" : ""}
-                >
-                  <td className="p-2 border text-center">{i + 1}</td>
-
-                  <td className="p-2 border">
-                    <FormSelect
-                      name={`questions.${i}.subject`}
-                      control={control}
-                      disabled={!editable}
-                      options={[
-                        { value: "Physics", label: "Physics" },
-                        { value: "Chemistry", label: "Chemistry" },
-                        { value: "Maths", label: "Maths" },
-                        { value: "Biology", label: "Biology" },
-                      ]}
-                    />
-                  </td>
-
-                  <td className="p-2 border">
-                    <FormSelect
-                      name={`questions.${i}.chapter`}
-                      control={control}
-                      disabled={!editable}
-                      options={CHAPTERS.map((c) => ({
-                        value: c,
-                        label: c,
-                      }))}
-                    />
-                  </td>
-
-                  <td className="p-2 border">
-                    <FormInput
-                      name={`questions.${i}.topic`}
-                      control={control}
-                      disabled={!editable}
-                    />
-                  </td>
-
-                  <td className="p-2 border">
-                    <FormSelect
-                      name={`questions.${i}.difficulty`}
-                      control={control}
-                      disabled={!editable}
-                      options={[
-                        { value: "Easy", label: "Easy" },
-                        { value: "Medium", label: "Medium" },
-                        { value: "Hard", label: "Hard" },
-                      ]}
-                    />
-                  </td>
-
-                  <td className="p-2 border">
-                    <FormSelect
-                      name={`questions.${i}.cognitiveType`}
-                      control={control}
-                      disabled={!editable}
-                      options={[
-                        { value: "Conceptual", label: "Conceptual" },
-                        { value: "Application", label: "Application" },
-                        { value: "Mixed", label: "Mixed" },
-                      ]}
-                    />
-                  </td>
-
-                  <td className="p-2 border">
-                    <FormSelect
-                      name={`questions.${i}.correctOption`}
-                      control={control}
-                      disabled={!editable}
-                      options={[
-                        { value: "A", label: "A" },
-                        { value: "B", label: "B" },
-                        { value: "C", label: "C" },
-                        { value: "D", label: "D" },
-                      ]}
-                    />
-                  </td>
-
-                  <td className="p-2 border">
-                    <FormInput
-                      name={`questions.${i}.marks`}
-                      type="number"
-                      control={control}
-                      disabled={!editable}
-                    />
-                  </td>
-
-                  <td className="p-2 border">
-                    <FormInput
-                      name={`questions.${i}.negativeMarks`}
-                      type="number"
-                      control={control}
-                      disabled={!editable}
-                    />
-                  </td>
-
-                  {!isFixed && editable && (
-                    <td className="p-2 border text-center">
-                      <button
-                        type="button"
-                        onClick={() => remove(i)}
-                        className="text-red-500 hover:text-red-700 font-bold"
-                        title="Remove question"
-                      >
-                        ✕
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
+            {fields.map((_, i) => (
+              <QuestionRow
+                key={i}
+                index={i}
+                control={control}
+                watch={watch}
+                setValue={setValue}
+                editable={editable}
+                isFixed={isFixed}
+                remove={remove}
+              />
+            ))}
           </tbody>
+
         </table>
       </div>
 
       {/* ================= Actions ================= */}
-      {/* {editable ? (
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            disabled={saving || !canSaveOrPublish}
-            onClick={saveConfig}
-          >
-            Save Draft
-          </Button>
-
-          <Button
-            disabled={saving || !canSaveOrPublish}
-            onClick={publish}
-          >
-            Publish Test
-          </Button>
-        </div>
-      ) : (
-        <Button
-          variant="outline"
-          onClick={async () => {
-            const updated = await unpublishTest(test._id!);
-            setTest(updated);
-            notify("Test reverted to Draft", "info");
-          }}
-        >
-          Unpublish
-        </Button>
-      )} */}
-
       {editable ? (
         <div className="flex justify-end gap-3">
           <Button
@@ -463,14 +342,12 @@ export default function TestBuilderManualPage() {
         </div>
       ) : (
         <div className="flex justify-end gap-3">
-          {/* 🔥 Upload Results */}
           {test.status === "Published" && (
             <Button onClick={() => setOpenUpload(true)}>
               Upload Results
             </Button>
           )}
 
-          {/* Unpublish */}
           <Button
             variant="outline"
             onClick={async () => {
@@ -484,24 +361,12 @@ export default function TestBuilderManualPage() {
         </div>
       )}
 
-      {test.status === "Completed" && (
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/tests/${test._id}/analytics`)}
-        >
-          View Analytics
-        </Button>
-      )}
-
-
 
       <UploadResultsDialog
         open={openUpload}
         testId={test._id!}
         onOpenChange={setOpenUpload}
       />
-
-
     </div>
   );
 }

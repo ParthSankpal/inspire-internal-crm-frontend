@@ -56,7 +56,8 @@ export const questionSchema = z.object({
 
   correctOption: z.enum(["A", "B", "C", "D"]),
   marks: z.number().min(1).default(4),
-  negativeMarks: z.number().max(0).default(-1),
+  negativeMarks: z.number().min(-10).max(0).default(-1),
+
 });
 
 export type QuestionFormData = z.infer<typeof questionSchema>;
