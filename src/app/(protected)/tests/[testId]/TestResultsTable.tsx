@@ -121,7 +121,7 @@ export default function TestResultsTable({ testId }: Props) {
           variant="outline"
           onClick={() =>
             router.push(
-              `/tests/${testId}/students/${row.student._id}/analytics`
+              `/students/${row.student._id}/analytics`
             )
           }
         >

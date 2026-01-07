@@ -9,6 +9,9 @@ interface GetQuestionsParams {
   topic?: string;
 }
 
+
+
+
 export async function getQuestions(
   params: GetQuestionsParams = {}
 ): Promise<Question[]> {
@@ -42,15 +45,18 @@ export async function deleteQuestion(id: string) {
 
 export async function saveQuestionConfig(
   testId: string,
-  questions: QuestionFormData[]
+  payload: {
+    questions: QuestionFormData[];
+    subjectWiseMaxMarks: Record<string, number>;
+  }
 ) {
   const { data } = await axiosClient.put(
     `/tests/${testId}/question-config`,
-    { questions }
+    payload
   );
-
   return data;
 }
+
 
 /**
  * Fetch single test with full question configuration

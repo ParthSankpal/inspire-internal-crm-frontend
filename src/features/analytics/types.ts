@@ -1,43 +1,25 @@
-export interface StudentAnalytics {
-  _id: {
-    subject: string;
-    cognitiveType: string;
-  };
+export interface StudentTestAnalytics {
   totalMarks: number;
-  correct: number;
-  attempted: number;
-}
-
-export interface SubjectWiseAnalytics {
-  _id: string; // subject
-  marks: number;
-  correct: number;
-  totalQuestions: number;
-}
-
-export interface TopicAnalytics {
-  _id: {
-    subject: string;
-    chapter: string;
-    topic: string;
+  correctCount: number;
+  incorrectCount: number;
+  notAttemptedCount: number;
+  subjectWiseMarks: Record<string, number>;
+  createdAt: string;
+  rank?: number;
+  test: {
+    _id: string;
+    name: string;
+    maxMarks: number;
+    date: string;
   };
-  score: number;
-  correct: number;
-  total: number;
 }
 
-export interface BatchAnalytics {
-  _id: {
-    subject: string;
-    cognitiveType: string;
+export interface StudentAnalyticsResponse {
+  success: boolean;
+  summary: {
+    totalTests: number;
+    totalMarks: number;
+    avgMarks: number;
   };
-  avgMarks: number;
-  correctRate: number;
-}
-
-export interface QuestionAnalytics {
-  _id: string;
-  attempts: number;
-  correct: number;
-  avgMarks: number;
+  tests: StudentTestAnalytics[];
 }

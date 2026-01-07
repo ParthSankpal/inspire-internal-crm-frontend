@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { Control, UseFormWatch, UseFormSetValue } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { Control, UseFormWatch, UseFormSetValue, useWatch } from "react-hook-form";
 
 import { FormInput } from "@/components/common/Forms/FormInput";
 import { FormSelect } from "@/components/common/Forms/FormSelect";
@@ -22,29 +22,55 @@ interface Props {
 export default function QuestionRow({
   index,
   control,
-  watch,
   setValue,
   editable,
   isFixed,
   remove,
 }: Props) {
-  const subject = watch(`questions.${index}.subject`);
-  const chapter = watch(`questions.${index}.chapter`);
-  const topic = watch(`questions.${index}.topic`);
 
-  const isIncomplete = !chapter || !topic;
+  const subject = useWatch({
+    control,
+    name: `questions.${index}.subject`,
+  });
 
-  /* reset logic */
+  const chapter = useWatch({
+    control,
+    name: `questions.${index}.chapter`,
+  });
+
+  const topic = useWatch({
+    control,
+    name: `questions.${index}.topic`,
+  });
+
+  // ✅ Memoized options
+  const chapterOptions = useMemo(
+    () =>
+      getChapters(subject).map(c => ({ value: c, label: c })),
+    [subject]
+  );
+
+  const topicOptions = useMemo(
+    () =>
+      getTopics(subject, chapter).map(t => ({ value: t, label: t })),
+    [subject, chapter]
+  );
+
+  // ✅ Reset ONLY when value actually changes
   useEffect(() => {
     setValue(`questions.${index}.chapter`, "");
     setValue(`questions.${index}.topic`, "");
-  }, [subject, index, setValue]);
+  }, [subject]);
 
   useEffect(() => {
     setValue(`questions.${index}.topic`, "");
-  }, [chapter, index, setValue]);
+  }, [chapter]);
 
-  const cellClass = `p-2 border ${isIncomplete ? "bg-red-50" : ""}`;
+  const isChapterMissing = !chapter;
+  const isTopicMissing = chapter && !topic;
+
+  const cellClass = `p-2 border ${isChapterMissing || isTopicMissing ? "bg-red-50" : ""
+    }`;
 
   return (
     <tr>
@@ -68,10 +94,7 @@ export default function QuestionRow({
         <FormCombobox
           name={`questions.${index}.chapter`}
           control={control}
-          options={getChapters(subject).map((c) => ({
-            value: c,
-            label: c,
-          }))}
+          options={chapterOptions}
         />
       </td>
 
@@ -79,10 +102,7 @@ export default function QuestionRow({
         <FormCombobox
           name={`questions.${index}.topic`}
           control={control}
-          options={getTopics(subject, chapter).map((t) => ({
-            value: t,
-            label: t,
-          }))}
+          options={topicOptions}
         />
       </td>
 

@@ -160,7 +160,10 @@ export interface Test {
 
   totalMarks: number;
   status: TestStatus;
-
+subjectWiseMaxMarks: Record<
+    "Physics" | "Chemistry" | "Maths" | "Biology" | "Mental Ability",
+    number
+  >;
   /** 🔥 NEW: Manual question configuration */
   questionConfig?: QuestionConfig[];
 

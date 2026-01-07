@@ -20,6 +20,7 @@ import { QuestionFormData, questionSchema } from "@/features/question/types";
 import { IsoDate } from "@/components/common/IsoDate";
 import UploadResultsDialog from "../UploadResultsDialog";
 import QuestionRow from "./QuestionRow";
+import { FormInput } from "@/components/common/Forms/FormInput";
 
 
 /* ----------------------------------------------------
@@ -27,7 +28,7 @@ import QuestionRow from "./QuestionRow";
 ---------------------------------------------------- */
 
 function getQuestionCount(examType: Test["examType"]) {
-  if (examType === "JEE") return 2;
+  if (examType === "JEE") return 75;
   if (examType === "NEET") return 180;
   return 0;
 }
@@ -63,7 +64,9 @@ const createEmptyQuestion = (
 type TestConfigForm = {
   classLevel: 8 | 9 | 10 | 11 | 12;
   questions: QuestionFormData[];
+  subjectWiseMaxMarks: Record<string, number>;
 };
+
 
 /* ----------------------------------------------------
    Page
@@ -111,9 +114,11 @@ export default function TestBuilderManualPage() {
 
         if (found?.questionConfig?.length) {
           reset({
-            classLevel: found.questionConfig[0].classLevel,
-            questions: found.questionConfig,
+            classLevel: found.questionConfig?.[0]?.classLevel ?? 11,
+            questions: found.questionConfig ?? [],
+            subjectWiseMaxMarks: found.subjectWiseMaxMarks ?? {},
           });
+
         } else if (fixedCount > 0) {
           reset({
             classLevel: 11,
@@ -175,12 +180,14 @@ export default function TestBuilderManualPage() {
       setSaving(true);
       const data = getValues();
 
-      const payload = data.questions.map((q) => ({
-        ...q,
-        classLevel: data.classLevel,
-      }));
+      await saveQuestionConfig(test._id!, {
+        questions: data.questions.map((q) => ({
+          ...q,
+          classLevel: data.classLevel,
+        })),
+        subjectWiseMaxMarks: data.subjectWiseMaxMarks,
+      });
 
-      await saveQuestionConfig(test._id!, payload);
       notify("Question configuration saved ✅", "success");
     } catch {
       notify("Failed to save question configuration", "error");
@@ -188,6 +195,7 @@ export default function TestBuilderManualPage() {
       setSaving(false);
     }
   };
+
 
   const publish = async () => {
     await saveConfig();
@@ -257,6 +265,26 @@ export default function TestBuilderManualPage() {
           </div>
         </div>
       </div>
+
+        {/* ================= Subject-wise Marks ================= */}
+          <div className="border rounded-lg p-4 bg-muted/30">
+            <h3 className="text-lg font-semibold mb-3">
+              Subject-wise Maximum Marks
+            </h3>
+
+            <div className="grid grid-cols-3 gap-4">
+              {test.subjectsIncluded.map((subject) => (
+                <FormInput
+                  key={subject}
+                  name={`subjectWiseMaxMarks.${subject}`}
+                  label={`${subject} Marks`}
+                  type="number"
+                  control={control}
+                  disabled={!editable}
+                />
+              ))}
+            </div>
+          </div>
 
       {/* ================= Add Question ================= */}
       {!isFixed && editable && (
