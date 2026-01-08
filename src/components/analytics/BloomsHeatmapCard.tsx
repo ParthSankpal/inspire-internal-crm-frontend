@@ -1,15 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { BloomsHeatmapRow } from "@/features/analytics/types";
 
-interface HeatmapRow {
-  cognitiveType: string;
-  levels: {
-    difficulty: string;
-    attempts: number;
-    accuracy: number;
-  }[];
-}
 
-export default function BloomsHeatmapCard({ data }: { data: HeatmapRow[] }) {
+export default function BloomsHeatmapCard({ data }: { data: BloomsHeatmapRow[] }) {
   return (
     <Card  className=" py-0">
       <CardContent className="p-4">
@@ -37,10 +30,10 @@ export default function BloomsHeatmapCard({ data }: { data: HeatmapRow[] }) {
                         {l.difficulty}
                       </p>
                       <p className="text-xl font-semibold">
-                        {percent}%
+                        {percent}% 
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {l.attempts} attempts
+                        Accuracy in {l.attempted} attempts out of {l.totalQuestions}
                       </p>
                     </div>
                   );

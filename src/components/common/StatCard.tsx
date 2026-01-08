@@ -6,29 +6,41 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import clsx from "clsx";
+
+type StatVariant = "default" | "success" | "warning" | "danger" | "info";
 
 interface StatCardProps {
   label: string;
   value: number | string;
-
-  /** Optional tooltip text */
   info?: string;
+
+  /** Visual meaning */
+  variant?: StatVariant;
 }
 
 export default function StatCard({
   label,
   value,
   info,
+  variant = "default",
 }: StatCardProps) {
+  const valueColor = clsx({
+    "text-foreground": variant === "default",
+    "text-green-600": variant === "success",
+    "text-yellow-600": variant === "warning",
+    "text-red-600": variant === "danger",
+    "text-blue-600": variant === "info",
+  });
+
   return (
-    <Card className=" py-0">
+    <Card className="py-0">
       <CardContent className="p-4">
         <div className="flex items-center gap-1">
           <p className="text-sm text-muted-foreground">
             {label}
           </p>
 
-          {/* ℹ️ Only show if info is provided */}
           {info && (
             <TooltipProvider>
               <Tooltip>
@@ -52,7 +64,7 @@ export default function StatCard({
           )}
         </div>
 
-        <p className="text-2xl font-semibold mt-1">
+        <p className={clsx("text-2xl font-semibold mt-1", valueColor)}>
           {value}
         </p>
       </CardContent>

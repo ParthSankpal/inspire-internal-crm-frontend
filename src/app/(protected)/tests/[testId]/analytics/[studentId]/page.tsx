@@ -118,34 +118,37 @@ export default function StudentTestAnalyticsPage() {
   return (
     <div className="p-6 space-y-8">
       <h1 className="text-2xl font-semibold">
-        Student Test Analytics
+        {result?.studentName}'s Analytics
       </h1>
-{/* 
-      {!loadingResult && result && (
-        <StudentOverviewCards data={result} />
-      )} */}
 
-      {!loadingSubjects && subjects && (
-        <SubjectWiseMarksCard data={subjects} />
-      )}
+      <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
 
+        {!loadingResult && result && (
+          <StudentOverviewCards data={result} />
+        )}
+
+        {!loadingSubjects && subjects && (
+          <SubjectWiseMarksCard data={subjects} />
+        )}
+      </div>
       {!loadingLearningMap && learningMap && (
-        <DifficultyMismatchCard
-          data={learningMap.difficultyMismatch}
-        />
-      )}
-
-      {/* {!loadingLearningMap && learningMap && (
         <BloomsHeatmapCard
           data={learningMap.bloomsHeatmap}
         />
-      )} */}
+      )}
 
       {!loadingLearningMap && learningMap && (
         <TopicHierarchyCard
           data={learningMap.hierarchy}
         />
       )}
+      {!loadingLearningMap && learningMap && (
+        <DifficultyMismatchCard
+          data={learningMap.difficultyMismatch}
+        />
+      )}
+
+
     </div>
   );
 }

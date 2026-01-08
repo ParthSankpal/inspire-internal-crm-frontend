@@ -1,3 +1,5 @@
+import { QuestionConfig } from "../test/types";
+
 export interface StudentTestAnalytics {
   totalMarks: number;
   correctCount: number;
@@ -95,17 +97,16 @@ export interface StudentTestResult {
   _id: string;
   totalMarks: number;
   correctCount: number;
+  accuracy: number;
+  answers: QuestionConfig[];
   incorrectCount: number;
+  normalizedScore: number;
   notAttemptedCount: number;
+  studentName:string;
   subjectWiseMarks: SubjectWiseMarks;
   createdAt: string;
   rank?: number;
-  test?: {
-    _id: string;
-    name: string;
-    maxMarks: number;
-    date: string;
-  };
+  test?: string
 }
 
 export interface StudentAnalyticsSummary {

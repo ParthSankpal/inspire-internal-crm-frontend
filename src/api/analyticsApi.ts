@@ -10,21 +10,6 @@ import { axiosClient } from "@/lib/apiClient";
    STUDENT – TEST SPECIFIC ANALYTICS
 ====================================================== */
 
-/**
- * Single test performance of a student
- * GET /api/analytics/student/:testId/:studentId
- */
-export async function getStudentResult(
-  testId: string,
-  studentId: string | number
-) {
-  const { data } = await axiosClient.get<{
-    success: boolean;
-    data: StudentTestResult | null;
-  }>(`/analytics/student/${testId}/${studentId}`);
-
-  return data;
-}
 
 /**
  * Subject-wise marks (single test)
