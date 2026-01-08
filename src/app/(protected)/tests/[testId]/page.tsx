@@ -304,9 +304,9 @@ export default function TestBuilderManualPage() {
         <div className="flex justify-end">
           <Button
             variant="outline"
-            onClick={() => router.push(`/tests/${test._id}/analytics`)}
+            onClick={() => router.push(`/tests/${test._id}/results`)}
           >
-            View Analytics
+            View Results
           </Button>
         </div>
       )}

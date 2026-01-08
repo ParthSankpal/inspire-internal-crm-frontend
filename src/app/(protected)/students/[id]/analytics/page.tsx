@@ -33,7 +33,7 @@ export default function StudentAnalyticsPage() {
     const loadData = async () => {
       try {
         const [a, s, acc] = await Promise.all([
-          getStudentAnalytics(id),
+          (id),
           getStudentStrengthWeakness(id),
           getStudentSubjectAccuracy(id),
         ]);
@@ -61,26 +61,26 @@ export default function StudentAnalyticsPage() {
       {/* ================= SUMMARY ================= */}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-  <StatCard
-    label="Total Tests"
-    value={analytics.summary.totalTestsConducted}
-  />
+        <StatCard
+          label="Total Tests"
+          value={analytics.summary.totalTestsConducted}
+        />
 
-  <StatCard
-    label="Tests Given"
-    value={analytics.summary.testsAppeared}
-  />
+        <StatCard
+          label="Tests Given"
+          value={analytics.summary.testsAppeared}
+        />
 
-  <StatCard
-    label="Tests Absent"
-    value={analytics.summary.testsAbsent}
-  />
+        <StatCard
+          label="Tests Absent"
+          value={analytics.summary.testsAbsent}
+        />
 
-  <StatCard
-    label="Average Marks"
-    value={analytics.summary.avgMarks}
-  />
-</div>
+        <StatCard
+          label="Average Marks"
+          value={analytics.summary.avgMarks}
+        />
+      </div>
 
 
       {/* ================= STRENGTH / WEAKNESS ================= */}

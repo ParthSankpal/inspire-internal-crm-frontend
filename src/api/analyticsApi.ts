@@ -1,35 +1,10 @@
+import { LearningMapResponse, StudentAnalyticsSummary, StudentTestResult, SubjectWiseMarks } from "@/features/analytics/types";
 import { axiosClient } from "@/lib/apiClient";
 
 /* ======================================================
    TYPES
 ====================================================== */
 
-export interface SubjectWiseMarks {
-  [subject: string]: number;
-}
-
-export interface StudentTestResult {
-  _id: string;
-  totalMarks: number;
-  correctCount: number;
-  incorrectCount: number;
-  notAttemptedCount: number;
-  subjectWiseMarks: SubjectWiseMarks;
-  createdAt: string;
-  rank?: number;
-  test?: {
-    _id: string;
-    name: string;
-    maxMarks: number;
-    date: string;
-  };
-}
-
-export interface StudentAnalyticsSummary {
-  totalTests: number;
-  totalMarks: number;
-  avgMarks: number;
-}
 
 /* ======================================================
    STUDENT – TEST SPECIFIC ANALYTICS
@@ -192,3 +167,85 @@ export async function getTestQuestionAnalytics(testId: string) {
 
   return data;
 }
+
+
+
+
+
+/* ======================================================
+   STUDENT – TEST SPECIFIC ANALYTICS
+====================================================== */
+
+/**
+ * GET student result (marks, accuracy, normalized score)
+ */
+export async function getStudentTestResult(
+  testId: string,
+  studentId: string
+): Promise<StudentTestResult | null> {
+  const { data } = await axiosClient.get(
+    `/analytics/student/${testId}/${studentId}`
+  );
+  return data.data;
+}
+
+/**
+ * GET subject-wise marks (single test)
+ */
+export async function getStudentSubjectWiseMarks(
+  testId: string,
+  studentId: string
+): Promise<SubjectWiseMarks> {
+  const { data } = await axiosClient.get(
+    `/analytics/student/${testId}/${studentId}/subjects`
+  );
+  return data.data?.subjectWiseMarks ?? {};
+}
+
+/* ======================================================
+   TOPIC / DIFFICULTY / BLOOM’S ANALYTICS
+====================================================== */
+
+/**
+ * GET subject → chapter → topic hierarchy
+ * + difficulty mismatch
+ * + Bloom’s taxonomy heatmap
+ */
+export async function getTestLearningMap(
+  testId: string
+): Promise<LearningMapResponse> {
+  const { data } = await axiosClient.get(
+    `/analytics/test/${testId}/learning-map`
+  );
+  return data.data;
+}
+
+
+export async function getStudentLearningMapAnalytics(
+  testId: string,
+  studentId: string
+): Promise<LearningMapResponse> {
+  const { data } = await axiosClient.get(
+    `/analytics/test/${testId}/learning-map/student/${studentId}`
+  );
+  return data.data;
+}
+
+
+/* ======================================================
+   OPTIONAL (FUTURE READY)
+====================================================== */
+
+/**
+ * Student-specific topic analytics (if you enable later)
+ */
+export async function getStudentTopicDifficultyAnalytics(
+  testId: string,
+  studentId: string
+) {
+  const { data } = await axiosClient.get(
+    `/analytics/student/${testId}/${studentId}/topics-difficulty`
+  );
+  return data.data;
+}
+

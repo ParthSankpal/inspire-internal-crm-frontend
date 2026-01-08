@@ -140,18 +140,18 @@ export default function TestsTable({ status }: TestsTableProps) {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => router.push(`/results/${row._id}`)}
+            onClick={() => router.push(`/tests/${row._id}/results`)}
           >
             Results
           </Button>
 
-          <Button
+          {/* <Button
             size="sm"
             variant="outline"
             onClick={() => router.push(`/tests/${row._id}/analytics`)}
           >
             Analytics
-          </Button>
+          </Button> */}
         </>
       )}
     </div>
