@@ -25,18 +25,18 @@ type Option = {
 
 type Props<T extends FieldValues> = {
   name: Path<T>;
-  label?: string;
   control: Control<T>;
   options: Option[];
   placeholder?: string;
+  disabled?: boolean;
 };
 
 export function FormCombobox<T extends FieldValues>({
   name,
-  label,
   control,
   options,
   placeholder = "Select...",
+  disabled = false,
 }: Props<T>) {
   const [open, setOpen] = React.useState(false);
 
@@ -45,23 +45,26 @@ export function FormCombobox<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field }) => {
-        const selected = options.find((o) => o.value === field.value);
+        const selected =
+          options.find((o) => o.value === field.value) ??
+          (field.value
+            ? { value: field.value, label: field.value }
+            : undefined);
 
         return (
-          <div className="flex flex-col gap-1 w-full">
-            {label && <label className="text-sm font-medium">{label}</label>}
+          <Popover open={open} onOpenChange={(v) => !disabled && setOpen(v)}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={disabled}
+                className="w-full justify-start"
+              >
+                {selected ? selected.label : placeholder}
+              </Button>
+            </PopoverTrigger>
 
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  type="button"
-                >
-                  {selected ? selected.label : placeholder}
-                </Button>
-              </PopoverTrigger>
-
+            {!disabled && (
               <PopoverContent className="p-0 w-full">
                 <Command>
                   <CommandInput placeholder={placeholder} />
@@ -74,7 +77,7 @@ export function FormCombobox<T extends FieldValues>({
                           key={opt.value}
                           onSelect={() => {
                             field.onChange(opt.value);
-                            setOpen(false); 
+                            setOpen(false);
                           }}
                         >
                           {opt.label}
@@ -84,8 +87,8 @@ export function FormCombobox<T extends FieldValues>({
                   </CommandList>
                 </Command>
               </PopoverContent>
-            </Popover>
-          </div>
+            )}
+          </Popover>
         );
       }}
     />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Control, UseFormWatch, UseFormSetValue, useWatch } from "react-hook-form";
 
 import { FormInput } from "@/components/common/Forms/FormInput";
@@ -56,27 +56,41 @@ export default function QuestionRow({
     [subject, chapter]
   );
 
-  // ✅ Reset ONLY when value actually changes
-  useEffect(() => {
+  const prevSubjectRef = useRef(subject);
+const prevChapterRef = useRef(chapter);
+
+// Subject → reset chapter & topic ONLY if subject changed
+useEffect(() => {
+  if (prevSubjectRef.current && prevSubjectRef.current !== subject) {
     setValue(`questions.${index}.chapter`, "");
     setValue(`questions.${index}.topic`, "");
-  }, [subject]);
+  }
+  prevSubjectRef.current = subject;
+}, [subject, index, setValue]);
 
-  useEffect(() => {
-    setValue(`questions.${index}.topic`, "");
-  }, [chapter]);
+// Chapter → reset topic ONLY if topic is invalid
+useEffect(() => {
+  if (prevChapterRef.current && prevChapterRef.current !== chapter) {
+    const validTopics = getTopics(subject, chapter);
+    if (!validTopics.includes(topic)) {
+      setValue(`questions.${index}.topic`, "");
+    }
+  }
+  prevChapterRef.current = chapter;
+}, [chapter, subject, topic, index, setValue]);
+
+ 
 
   const isChapterMissing = !chapter;
   const isTopicMissing = chapter && !topic;
 
-  const cellClass = `p-2 border ${isChapterMissing || isTopicMissing ? "bg-red-50" : ""
-    }`;
+  
 
   return (
-    <tr>
-      <td className={cellClass + " text-center"}>{index + 1}</td>
+    <tr className={isChapterMissing || isTopicMissing ? "bg-red-50" : "" + " text-center"}>
+      <td className=" p-2 border">{index + 1}</td>
 
-      <td className={cellClass}>
+      <td className=" p-2 border">
         <FormSelect
           name={`questions.${index}.subject`}
           control={control}
@@ -90,23 +104,28 @@ export default function QuestionRow({
         />
       </td>
 
-      <td className={cellClass}>
+      <td className=" p-2 border">
         <FormCombobox
           name={`questions.${index}.chapter`}
           control={control}
           options={chapterOptions}
+          disabled={!subject}
         />
       </td>
 
-      <td className={cellClass}>
+      <td className=" p-2 border">
+
         <FormCombobox
           name={`questions.${index}.topic`}
           control={control}
           options={topicOptions}
+          disabled={!chapter}
         />
+
       </td>
 
-      <td className={cellClass}>
+
+      <td className=" p-2 border">
         <FormSelect
           name={`questions.${index}.difficulty`}
           control={control}
@@ -119,7 +138,7 @@ export default function QuestionRow({
         />
       </td>
 
-      <td className={cellClass}>
+      <td className=" p-2 border">
         <FormSelect
           name={`questions.${index}.cognitiveType`}
           control={control}
@@ -132,7 +151,7 @@ export default function QuestionRow({
         />
       </td>
 
-      <td className={cellClass}>
+      <td className=" p-2 border">
         <FormSelect
           name={`questions.${index}.correctOption`}
           control={control}
@@ -146,7 +165,7 @@ export default function QuestionRow({
         />
       </td>
 
-      <td className={cellClass}>
+      <td className=" p-2 border">
         <FormInput
           name={`questions.${index}.marks`}
           type="number"
@@ -155,7 +174,7 @@ export default function QuestionRow({
         />
       </td>
 
-      <td className={cellClass}>
+      <td className=" p-2 border">
         <FormInput
           name={`questions.${index}.negativeMarks`}
           type="number"
@@ -165,7 +184,7 @@ export default function QuestionRow({
       </td>
 
       {!isFixed && editable && (
-        <td className={cellClass + " text-center"}>
+        <td className=" p-2 border">
           <button
             type="button"
             onClick={() => remove(index)}
