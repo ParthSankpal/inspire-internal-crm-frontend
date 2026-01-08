@@ -120,10 +120,10 @@ export default function StudentTestAnalyticsPage() {
       <h1 className="text-2xl font-semibold">
         Student Test Analytics
       </h1>
-
+{/* 
       {!loadingResult && result && (
         <StudentOverviewCards data={result} />
-      )}
+      )} */}
 
       {!loadingSubjects && subjects && (
         <SubjectWiseMarksCard data={subjects} />
@@ -135,11 +135,11 @@ export default function StudentTestAnalyticsPage() {
         />
       )}
 
-      {!loadingLearningMap && learningMap && (
+      {/* {!loadingLearningMap && learningMap && (
         <BloomsHeatmapCard
           data={learningMap.bloomsHeatmap}
         />
-      )}
+      )} */}
 
       {!loadingLearningMap && learningMap && (
         <TopicHierarchyCard
