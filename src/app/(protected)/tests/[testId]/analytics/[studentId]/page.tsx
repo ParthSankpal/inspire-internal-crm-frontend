@@ -18,6 +18,7 @@ import {
 import { useNotify } from "@/components/common/NotificationProvider";
 import { LearningMapResponse, StudentTestResult, SubjectWiseMarks } from "@/features/analytics/types";
 import { Button } from "@/components/ui/button";
+import { API_BASE_URL } from "@/lib/env";
 
 
 export default function StudentTestAnalyticsPage() {
@@ -125,16 +126,14 @@ export default function StudentTestAnalyticsPage() {
       <Button
         variant="outline"
         onClick={() =>
-
           window.open(
-            `/api/analytics/test/${testId}/student/${studentId}/learning-map/pdf`,
+            `${API_BASE_URL}/analytics/test/${testId}/student/${studentId}/learning-map/pdf`,
             "_blank"
           )
         }
       >
         Export PDF
       </Button>
-
 
       <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
 

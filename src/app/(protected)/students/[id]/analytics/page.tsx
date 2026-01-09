@@ -1,184 +1,86 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 
 
-import StatCard from "@/components/common/StatCard";
-import { DataTable } from "@/components/common/DataTable";
-// import MarksTrendChart from "@/components/analytics/MarksTrendChart";
-import { Button } from "@/components/ui/button";
-import { getStudentAnalytics, getStudentStrengthWeakness, getStudentSubjectAccuracy } from "@/api/analyticsApi";
+/* =============================
+   COMPONENTS
+============================= */
 
-/* ======================================================
-   PAGE
-====================================================== */
 
-export default function StudentAnalyticsPage() {
+
+import { getStudentOverallAnalytics } from "@/api/studentOverallAnalytics";
+import { StudentOverallAnalytics } from "@/features/analytics/studentOverall.types";
+import StudentOverallSummary from "@/components/studentOverallAnalytics/StudentOverallSummary";
+import StudentPerformanceTrend from "@/components/studentOverallAnalytics/StudentPerformanceTrend";
+import StudentSubjectOverview from "@/components/studentOverallAnalytics/StudentSubjectOverview";
+import StudentTestHistoryTable from "@/components/studentOverallAnalytics/StudentTestHistoryTable";
+
+export default function StudentOverallAnalyticsPage() {
   const { id } = useParams<{ id: string }>();
+  console.log(id);
 
-  const [analytics, setAnalytics] = useState<any>(null);
-  const [strength, setStrength] = useState<any>(null);
-  const [accuracy, setAccuracy] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  /* -------------------------------------------------- */
-  /* FETCH DATA                                         */
-  /* -------------------------------------------------- */
+  const [analytics, setAnalytics] =
+    useState<StudentOverallAnalytics | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    const loadData = async () => {
+    const fetchAnalytics = async () => {
       try {
-        const [a, s, acc] = await Promise.all([
-          (id),
-          getStudentStrengthWeakness(id),
-          getStudentSubjectAccuracy(id),
-        ]);
+        setLoading(true);
+        const data = await getStudentOverallAnalytics(id);
+        console.log(data);
 
-        setAnalytics(a);
-        setStrength(s);
-        setAccuracy(acc.data);
+        setAnalytics(data);
+      } catch (err) {
+        console.error("Failed to load student analytics", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
+    fetchAnalytics();
   }, [id]);
 
-  if (loading) return <div>Loading analytics...</div>;
-  if (!analytics) return <div>No data found</div>;
+  if (loading) {
+    return <div className="p-6">hi</div>;
+  }
 
-  /* -------------------------------------------------- */
-  /* RENDER                                             */
-  /* -------------------------------------------------- */
+  if (!analytics) {
+    return <div className="p-6">No analytics available</div>;
+  }
 
   return (
-    <div className="space-y-8">
-      {/* ================= SUMMARY ================= */}
+    <div className="space-y-6 p-6">
+      {/* =============================
+         SUMMARY CARDS
+      ============================== */}
+      <StudentOverallSummary summary={analytics.summary} />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Tests"
-          value={analytics.summary.totalTestsConducted}
-        />
+      {/* =============================
+         SCORE TREND
+      ============================== */}
+      <StudentPerformanceTrend timeline={analytics.timeline} />
 
-        <StatCard
-          label="Tests Given"
-          value={analytics.summary.testsAppeared}
-        />
+      {/* =============================
+         SUBJECT PERFORMANCE
+      ============================== */}
+      <StudentSubjectOverview
+        subjects={analytics.subjects}
+        strengthWeakness={analytics.strengthWeakness}
+      />
 
-        <StatCard
-          label="Tests Absent"
-          value={analytics.summary.testsAbsent}
-        />
-
-        <StatCard
-          label="Average Marks"
-          value={analytics.summary.avgMarks}
-        />
-      </div>
-
-
-      {/* ================= STRENGTH / WEAKNESS ================= */}
-
-      {strength && (
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            label="Strongest Subject"
-            value={strength.strongest?._id ?? "-"}
-          />
-          <StatCard
-            label="Weakest Subject"
-            value={strength.weakest?._id ?? "-"}
-          />
-        </div>
-      )}
-
-      {/* ================= MARKS TREND ================= */}
-
-      {/* <MarksTrendChart data={analytics.tests} /> */}
-
-      {/* ================= SUBJECT ACCURACY ================= */}
-
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">
-          Subject-wise Average
-        </h2>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {accuracy.map((s) => (
-            <StatCard
-              key={s.subject}
-              label={s.subject}
-              value={s.avgMarks}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* ================= TEST-WISE TABLE ================= */}
-
-      <div>
-        <h2 className="mb-3 text-lg font-semibold">
-          Test-wise Performance
-        </h2>
-
-        <DataTable
-          data={analytics.tests}
-          showIndex
-          columns={[
-            {
-              id: "test",
-              label: "Test",
-              accessor: (r: any) => r.test.name,
-            },
-            {
-              id: "date",
-              label: "Date",
-              accessor: (r: any) =>
-                new Date(r.test.date).toLocaleDateString(),
-            },
-            {
-              id: "marks",
-              label: "Marks",
-              accessor: (r: any) =>
-                `${r.totalMarks} / ${r.test.maxMarks}`,
-            },
-            {
-              id: "rank",
-              label: "Rank",
-              accessor: (r: any) => r.rank ?? "-",
-            },
-            {
-              id: "correct",
-              label: "✔",
-              accessor: (r: any) => r.correctCount,
-            },
-            {
-              id: "incorrect",
-              label: "✖",
-              accessor: (r: any) => r.incorrectCount,
-            },
-            {
-              id: "na",
-              label: "Ø",
-              accessor: (r: any) => r.notAttemptedCount,
-            },
-          ]}
-        />
-      </div>
-
-      {/* ================= ACTIONS ================= */}
-
-      <div className="flex justify-end">
-        <Button variant="outline">
-          Download PDF
-        </Button>
-      </div>
+      {/* =============================
+         TEST HISTORY
+      ============================== */}
+      <StudentTestHistoryTable
+        timeline={analytics.timeline}
+        studentId={id}
+      />
     </div>
   );
 }
