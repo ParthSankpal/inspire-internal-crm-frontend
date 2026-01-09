@@ -130,7 +130,6 @@ export default function StudentTestAnalyticsPage() {
             `/api/analytics/test/${testId}/student/${studentId}/learning-map/pdf`,
             "_blank"
           )
-
         }
       >
         Export PDF
