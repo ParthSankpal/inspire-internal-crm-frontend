@@ -1,4 +1,4 @@
-import { StudentOverallAnalytics } from "@/features/analytics/studentOverall.types";
+import { StudentOverallAnalytics, StudentTestHistoryResponse } from "@/features/analytics/studentOverall.types";
 import { axiosClient } from "@/lib/apiClient";
 
 
@@ -13,4 +13,23 @@ export async function getStudentOverallAnalytics(
   );
 
   return data.data;
+}
+
+
+export async function getStudentTestHistory(params: {
+  studentId: string;
+  page: number;
+  limit: number;
+  search?: string;
+  sortKey?: string;
+  sortDir?: "asc" | "desc";
+}): Promise<StudentTestHistoryResponse> {
+  const { studentId, ...query } = params;
+
+  const { data } = await axiosClient.get(
+    `/analytics/students/${studentId}/tests`,
+    { params: query }
+  );
+
+  return data;
 }

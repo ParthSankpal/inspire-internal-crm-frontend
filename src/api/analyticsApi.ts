@@ -169,7 +169,7 @@ export async function getStudentTestResult(
   studentId: string
 ): Promise<StudentTestResult | null> {
   const { data } = await axiosClient.get(
-    `/analytics/student/${testId}/${studentId}`
+    `/analytics/student/test/${testId}/${studentId}`
   );
   return data.data;
 }

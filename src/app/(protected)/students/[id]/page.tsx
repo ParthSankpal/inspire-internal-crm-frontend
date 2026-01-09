@@ -68,8 +68,8 @@ export default function StudentDetailsPage() {
                     </h1>
                 </div>
 
-                <Button onClick={exportPDF} variant="secondary">
-                    Export PDF
+                <Button variant="outline" onClick={() => router.push(`/students/${id}/analytics`)} >
+                    View Analytics
                 </Button>
             </div>
 

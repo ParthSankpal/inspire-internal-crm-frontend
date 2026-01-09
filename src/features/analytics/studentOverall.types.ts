@@ -1,3 +1,5 @@
+import { PaginationMeta } from "../pagination";
+
 export type Subject =
   | "Physics"
   | "Chemistry"
@@ -72,3 +74,31 @@ export interface StudentOverallAnalytics {
 
 export type StudentOverallAnalyticsResponse =
   ApiResponse<StudentOverallAnalytics>;
+
+
+
+  /* =============================
+   SINGLE ROW (DATATABLE)
+============================= */
+
+export interface StudentTestHistoryRow {
+  _id?: string;
+  testId: string;
+  testName: string;
+  date: string;            // ISO string (API-friendly)
+
+  attempts: number;
+  normalizedScore: number; // %
+  accuracy: number;        // 0–1
+}
+
+
+/* =============================
+   API RESPONSE
+============================= */
+
+export interface StudentTestHistoryResponse {
+  success: boolean;
+  data: StudentTestHistoryRow[];
+  pagination: PaginationMeta;
+}

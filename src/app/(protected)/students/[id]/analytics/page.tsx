@@ -78,7 +78,6 @@ export default function StudentOverallAnalyticsPage() {
          TEST HISTORY
       ============================== */}
       <StudentTestHistoryTable
-        timeline={analytics.timeline}
         studentId={id}
       />
     </div>
