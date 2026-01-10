@@ -70,6 +70,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       parent: {
         fatherName: "",
         motherName: "",
+        parentEmail:"",
         fatherPhone: "",
         motherPhone: "",
         occupation: "",
@@ -276,6 +277,7 @@ const columns = [
                 parent: {
                   fatherName: row.parent?.fatherName ?? "",
                   motherName: row.parent?.motherName ?? "",
+                  parentEmail: row.parent?.parentEmail ?? "",
                   fatherPhone: row.parent?.fatherPhone ?? "",
                   motherPhone: row.parent?.motherPhone ?? "",
                   occupation: row.parent?.occupation ?? "",
@@ -386,6 +388,7 @@ const columns = [
           <FormInput name="parent.motherName" label="Mother Name" control={control} error={errors.parent?.motherName?.message} />
           <FormInput name="parent.fatherPhone" label="Father Phone" control={control} error={errors.parent?.fatherPhone?.message} />
           <FormInput name="parent.motherPhone" label="Mother Phone" control={control} error={errors.parent?.motherPhone?.message} />
+          <FormInput name="parent.parentEmail" label="Parent Email" control={control} error={errors.parent?.parentEmail?.message} />
           <FormInput name="parent.occupation" label="Occupation" control={control} error={errors.parent?.occupation?.message} />
         </AccordionContent>
       </AccordionItem>

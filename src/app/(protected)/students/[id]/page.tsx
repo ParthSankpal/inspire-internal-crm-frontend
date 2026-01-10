@@ -117,6 +117,7 @@ export default function StudentDetailsPage() {
                     <CardContent className="grid grid-cols-3 gap-4">
                         <p><b>Father:</b> {student.parent.fatherName} ({student.parent.fatherPhone})</p>
                         <p><b>Mother:</b> {student.parent.motherName} ({student.parent.motherPhone})</p>
+                        <p><b>parentEmail:</b> {student.parent.parentEmail} </p>
                         <p><b>Occupation:</b> {student.parent.occupation}</p>
                     </CardContent>
                 </Card>

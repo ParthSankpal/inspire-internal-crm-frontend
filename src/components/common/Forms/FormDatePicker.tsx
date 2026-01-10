@@ -66,8 +66,8 @@ const currentYear = new Date().getFullYear();
                   <Calendar
                     mode="single"
                     captionLayout="dropdown"
-                    fromYear={currentYear - 10}
-                    toYear={currentYear + 10} // admissions / payments / planning
+                    fromYear={currentYear - 20}
+                    toYear={currentYear + 5} // admissions / payments / planning
                     selected={selectedDate}
                     // disabled={{ before: new Date() }}
                     onSelect={(date) => {

@@ -10,6 +10,7 @@ import BloomsHeatmapCard from "@/components/analytics/BloomsHeatmapCard";
 import TopicHierarchyCard from "@/components/analytics/TopicHierarchyCard";
 
 import {
+  downloadStudentLearningMapPdf,
   getStudentLearningMapAnalytics,
   getStudentSubjectWiseMarks,
   getStudentTestResult,
@@ -124,13 +125,27 @@ export default function StudentTestAnalyticsPage() {
 
       <Button
         variant="outline"
-        onClick={() =>
+        onClick={async () => {
+          try {
+            const pdfBlob = await downloadStudentLearningMapPdf(
+              testId,
+              studentId
+            );
 
-          window.open(
-            `/api/analytics/test/${testId}/student/${studentId}/learning-map/pdf`,
-            "_blank"
-          )
-        }
+            const pdfUrl = window.URL.createObjectURL(
+              new Blob([pdfBlob], { type: "application/pdf" })
+            );
+
+            window.open(pdfUrl, "_blank");
+
+            // Optional cleanup after some time
+            setTimeout(() => {
+              window.URL.revokeObjectURL(pdfUrl);
+            }, 10000);
+          } catch (err) {
+            notify("Failed to download PDF", "error");
+          }
+        }}
       >
         Download PDF
       </Button>

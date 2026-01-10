@@ -52,17 +52,17 @@ axiosClient.interceptors.request.use(
         }
       }
 
-      // 🧩 Diagnostic log for debugging outgoing requests
-      const authHeader =
-        config.headers?.Authorization || config.headers?.authorization;
-      console.log(
-        "%c[Axios → Request]",
-        "color:#3b82f6; font-weight:bold;",
-        // "\nURL:", config.baseURL + config.url,
-        "\nMethod:", config.method?.toUpperCase(),
-        "\nAuthorization Header:",
-        authHeader ? authHeader.slice(0, 40) + "..." : "❌ Missing"
-      );
+      // // 🧩 Diagnostic log for debugging outgoing requests
+      // const authHeader =
+      //   config.headers?.Authorization || config.headers?.authorization;
+      // console.log(
+      //   "%c[Axios → Request]",
+      //   "color:#3b82f6; font-weight:bold;",
+      //   // "\nURL:", config.baseURL + config.url,
+      //   "\nMethod:", config.method?.toUpperCase(),
+      //   "\nAuthorization Header:",
+      //   authHeader ? authHeader.slice(0, 40) + "..." : "❌ Missing"
+      // );
     } catch (err) {
       console.error("❌ Error in Axios request interceptor:", err);
     }
@@ -74,15 +74,15 @@ axiosClient.interceptors.request.use(
 // ✅ Response Interceptor
 axiosClient.interceptors.response.use(
   (response: AxiosResponse): AxiosResponse => {
-    // 🧩 Log successful responses (useful for debugging)
-    if (typeof window !== "undefined") {
-      console.log(
-        "%c[Axios ← Response]",
-        "color:#22c55e; font-weight:bold;",
-        "\nStatus:", response.status,
-        "\nURL:", response.config.url
-      );
-    }
+    // // 🧩 Log successful responses (useful for debugging)
+    // if (typeof window !== "undefined") {
+    //   console.log(
+    //     "%c[Axios ← Response]",
+    //     "color:#22c55e; font-weight:bold;",
+    //     "\nStatus:", response.status,
+    //     "\nURL:", response.config.url
+    //   );
+    // }
     return response;
   },
   // (error: AxiosError) => {

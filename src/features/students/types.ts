@@ -40,6 +40,7 @@ export interface Student {
 
   parent: {
     fatherName: string;
+    parentEmail?: string;
     motherName: string;
     fatherPhone?: string;
     motherPhone?: string;
@@ -104,6 +105,7 @@ export const studentSchema = z.object({
   parent: z.object({
     fatherName: z.string().min(1, "Father name required"),
     motherName: z.string().min(1, "Mother name required"),
+    parentEmail: z.string().email("Invalid email").optional().or(z.literal("")),
     fatherPhone: z.string().optional(),
     motherPhone: z.string().optional(),
     occupation: z.string().optional(),
