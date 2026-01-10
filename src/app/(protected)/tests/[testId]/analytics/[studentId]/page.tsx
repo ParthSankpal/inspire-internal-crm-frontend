@@ -127,18 +127,40 @@ export default function StudentTestAnalyticsPage() {
         variant="outline"
         onClick={async () => {
           try {
-            const pdfBlob = await downloadStudentLearningMapPdf(
+            const response = await downloadStudentLearningMapPdf(
               testId,
               studentId
             );
 
+            const blob = response.data;
+
+            // ✅ Extract filename from backend header
+            const contentDisposition =
+              response.headers["content-disposition"];
+
+            let filename = "LearningMap.pdf";
+
+            if (contentDisposition) {
+              const match = contentDisposition.match(/filename="?(.+)"?/);
+              if (match?.[1]) filename = match[1];
+            }
+
+            // ✅ Create object URL
             const pdfUrl = window.URL.createObjectURL(
-              new Blob([pdfBlob], { type: "application/pdf" })
+              new Blob([blob], { type: "application/pdf" })
             );
 
+            // ✅ Open preview
             window.open(pdfUrl, "_blank");
 
-            // Optional cleanup after some time
+            // ✅ Trigger download with correct filename
+            const a = document.createElement("a");
+            a.href = pdfUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
             setTimeout(() => {
               window.URL.revokeObjectURL(pdfUrl);
             }, 10000);
@@ -149,6 +171,7 @@ export default function StudentTestAnalyticsPage() {
       >
         Download PDF
       </Button>
+
 
 
       <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">

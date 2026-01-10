@@ -216,20 +216,18 @@ export async function getStudentLearningMapAnalytics(
   return data.data;
 }
 
-
 export const downloadStudentLearningMapPdf = async (
   testId: string,
   studentId: string
-): Promise<Blob> => {
-  const response = await axiosClient.get(
+) => {
+  return axiosClient.get(
     `/analytics/test/${testId}/student/${studentId}/learning-map/pdf`,
     {
-      responseType: "blob", 
+      responseType: "blob",
     }
   );
-
-  return response.data;
 };
+
 
 /* ======================================================
    OPTIONAL (FUTURE READY)
