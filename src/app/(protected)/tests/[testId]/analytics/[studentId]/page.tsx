@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import StudentOverviewCards from "@/components/analytics/StudentOverviewCards";
 import SubjectWiseMarksCard from "@/components/analytics/SubjectWiseMarksCard";
@@ -19,6 +19,7 @@ import {
 import { useNotify } from "@/components/common/NotificationProvider";
 import { LearningMapResponse, StudentTestResult, SubjectWiseMarks } from "@/features/analytics/types";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 
 export default function StudentTestAnalyticsPage() {
@@ -28,6 +29,7 @@ export default function StudentTestAnalyticsPage() {
   }>();
 
   const notify = useNotify();
+    const router = useRouter();
 
   /* ===============================
      DATA STATES
@@ -119,10 +121,19 @@ export default function StudentTestAnalyticsPage() {
 
   return (
     <div className="p-6 space-y-8">
+      <div className=" flex justify-between items-center">
+
+        <Button
+                variant="outline"
+                size="icon"
+                onClick={() => router.back()}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+
       <h1 className="text-2xl font-semibold">
         {result?.studentName}'s Analytics
       </h1>
-
       <Button
         variant="outline"
         onClick={async () => {
@@ -171,6 +182,7 @@ export default function StudentTestAnalyticsPage() {
       >
         Download PDF
       </Button>
+      </div>
 
 
 

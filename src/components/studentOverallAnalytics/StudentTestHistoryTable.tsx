@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 import { DataTable } from "@/components/common/DataTable";
 import { StudentTestHistoryRow } from "@/features/analytics/studentOverall.types";
 import { getStudentTestHistory } from "@/api/studentOverallAnalytics";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { IsoDate } from "../common/IsoDate";
 
 
 export default function StudentTestHistoryTable({
@@ -17,6 +19,7 @@ export default function StudentTestHistoryTable({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
+    const router = useRouter();
 
   useEffect(() => {
     loadData();
@@ -62,7 +65,7 @@ export default function StudentTestHistoryTable({
           id: "date",
           label: "Date",
           accessor: (row) =>
-            new Date(row.date).toLocaleDateString(),
+            <IsoDate value={row.date} />,
         },
         {
           id: "normalizedScore",
@@ -77,12 +80,18 @@ export default function StudentTestHistoryTable({
         },
       ]}
       rowActions={(row) => (
-        <Link
-          href={`/students/${studentId}/tests/${row.testId}/analytics`}
-          className="text-blue-600 hover:underline"
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() =>
+            router.push(
+              `/tests/${row.testId}/analytics/${studentId}`
+            )
+          }
         >
-          View
-        </Link>
+          View Analytics
+        </Button>
+
       )}
     />
   );
