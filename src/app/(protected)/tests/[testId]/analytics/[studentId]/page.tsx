@@ -138,7 +138,7 @@ export default function StudentTestAnalyticsPage() {
             const contentDisposition =
               response.headers["content-disposition"];
 
-            let filename = "LearningMap.pdf";
+            let filename = `${result?.studentName}_${result?.test}`;
 
             if (contentDisposition) {
               const match = contentDisposition.match(/filename="?(.+)"?/);

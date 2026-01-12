@@ -338,7 +338,7 @@ export default function TestBuilderManualPage() {
                 key={i}
                 index={i}
                 control={control}
-                watch={watch}
+                // watch={watch}
                 setValue={setValue}
                 editable={editable}
                 isFixed={isFixed}

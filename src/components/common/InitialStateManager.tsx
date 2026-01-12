@@ -107,7 +107,14 @@ const InitialStateManager = () => {
   if (!checked) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground">Checking session...</p>
+       <div className="flex h-[70vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-muted border-t-primary" />
+          {/* <p className="text-sm text-muted-foreground">
+            Loading test analytics...
+          </p> */}
+        </div>
+      </div>
       </div>
     );
   }
