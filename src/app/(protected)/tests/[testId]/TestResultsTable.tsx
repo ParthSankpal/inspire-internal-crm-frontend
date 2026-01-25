@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { DataTable } from "@/components/common/DataTable";
 import { Button } from "@/components/ui/button";
 import { getTestResponses, TestResponse } from "@/api/testResponses";
+import { BulkEmailFailure, emailBulkStudentAnalyticsPDF, emailStudentAnalyticsPDF } from "@/api/analyticsApi";
+import { useNotify } from "@/components/common/NotificationProvider";
+import { CustomDialog } from "@/components/common/CustomDialog";
 
 interface Props {
   testId: string;
@@ -13,6 +16,8 @@ interface Props {
 
 export default function TestResultsTable({ testId }: Props) {
   const router = useRouter();
+  const notify = useNotify();
+
 
   const [items, setItems] = useState<TestResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,6 +28,11 @@ export default function TestResultsTable({ testId }: Props) {
     totalPages: 1,
   });
   const [search, setSearch] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [bulkEmailLoading, setBulkEmailLoading] = useState(false);
+  const [failureDialogOpen, setFailureDialogOpen] = useState(false);
+  const [emailFailures, setEmailFailures] = useState<BulkEmailFailure[]>([]);
+
 
   const loadResponses = useCallback(async () => {
     setLoading(true);
@@ -99,35 +109,134 @@ export default function TestResultsTable({ testId }: Props) {
     },
   ];
 
-  return (
-    <DataTable<TestResponse>
-      columns={columns}
-      data={items}
-      totalItems={pagination.totalItems}
-      serverSide
-      searchable
-      showIndex
-      emptyMessage={loading ? "Loading results..." : "No results found"}
-      onPaginationChange={(info) =>
-        setPagination((p) => ({ ...p, page: info.page, limit: info.limit }))
+  const handleEmailStudent = async (studentId: string) => {
+    try {
+      setEmailLoading(true);
+      await emailStudentAnalyticsPDF(testId, studentId);
+      notify("Report emailed to parent", "success", 2000);
+    } catch (err) {
+      notify("Failed to send report", "error");
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+
+  const handleEmailAll = async () => {
+    try {
+      setBulkEmailLoading(true);
+
+      const studentIds = items.map((r) => r.student._id);
+
+      if (!studentIds.length) {
+        notify("No students found", "warning");
+        return;
       }
-      onSearchChange={(val) => {
-        setSearch(val);
-        setPagination((p) => ({ ...p, page: 1 }));
-      }}
-      rowActions={(row) => (
+
+      const res = await emailBulkStudentAnalyticsPDF(testId, studentIds);
+
+      if (res.failed === 0) {
+        notify(
+          `All reports emailed successfully (${res.sent})`,
+          "success",
+          2500
+        );
+      } else {
+        notify(
+          `Emails sent: ${res.sent}, Failed: ${res.failed}`,
+          "warning",
+          4000
+        );
+
+        // 🔥 OPEN FAILURE DIALOG
+        setEmailFailures(res.failures || []);
+        setFailureDialogOpen(true);
+      }
+
+
+    } catch (err) {
+      notify("Bulk email failed", "error");
+    } finally {
+      setBulkEmailLoading(false);
+    }
+  };
+
+  return (
+
+    <>
+      <div className="flex justify-end mb-3">
         <Button
-          size="sm"
           variant="outline"
-          onClick={() =>
-            router.push(
-              `/tests/${testId}/analytics/${row.student._id}`
-            )
-          }
+          disabled={bulkEmailLoading || loading}
+          onClick={handleEmailAll}
         >
-          View Analytics
+          {bulkEmailLoading ? "Sending Emails..." : "Email All Reports"}
         </Button>
-      )}
-    />
+      </div>
+
+      <DataTable<TestResponse>
+        columns={columns}
+        data={items}
+        totalItems={pagination.totalItems}
+        serverSide
+        searchable
+        showIndex
+        emptyMessage={loading ? "Loading results..." : "No results found"}
+        onPaginationChange={(info) =>
+          setPagination((p) => ({ ...p, page: info.page, limit: info.limit }))
+        }
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPagination((p) => ({ ...p, page: 1 }));
+        }}
+        rowActions={(row) => (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                router.push(
+                  `/tests/${testId}/analytics/${row.student._id}`
+                )
+              }
+            >
+              View Analytics
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={emailLoading}
+              onClick={() => handleEmailStudent(row.student._id)}
+            >
+              Email Report
+            </Button>
+          </div>
+        )}
+      />
+
+      <CustomDialog
+        open={failureDialogOpen}
+        onOpenChange={setFailureDialogOpen}
+        title="Email Failed for Some Students"
+        description="The following students' reports could not be emailed."
+        showCancel
+        cancelLabel="Close"
+      >
+        <ul className="list-disc pl-5 space-y-2">
+          {emailFailures.map((f) => (
+            <li key={f.studentId} className="text-sm">
+              <span className="font-medium">{f.studentName}</span>
+              <span className="text-muted-foreground">
+                {" "}
+                — {f.reason}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </CustomDialog>
+
+
+    </>
   );
 }

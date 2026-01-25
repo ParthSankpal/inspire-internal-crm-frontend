@@ -246,3 +246,56 @@ export async function getStudentTopicDifficultyAnalytics(
   return data.data;
 }
 
+
+
+
+export interface EmailStudentReportResponse {
+  success: boolean;
+  message?: string;
+}
+
+export async function emailStudentAnalyticsPDF(
+  testId: string,
+  studentId: string
+): Promise<EmailStudentReportResponse> {
+  const { data } = await axiosClient.post(
+    `/email/studentAnalytics`,
+    {
+      testId,
+      studentId,
+    }
+  );
+
+  return data;
+}
+
+
+
+export interface BulkEmailFailure {
+  studentId: string;
+  studentName: string;
+  reason: string;
+}
+
+export interface EmailBulkStudentReportsResponse {
+  success: boolean;
+  total: number;
+  sent: number;
+  failed: number;
+  failures: BulkEmailFailure[];
+}
+
+export async function emailBulkStudentAnalyticsPDF(
+  testId: string,
+  studentIds: string[]
+): Promise<EmailBulkStudentReportsResponse> {
+  const { data } = await axiosClient.post(
+    `/email/test/bulkAnalytics`,
+    {
+      testId,
+      studentIds,
+    }
+  );
+
+  return data;
+}
