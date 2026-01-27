@@ -9,6 +9,7 @@ import { getTestResponses, TestResponse } from "@/api/testResponses";
 import { BulkEmailFailure, emailBulkStudentAnalyticsPDF, emailStudentAnalyticsPDF } from "@/api/analyticsApi";
 import { useNotify } from "@/components/common/NotificationProvider";
 import { CustomDialog } from "@/components/common/CustomDialog";
+import { downloadTestResultsPdf } from "@/api/testApi";
 
 interface Props {
   testId: string;
@@ -164,7 +165,13 @@ export default function TestResultsTable({ testId }: Props) {
   return (
 
     <>
-      <div className="flex justify-end mb-3">
+      <div className="flex gap-4 justify-end mb-3">
+
+        <Button
+          onClick={() => downloadTestResultsPdf(testId)}
+        >
+          Download PDF
+        </Button>
         <Button
           variant="outline"
           disabled={bulkEmailLoading || loading}
@@ -206,7 +213,7 @@ export default function TestResultsTable({ testId }: Props) {
             <Button
               size="sm"
               variant="outline"
-              disabled={emailLoading}
+              disabled={emailLoading || bulkEmailLoading || loading}
               onClick={() => handleEmailStudent(row.student._id)}
             >
               Email Report

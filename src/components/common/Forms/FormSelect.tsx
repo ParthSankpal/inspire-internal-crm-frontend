@@ -17,7 +17,7 @@ interface Option<T = string | number> {
 
 interface FormSelectProps<T extends FieldValues, V = string | number> {
   name: Path<T>;
-  control: Control<T>;
+  control?: Control<T>;
   options: Option<V>[];
   label?: string;
   placeholder?: string;

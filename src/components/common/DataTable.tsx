@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
 
-interface Column<T> {
+ export interface Column<T> {
   id: string;
   label: string;
   accessor?: (row: T) => React.ReactNode;

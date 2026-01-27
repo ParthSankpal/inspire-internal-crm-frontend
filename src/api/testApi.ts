@@ -70,3 +70,26 @@ export async function getTestResponses(
   const json = await res.json();
   return json;
 }
+
+
+
+export async function downloadTestResultsPdf(testId: string) {
+  const response = await axiosClient.get(
+    `/tests/${testId}/responses/pdf`,
+    {
+      responseType: "blob",
+    }
+  );
+
+  const blob = new Blob([response.data], {
+    type: "application/pdf",
+  });
+
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "test-results.pdf";
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+}
