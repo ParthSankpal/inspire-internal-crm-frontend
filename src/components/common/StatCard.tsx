@@ -14,7 +14,7 @@ interface StatCardProps {
   label: string;
   value: number | string;
   info?: string;
-loading?:boolean;
+  loading?: boolean;
   /** Visual meaning */
   variant?: StatVariant;
 }
@@ -35,10 +35,10 @@ export default function StatCard({
   });
 
 
-  
-  if (loading ) {
+
+  if (loading) {
     return (
-      <div className="flex h-[70vh] items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-muted border-t-primary" />
           <p className="text-sm text-muted-foreground">

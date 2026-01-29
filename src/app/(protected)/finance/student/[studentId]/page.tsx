@@ -8,6 +8,7 @@ import { Installment } from "@/features/finance/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { IsoDate } from "@/components/common/IsoDate";
+import StatCard from "@/components/common/StatCard";
 
 /* =========================
    UI ROW TYPES (DataTable requires _id)
@@ -85,16 +86,19 @@ export default function StudentFinancePage() {
             id: "amount",
             label: "Amount",
             accessor: (i) => `₹ ${i.amount}`,
+            className: "text-blue-600",
         },
         {
             id: "paid",
             label: "Paid",
             accessor: (i) => `₹ ${i.paidAmount}`,
+            className: "text-green-600",
         },
         {
             id: "pending",
             label: "Pending",
             accessor: (i) => `₹ ${i.pendingAmount}`,
+            className: "text-red-600",
         },
         { id: "status", label: "Status" },
     ];
@@ -113,8 +117,10 @@ export default function StudentFinancePage() {
             id: "amount",
             label: "Amount",
             accessor: (p) => `₹ ${p.amount}`,
+            className: "text-blue-600",
         },
-        { id: "mode", label: "Mode" },
+            
+        { id: "mode", label: "Mode", className: "text-green-600" },
         { id: "paymentRef", label: "Ref" },
         { id: "notes", label: "Notes" },
     ];
@@ -134,7 +140,7 @@ export default function StudentFinancePage() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <h1 className="text-2xl font-semibold">
-                    {data.firstName} {data.lastName}
+                    {data.firstName} {data.lastName} ({data.studentId})
                 </h1>
             </div>
 
@@ -142,9 +148,9 @@ export default function StudentFinancePage() {
           STATS
       ========================= */}
             <div className="grid grid-cols-3 gap-4">
-                <Stat label="Final Fees" value={data.fees.finalFees} />
-                <Stat label="Collected" value={data.totalCollected} />
-                <Stat label="Pending" value={data.totalPending} />
+                <StatCard label="Final Fees" value={data.fees.finalFees} variant="info" />
+                <StatCard label="Collected" value={data.totalCollected} variant="success"/>
+                <StatCard label="Pending" value={data.totalPending} variant="danger" />
             </div>
 
             {/* =========================
@@ -182,15 +188,4 @@ export default function StudentFinancePage() {
     );
 }
 
-/* =========================
-   STAT CARD
-========================= */
 
-function Stat({ label, value }: { label: string; value: number }) {
-    return (
-        <div className="border rounded-lg p-4 bg-white">
-            <p className="text-sm text-gray-500">{label}</p>
-            <p className="text-xl font-semibold">₹ {value}</p>
-        </div>
-    );
-}

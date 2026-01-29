@@ -8,7 +8,7 @@ import PaymentsTab from "./transactions/PaymentsTab";
 
 
 export default function PaymentsPage() {
-  const [activeTab, setActiveTab] = useState<"banks" | "transactions" | "summary">("banks");
+  const [activeTab, setActiveTab] = useState<"banks" | "transactions" | "summary">("transactions");
 
   return (
     <div className="space-y-6 p-6">
@@ -17,8 +17,8 @@ export default function PaymentsPage() {
         onValueChange={(v) => setActiveTab(v as "banks" | "transactions" | "summary")}
       >
         <TabsList className="mb-4">
-          <TabsTrigger value="banks">Banks</TabsTrigger>
           <TabsTrigger value="transactions">Payments</TabsTrigger>
+          <TabsTrigger value="banks">Banks</TabsTrigger>
           {/* <TabsTrigger value="summary">Summary</TabsTrigger> */}
         </TabsList>
 

@@ -100,7 +100,7 @@ export default function EnquiriesPage() {
   const loadCounselors = useCallback(async () => {
     try {
       const usersRes = await getAllUsers(1, 100);
-      setCounselors(usersRes.data.filter((u) => u.role === "counselor"));
+      setCounselors(usersRes.data);
     } catch(err) {
       console.error("❌ Failed to load counselors", err);
       notify("Failed to load counselors", "error");

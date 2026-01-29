@@ -26,9 +26,9 @@ export default function AppSidebar({
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="flex items-center justify-center py-4">
         {state === "expanded" ? (
-          <Image src={"/cclogo.png"} alt="Logo" className="h-8 w-auto" width={200} height={200} />
+          <Image src={"/InspireAcademyImage.jpg"} alt="Logo" className="h-10 w-auto" width={200} height={200} />
         ) : (
-          <Image src={"/cclogoshort.png"} alt="Short Logo" className="h-8 w-auto" width={200} height={200} />
+          <Image src={"/InspireAcademyImage.jpg"} alt="Short Logo" className="h-10 w-auto" width={200} height={200} />
         )}
       </SidebarHeader>
 

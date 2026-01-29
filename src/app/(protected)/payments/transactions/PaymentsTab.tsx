@@ -8,6 +8,7 @@ import PaymentModals from "./PaymentModals";
 import { useState } from "react";
 import { Payment } from "@/features/payments/types";
 import { Column } from "@/features/pagination";
+import { IsoDate } from "@/components/common/IsoDate";
 
 export default function PaymentsTab() {
   const {
@@ -29,11 +30,11 @@ export default function PaymentsTab() {
 
   const bankOptions = banks.map((b) => ({ value: b._id!, label: b.name }));
 
-const columns: Column<Payment>[] = [
+const columns = [
   {
     id: "date",
     label: "Date",
-    accessor: (p: Payment) => p.date?.slice(0, 10) ?? "-",
+    accessor: (p: Payment) => <IsoDate value={p.date}  />,
   },
   {
     id: "amount",

@@ -24,9 +24,9 @@ export default function BatchFinancePage() {
 
   const columns: Column<BatchStudentFinance>[] = [
     { id: "student", label: "Student", accessor: s => `${s.firstName} ${s.lastName}` },
-    { id: "finalFees", label: "Final Fees", accessor: s => `₹ ${s.fees.finalFees}` },
-    { id: "collected", label: "Collected", accessor: s => `₹ ${s.totalCollected}` },
-    { id: "pending", label: "Pending", accessor: s => `₹ ${s.totalPending}` },
+    { id: "finalFees", label: "Final Fees",className: "text-blue-600", accessor: s => `₹ ${s.fees.finalFees}` },
+    { id: "collected", label: "Collected", className: "text-green-600", accessor: s => `₹ ${s.totalCollected}` },
+    { id: "pending", label: "Pending",className: "text-red-600", accessor: s => `₹ ${s.totalPending}` },
     { id: "upcoming", label: "Upcoming", accessor: s => s.upcomingInstallments.length },
     { id: "overdue", label: "Overdue", accessor: s => s.overdueInstallments.length },
   ];
@@ -54,9 +54,9 @@ export default function BatchFinancePage() {
       {/* SUMMARY */}
       {summary && (
         <div className="grid grid-cols-3 gap-4">
-          <StatCard label="Total Fees" value={summary.totalFinalFees} />
-          <StatCard label="Collected" value={summary.totalCollected} />
-          <StatCard label="Pending" value={summary.totalPending} />
+          <StatCard label="Total Fees" value={summary.totalFinalFees} variant="info" />
+          <StatCard label="Collected" value={summary.totalCollected} variant="success" />
+          <StatCard label="Pending" value={summary.totalPending} variant="danger"/>
         </div>
       )}
 

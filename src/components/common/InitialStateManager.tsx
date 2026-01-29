@@ -18,7 +18,7 @@ const publicPages = [
   "/login", 
 ];
 
-const entryPages = ["/", "/login", "/signup"]; // pages we want logged-in users redirected away from
+const entryPages = ["/login", "/signup"]; // pages we want logged-in users redirected away from
 
 const InitialStateManager = () => {
   const router = useRouter();
@@ -98,7 +98,7 @@ const InitialStateManager = () => {
     } else {
       // Not logged in: if on a protected page, redirect to root/login
       if (!publicPages.includes(pathname)) {
-        router.push("/"); // or "/login" if that's your desired login route
+        router.push("/login"); // or "/login" if that's your desired login route
       }
     }
   }, [checked, user, pathname, router]);

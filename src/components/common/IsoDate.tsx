@@ -11,9 +11,10 @@ export function IsoDate({ value }: IsoDateProps) {
 
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
+   const monthName = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  const formatted = `${day}-${month}-${year}`;
+  const formatted = `${day}-${monthName}-${year}`;
 
   return <span>{formatted}</span>;
 }
