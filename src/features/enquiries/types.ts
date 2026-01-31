@@ -1,6 +1,15 @@
 import { z } from "zod";
 
-export type EnquiryStatus = "new" | "counseling_done" | "admitted" | "dropped";
+/* ======================
+   ENUMS
+====================== */
+
+export type EnquiryStatus =
+  | "new"
+  | "follow_up"
+  | "counseling_done"
+  | "admitted"
+  | "lost";
 
 export interface ParentNames {
   fatherName?: string;
@@ -9,39 +18,175 @@ export interface ParentNames {
   motherOccupation?: string;
 }
 
-export interface Reminder {
-  _id?: string;
+
+export type EnquirySourceType =
+  | "school_visit"
+  | "seminar"
+  | "ktse"
+  | "walk_in"
+  | "student_referral"
+  | "parent_referral"
+  | "instagram"
+  | "whatsapp"
+  | "website"
+  | "teacher_reference";
+
+/* ======================
+   SUB TYPES
+====================== */
+
+export interface FollowUp {
   date: string;
-  message?: string;
-  completed?: boolean;
+  mode: "call" | "whatsapp" | "in_person";
+  outcome:
+  | "interested"
+  | "call_back"
+  | "demo_attended"
+  | "test_given"
+  | "not_interested";
+  note?: string;
+  nextFollowUpDate?: string;
 }
+
+export interface AdmissionInfo {
+  admissionDate: string;
+  program: string;
+  feesFinalized: number;
+  paymentMode: "full" | "installment";
+  discountPercent?: number;
+}
+
+export interface LostReason {
+  reason:
+  | "fees"
+  | "distance"
+  | "school_pressure"
+  | "joined_competitor"
+  | "not_serious"
+  | "parents_not_convinced"
+  | "plan_changed";
+  note?: string;
+}
+
+/* ======================
+   MAIN ENQUIRY TYPE
+====================== */
 
 export interface Enquiry {
   _id?: string;
+
   studentName: string;
   phoneNo: string;
   email?: string;
-  schoolName: string;
+  standard: string;
   parentNames: ParentNames;
   targetExams: string[];
-  enquiryDate: string;
+
+  school: {
+    name: string;
+    area?: "urban" | "semi_urban" | "rural";
+    type?: "private" | "govt" | "semi_govt";
+    category?: "top" | "mid" | "local";
+  };
+
+  source: {
+    type: EnquirySourceType;
+    sourceSchoolName?: string;
+    referenceName?: string;
+    referenceContact?: string;
+  };
+
+  enquiryQuality: "high" | "medium" | "low";
+  academicLevel?: "strong" | "average" | "weak";
+  priceSensitivity?: boolean;
+
   status: EnquiryStatus;
-  counselor?: { id?: string; name?: string };
-  note?: string;
+
+  counselor?: {
+    id?: string;
+    name?: string;
+  };
   reference?: string;
   referenceContact?: string;
-  address?: string;
-  standard?: string;
-  reminders?: Reminder[];
+  followUps?: FollowUp[];
+  admission?: AdmissionInfo;
+  lostReason?: LostReason;
+
+  enquiryDate?: string;
+  createdAt?: string;
 }
+
+export type FollowUpFormData = {
+  mode: "call" | "whatsapp" | "in_person";
+  outcome:
+  | "interested"
+  | "call_back"
+  | "demo_attended"
+  | "test_given"
+  | "not_interested";
+  note?: string;
+  nextFollowUpDate?: string;
+};
+
+export type AdmissionFormData = {
+  program: string;
+  feesFinalized: number;
+  paymentMode: "full" | "installment";
+  discountPercent?: number;
+};
+
+export type LostFormData = {
+  reason:
+  | "fees"
+  | "distance"
+  | "school_pressure"
+  | "joined_competitor"
+  | "not_serious"
+  | "parents_not_convinced"
+  | "plan_changed";
+  note?: string;
+};
+
+
+const enquirySourceEnum = z.enum([
+  "school_visit",
+  "seminar",
+  "ktse",
+  "walk_in",
+  "student_referral",
+  "parent_referral",
+  "instagram",
+  "whatsapp",
+  "website",
+  "teacher_reference",
+]);
+
 
 
 export const enquirySchema = z.object({
-  studentName: z.string().min(1, "Student name is required"),
-  phoneNo: z.string().regex(/^[0-9]{10}$/, "Phone must be 10 digits"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
-  schoolName: z.string().min(1, "School is required"),
-  standard: z.string().optional(),
+  studentName: z.string().min(1),
+  phoneNo: z.string().regex(/^[0-9]{10}$/),
+  email: z.string().email().optional().or(z.literal("")),
+  standard: z.string().min(1),
+
+  school: z.object({
+    name: z.string().min(1, "School name is required"),
+    area: z.enum([
+      "urban",
+      "semi_urban",
+      "rural"
+    ]),
+    type: z.enum([
+      "private",
+      "govt",
+      "semi_govt"
+    ]),
+    category: z.enum([
+      "top",
+      "mid",
+      "local"
+    ])
+  }),
 
   parentNames: z.object({
     fatherName: z.string().optional(),
@@ -49,26 +194,30 @@ export const enquirySchema = z.object({
     motherName: z.string().optional(),
     motherOccupation: z.string().optional(),
   }),
+  targetExams: z.array(z.string()).min(1),
 
-  targetExams: z.array(z.string().min(1)).min(1, "Select at least one exam"),
-  status: z.enum(["new", "counseling_done", "admitted", "dropped"]),
+  source: z.object({
+    type: enquirySourceEnum,
+    referenceName: z.string().optional(),
+    referenceContact: z.string().optional(),
+  }),
+
+  enquiryQuality: z.enum(["high", "medium", "low"]).default("medium"),
 
   counselor: z.object({
     id: z.string().optional(),
     name: z.string().optional(),
   }),
-
   reference: z.string().optional(),
   referenceContact: z.string().optional(),
-  address: z.string().optional(),
-  note: z.string().optional(),
+
+  status: z.enum([
+    "new",
+    "follow_up",
+    "counseling_done",
+    "admitted",
+    "lost",
+  ]),
 });
 
 export type EnquiryFormData = z.infer<typeof enquirySchema>;
-
-export const reminderSchema = z.object({
-  date: z.string().min(1, "Date is required"),
-  message: z.string().min(1, "Message is required"),
-});
-
-export type ReminderFormData = z.infer<typeof reminderSchema>;

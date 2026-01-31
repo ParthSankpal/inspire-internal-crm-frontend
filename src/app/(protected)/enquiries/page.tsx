@@ -1,49 +1,50 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/DataTable";
 import { ConfirmDialog } from "@/components/common/dialogs/ConfirmDialog";
-import { FormDialog } from "@/components/common/dialogs/FormDialog";
-import { Input } from "@/components/ui/input";
 
 import {
   getAllEnquiries,
   createEnquiry,
   updateEnquiry,
   deleteEnquiry,
-  addReminder,
-  updateReminder,
-  deleteReminder,
-  getReminders,
+  markEnquiryAdmitted,
+  addFollowUp,
+  markEnquiryLost,
 } from "@/api/enquiries";
 
 import {
   Enquiry,
   EnquiryFormData,
   enquirySchema,
-  Reminder,
-  ReminderFormData,
-  reminderSchema,
 } from "@/features/enquiries/types";
-import { User } from "@/features/auth/types";
-import { getAllUsers } from "@/api/authApi";
 
-import { useForm } from "react-hook-form";
+import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { useCrud } from "@/hooks/useCrud";
-import { useNotify } from "@/components/common/NotificationProvider";
+
+import { FormInput } from "@/components/common/Forms/FormInput";
 import { FormSelect } from "@/components/common/Forms/FormSelect";
 import { FormMultiSelect } from "@/components/common/Forms/FormMultiSelect";
-import { FormInput } from "@/components/common/Forms/FormInput";
 import { FormDialogWrapper } from "@/components/common/Forms/FormDialogWrapper";
-import { FormField } from "@/components/common/Forms/FormField";
+import AdmitModal from "./AdmitModal";
+import FollowUpModal from "./FollowUpModal";
+import LostModal from "./LostModal";
+import EnquiryAnalytics from "./EnquiryAnalytics";
+import { useNotify } from "@/components/common/NotificationProvider";
+import { getAllUsers } from "@/api/authApi";
+import { User } from "@/features/auth/types";
 
 export default function EnquiriesPage() {
+  const router = useRouter();
   const notify = useNotify();
 
-  // 🧭 Pagination & search states
+  /* ======================
+     PAGINATION
+  ====================== */
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -51,21 +52,25 @@ export default function EnquiriesPage() {
     totalPages: 1,
   });
   const [search, setSearch] = useState("");
+  const [counselors, setCounselors] = useState<User[]>([]);
 
 
   const fetchEnquiries = useCallback(async () => {
-    const res = await getAllEnquiries(pagination.page, pagination.limit, search);
-    setPagination(prev => {
-      const next = { ...prev, totalItems: res.pagination.totalItems, totalPages: res.pagination.totalPages };
-      if (prev.totalItems === next.totalItems && prev.totalPages === next.totalPages) return prev;
-      return next;
-    });
+    const res = await getAllEnquiries(
+      pagination.page,
+      pagination.limit,
+      search
+    );
+
+    setPagination((prev) => ({
+      ...prev,
+      totalItems: res.pagination.totalItems,
+      totalPages: res.pagination.totalPages,
+    }));
 
     return res.data;
   }, [pagination.page, pagination.limit, search]);
 
-
-  // 🧭 CRUD Hook setup
   const {
     items: enquiries,
     loading,
@@ -87,46 +92,39 @@ export default function EnquiriesPage() {
   });
 
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [reminderOpen, setReminderOpen] = useState(false);
-  const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null);
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [editingReminderId, setEditingReminderId] = useState<string | null>(null);
-  const [counselors, setCounselors] = useState<User[]>([]);
 
-  // 🧭 Load counselors for dropdown
-  const loadCounselors = useCallback(async () => {
-    try {
-      const usersRes = await getAllUsers(1, 100);
-      setCounselors(usersRes.data);
-    } catch(err) {
-      console.error("❌ Failed to load counselors", err);
-      notify("Failed to load counselors", "error");
-    }
-  }, [notify]);
+  /* ======================
+     MODALS
+  ====================== */
+  const [addOpen, setAddOpen] = useState<boolean>(false);
+  const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  const [selected, setSelected] = useState<Enquiry | null>(null);
 
-useEffect(() => {
-  load();
-  loadCounselors();
-}, [load, loadCounselors]);
+  const [followUpOpen, setFollowUpOpen] = useState<boolean>(false);
+  const [admitOpen, setAdmitOpen] = useState<boolean>(false);
+  const [lostOpen, setLostOpen] = useState<boolean>(false);
 
-
-  // 🧭 React Hook Form setup
+  /* ======================
+     FORM (USES YOUR SCHEMA)
+  ====================== */
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors },
   } = useForm<EnquiryFormData>({
-    resolver: zodResolver(enquirySchema),
+    resolver: zodResolver(enquirySchema) as unknown as Resolver<EnquiryFormData>,
     defaultValues: {
       studentName: "",
       phoneNo: "",
       email: "",
-      schoolName: "",
       standard: "",
+      school: {
+        name: "",
+        area: "urban",
+        type: "private",
+        category: "top"
+      },
       parentNames: {
         fatherName: "",
         fatherOccupation: "",
@@ -134,71 +132,18 @@ useEffect(() => {
         motherOccupation: "",
       },
       targetExams: [],
+      source: { type: "walk_in" },
+      enquiryQuality: "medium",
       status: "new",
       counselor: { id: "", name: "" },
       reference: "",
       referenceContact: "",
-      address: "",
-      note: "",
     },
   });
 
-
-  // 🧭 Reminder form
-  const {
-    register: registerReminder,
-    handleSubmit: handleSubmitReminder,
-    reset: resetReminder,
-    formState: { errors: reminderErrors },
-  } = useForm<ReminderFormData>({
-    resolver: zodResolver(reminderSchema),
-    defaultValues: { date: "", message: "" },
-  });
-
-  // 🧭 Reminder modal handlers
-  const openReminderModal = async (row: Enquiry) => {
-    setSelectedEnquiry(row);
-    try {
-      const data = await getReminders(row._id!);
-      setReminders(data);
-    } catch {
-      notify("Failed to load reminders", "error");
-    }
-    resetReminder();
-    setEditingReminderId(null);
-    setReminderOpen(true);
-  };
-
-  const handleSaveReminder = async (data: ReminderFormData) => {
-    if (!selectedEnquiry?._id) return;
-    try {
-      if (editingReminderId) {
-        await updateReminder(selectedEnquiry._id, editingReminderId, data);
-        notify("Reminder updated", "success");
-      } else {
-        await addReminder(selectedEnquiry._id, data);
-        notify("Reminder added", "success");
-      }
-      setReminders(await getReminders(selectedEnquiry._id));
-      resetReminder();
-      setEditingReminderId(null);
-    } catch {
-      notify("Failed to save reminder", "error");
-    }
-  };
-
-  const handleDeleteReminder = async (id: string) => {
-    if (!selectedEnquiry?._id) return;
-    try {
-      await deleteReminder(selectedEnquiry._id, id);
-      setReminders(await getReminders(selectedEnquiry._id));
-      notify("Reminder deleted", "success");
-    } catch {
-      notify("Failed to delete reminder", "error");
-    }
-  };
-
-  // 🧭 Enquiry CRUD handlers
+  /* ======================
+     HANDLERS
+  ====================== */
   const handleCreate = async (data: EnquiryFormData) => {
     await create(data);
     setAddOpen(false);
@@ -206,48 +151,47 @@ useEffect(() => {
   };
 
   const handleUpdate = async (data: EnquiryFormData) => {
-    if (!selectedEnquiry?._id) return;
-    await update(selectedEnquiry._id, data);
+    if (!selected?._id) return;
+    await update(selected._id, data);
     setEditOpen(false);
     reset();
   };
 
   const handleDelete = async () => {
-    if (!selectedEnquiry?._id) return;
-    await remove(selectedEnquiry._id);
+    if (!selected?._id) return;
+    await remove(selected._id);
     setDeleteOpen(false);
   };
 
- const columns = [
-  { id: "studentName", label: "Student Name" },
-  { id: "phoneNo", label: "Phone" },
-  { id: "schoolName", label: "School" },
-  { id: "standard", label: "Standard" },
-  { id: "status", label: "Status" },
-];
-
+  /* ======================
+     TABLE
+  ====================== */
+  const columns = [
+    { id: "studentName", label: "Student" },
+    { id: "phoneNo", label: "Phone" },
+    { id: "school?.name", label: "School" },
+    { id: "standard", label: "Class" },
+    { id: "status", label: "Status" },
+  ];
 
   const rowActions = (row: Enquiry) => (
-    <div className="flex gap-2 justify-center">
+    <div className="flex gap-2 flex-wrap">
+      {/* EDIT */}
       <Button
         size="sm"
         variant="outline"
-        onClick={() => {
-          setSelectedEnquiry(row);
-          reset(row);
-          setEditOpen(true);
-        }}
+        onClick={() => router.push(`/enquiries/${row._id}`)}
       >
-        Edit
+        view
       </Button>
-      <Button size="sm" variant="outline" onClick={() => openReminderModal(row)}>
-        Reminder
-      </Button>
+
+
+      {/* DELETE */}
       <Button
         size="sm"
         variant="destructive"
         onClick={() => {
-          setSelectedEnquiry(row);
+          setSelected(row);
           setDeleteOpen(true);
         }}
       >
@@ -256,52 +200,98 @@ useEffect(() => {
     </div>
   );
 
+  // 🧭 Load counselors for dropdown
+  const loadCounselors = useCallback(async () => {
+    try {
+      const usersRes = await getAllUsers(1, 100);
+      setCounselors(usersRes.data);
+    } catch (err) {
+      console.error("❌ Failed to load counselors", err);
+      notify("Failed to load counselors", "error");
+    }
+  }, [notify]);
+
+
+  useEffect(() => {
+    load();
+    loadCounselors();
+  }, [load, loadCounselors]);
   return (
     <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-semibold">Enquiries</h1>
-        <Button
-          onClick={() => {
-            reset();
-            setAddOpen(true);
-          }}
-        >
-          Add Enquiry
-        </Button>
+        <div className=" flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/enquiries/analytics`)}
+          >
+            View analytics
+          </Button>
+          <Button onClick={() => setAddOpen(true)}>Add Enquiry</Button>
+        </div>
       </div>
 
-      {/* Table */}
       <DataTable<Enquiry>
         columns={columns}
         data={enquiries}
-        totalItems={pagination.totalItems}
-        page={pagination.page}
-        limit={pagination.limit}
+
         serverSide
         searchable
+        page={pagination.page}
+        limit={pagination.limit}
+        totalItems={pagination.totalItems}
+        onSearchChange={setSearch}
         onPaginationChange={(info) =>
-          setPagination((prev) => ({ ...prev, page: info.page, limit: info.limit }))
+          setPagination((p) => ({ ...p, ...info }))
         }
-        onSearchChange={(val) => setSearch(val)}
         rowActions={rowActions}
-        emptyMessage={loading ? "Loading..." : "No enquiries found"}
         showIndex
       />
 
-      {/* Add Enquiry */}
+      {/* ADD */}
       <FormDialogWrapper
         open={addOpen}
         onOpenChange={setAddOpen}
         title="Add Enquiry"
         onSubmit={handleSubmit(handleCreate)}
       >
-        <div className="  grid md:grid-cols-2 gap-4">
-
-          <FormInput name="studentName" label="Student Name" control={control} error={errors.studentName?.message} />
-          <FormInput name="phoneNo" label="Phone" control={control} error={errors.phoneNo?.message} />
+        <div className="grid md:grid-cols-2 gap-4">
+          <FormInput name="studentName" label="Student Name" control={control} />
+          <FormInput name="phoneNo" label="Phone" control={control} />
           <FormInput name="email" label="Email" control={control} />
-          <FormInput name="schoolName" label="School" control={control} />
+          <FormInput name="school.name" label="School" control={control} />
+          <FormSelect
+            name="school.area"
+            label="School Area"
+            control={control}
+            options={[
+              { value: "urban", label: "Urban" },
+              { value: "semi_urban", label: "Semi Urban" },
+              { value: "rural", label: "Rural" },
+            ]}
+          />
+
+          <FormSelect
+            name="school.type"
+            label="School Type"
+            control={control}
+            options={[
+              { value: "private", label: "Private" },
+              { value: "govt", label: "Gov" },
+              { value: "semi_govt", label: "Semi Gov" },
+            ]}
+          />
+
+          <FormSelect
+            name="school.category"
+            label="School Category"
+            control={control}
+            options={[
+              { value: "top", label: "Top" },
+              { value: "mid", label: "Mid" },
+              { value: "local", label: "Local" },
+            ]}
+          />
           <FormInput name="standard" label="Standard" control={control} />
           <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
           <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
@@ -312,27 +302,24 @@ useEffect(() => {
             name="targetExams"
             label="Target Exams"
             control={control}
-            error={errors.targetExams?.message}
             options={[
               { value: "NEET", label: "NEET" },
               { value: "IIT-JEE", label: "IIT-JEE" },
               { value: "Foundation", label: "Foundation" },
-              { value: "Other", label: "Other" },
             ]}
           />
 
           <FormSelect
-            name="status"
-            label="Status"
+            name="source.type"
+            label="Source"
             control={control}
             options={[
-              { value: "new", label: "New" },
-              { value: "counseling_done", label: "Counseling Done" },
-              { value: "admitted", label: "Admitted" },
-              { value: "dropped", label: "Dropped" },
+              { value: "walk_in", label: "Walk In" },
+              { value: "school_visit", label: "School Visit" },
+              { value: "ktse", label: "KTSE" },
+              { value: "instagram", label: "Instagram" },
             ]}
           />
-
           <FormSelect
             name="counselor.id"
             label="Counselor"
@@ -352,139 +339,80 @@ useEffect(() => {
           />
 
           <FormInput name="reference" label="Reference" control={control} />
-          <FormInput name="address" label="Address" control={control} />
-          <FormInput name="note" label="Note" control={control} />
+          <FormInput name="referenceContact" label="Reference Contact no" control={control} />
         </div>
       </FormDialogWrapper>
 
-      {/* Edit Enquiry */}
+      {/* EDIT */}
       <FormDialogWrapper
         open={editOpen}
         onOpenChange={setEditOpen}
         title="Edit Enquiry"
-        onSubmit={handleSubmit(handleUpdate)}
         submitLabel="Update"
+        onSubmit={handleSubmit(handleUpdate)}
       >
-        <FormInput name="studentName" label="Student Name" control={control} error={errors.studentName?.message} />
-        <FormInput name="phoneNo" label="Phone" control={control} error={errors.phoneNo?.message} />
-        <FormInput name="email" label="Email" control={control} />
-        <FormInput name="schoolName" label="School" control={control} />
+        <FormInput name="studentName" label="Student Name" control={control} />
+        <FormInput name="phoneNo" label="Phone" control={control} />
+        <FormInput name="school.name" label="School" control={control} />
         <FormInput name="standard" label="Standard" control={control} />
-        <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
-        <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
-        <FormInput name="parentNames.motherName" label="Mother Name" control={control} />
-        <FormInput name="parentNames.motherOccupation" label="Mother Occupation" control={control} />
-
-        <FormMultiSelect
-          name="targetExams"
-          label="Target Exams"
-          control={control}
-          error={errors.targetExams?.message}
-          options={[
-            { value: "NEET", label: "NEET" },
-            { value: "IIT-JEE", label: "IIT-JEE" },
-            { value: "Foundation", label: "Foundation" },
-            { value: "Other", label: "Other" },
-          ]}
-        />
-
-        <FormSelect
-          name="status"
-          label="Status"
-          control={control}
-          options={[
-            { value: "new", label: "New" },
-            { value: "counseling_done", label: "Counseling Done" },
-            { value: "admitted", label: "Admitted" },
-            { value: "dropped", label: "Dropped" },
-          ]}
-        />
-
-        <FormSelect
-          name="counselor.id"
-          label="Counselor"
-          control={control}
-          placeholder="Select counselor"
-          options={counselors.map((c) => ({ value: c._id, label: c.name }))}
-          onValueChange={(val) => {
-            const selected = counselors.find((c) => c._id === val);
-            reset((prev) => ({
-              ...prev,
-              counselor: {
-                id: selected?._id || "",
-                name: selected?.name || "",
-              },
-            }));
-          }}
-        />
-
-        <FormInput name="reference" label="Reference" control={control} />
-        <FormInput name="address" label="Address" control={control} />
-        <FormInput name="note" label="Note" control={control} />
       </FormDialogWrapper>
 
-      {/* Reminder Modal */}
-      <FormDialog
-        open={reminderOpen}
-        onOpenChange={setReminderOpen}
-        title={`Reminders for ${selectedEnquiry?.studentName}`}
-        onSubmit={handleSubmitReminder(handleSaveReminder)}
-        submitLabel={editingReminderId ? "Update Reminder" : "Add Reminder"}
-      >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            {reminders.length ? (
-              reminders.map((r) => (
-                <div key={r._id} className="flex items-center justify-between border p-2 rounded">
-                  <div>
-                    <p className="text-sm font-medium">{new Date(r.date).toDateString()}</p>
-                    <p className="text-xs text-gray-600">{r.message}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        resetReminder({
-                          date: r.date.split("T")[0],
-                          message: r.message || "",
-                        });
-                        setEditingReminderId(r._id!);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDeleteReminder(r._id!)}>
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500">No reminders yet</p>
-            )}
-          </div>
 
-          <div className="space-y-3 border-t pt-3">
-            <h3 className="text-sm font-semibold">
-              {editingReminderId ? "Edit Reminder" : "Add New Reminder"}
-            </h3>
-            <FormField label="Reminder Date" error={reminderErrors.date?.message}>
-              <Input type="date" {...registerReminder("date")} />
-            </FormField>
-            <FormField label="Message" error={reminderErrors.message?.message}>
-              <Input placeholder="Message" {...registerReminder("message")} />
-            </FormField>
-          </div>
-        </div>
-      </FormDialog>
+      <FollowUpModal
+        open={followUpOpen}
+        onClose={() => setFollowUpOpen(false)}
+        enquiry={selected}
+        onSubmit={async (data) => {
+          if (!selected?._id) return;
 
-      {/* Delete Confirm */}
+          await addFollowUp(selected._id, {
+            ...data,
+            date: new Date(),
+          });
+
+          await load(); // refresh table & follow-ups
+        }}
+      />
+
+
+      <AdmitModal
+        open={admitOpen}
+        onClose={() => setAdmitOpen(false)}
+        onSubmit={async (data) => {
+          if (!selected?._id) return;
+
+          await markEnquiryAdmitted(selected._id, {
+            ...data,
+            admissionDate: new Date(),
+          });
+
+          setAdmitOpen(false);
+          load();
+        }}
+      />
+
+      <LostModal
+        open={lostOpen}
+        onClose={() => setLostOpen(false)}
+        onSubmit={async (data) => {
+          if (!selected?._id) return;
+
+          await markEnquiryLost(selected._id, {
+            lostReason: data,
+          });
+
+          setLostOpen(false);
+          load();
+        }}
+      />
+
+
+      {/* DELETE */}
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Delete Enquiry"
-        description={`Are you sure you want to delete ${selectedEnquiry?.studentName}?`}
+        description={`Delete ${selected?.studentName}?`}
         onConfirm={handleDelete}
       />
     </div>
