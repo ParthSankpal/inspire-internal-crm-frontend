@@ -37,6 +37,7 @@ import EnquiryAnalytics from "./EnquiryAnalytics";
 import { useNotify } from "@/components/common/NotificationProvider";
 import { getAllUsers } from "@/api/authApi";
 import { User } from "@/features/auth/types";
+import { Column } from "@/features/pagination";
 
 export default function EnquiriesPage() {
   const router = useRouter();
@@ -123,7 +124,8 @@ export default function EnquiriesPage() {
         name: "",
         area: "urban",
         type: "private",
-        category: "top"
+        category: "top",
+        medium:"CBSE"
       },
       parentNames: {
         fatherName: "",
@@ -166,10 +168,14 @@ export default function EnquiriesPage() {
   /* ======================
      TABLE
   ====================== */
-  const columns = [
+  const columns: Column<Enquiry>[] = [
     { id: "studentName", label: "Student" },
     { id: "phoneNo", label: "Phone" },
-    { id: "school?.name", label: "School" },
+    {
+      id: "school",
+      label: "School",
+      accessor: (e) => e.school?.name ?? "-",
+    },
     { id: "standard", label: "Class" },
     { id: "status", label: "Status" },
   ];
@@ -292,6 +298,20 @@ export default function EnquiriesPage() {
               { value: "local", label: "Local" },
             ]}
           />
+
+          <FormSelect
+            name="school.medium"
+            label="School Category"
+            control={control}
+            options={[
+              { value: "CBSE", label: "CBSE" },
+              { value: "SEMI-ENGLISH", label: "SEMI-ENGLISH" },
+              { value: "ENGLISH", label: "ENGLISH" },
+              { value: "MARATHI", label: "MARATHI" },
+              { value: "ICSE", label: "ICSE" },
+              { value: "IB/IGCSE", label: "IB/IGCSE" },
+            ]}
+          />
           <FormInput name="standard" label="Standard" control={control} />
           <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
           <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
@@ -317,7 +337,16 @@ export default function EnquiriesPage() {
               { value: "walk_in", label: "Walk In" },
               { value: "school_visit", label: "School Visit" },
               { value: "ktse", label: "KTSE" },
-              { value: "instagram", label: "Instagram" },
+              { value: "seminar", label: "Seminar" },
+              { value: "student_referral", label: "Student Referral" },
+              { value: "social_media", label: "Social Media Post" },
+              { value: "whatsapp", label: "Whatsapp" },
+              { value: "teacher_reference", label: "Teacher Reference" },
+              { value: "digital_banner", label: "Digital Bbanner" },
+              { value: "paper_leaflet", label: "Paper Lleaflet" },
+              { value: "radio_advertisement", label: "Radio Advertisement" },
+              { value: "calling", label: "Calling" },
+              { value: "news_paper", label: "News Paper" },
             ]}
           />
           <FormSelect

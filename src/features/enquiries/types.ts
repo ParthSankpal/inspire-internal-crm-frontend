@@ -26,11 +26,15 @@ export type EnquirySourceType =
   | "walk_in"
   | "student_referral"
   | "parent_referral"
-  | "instagram"
+  | "social_media"
   | "whatsapp"
   | "website"
-  | "teacher_reference";
-
+  | "teacher_reference"
+  | "digital_banner"
+  | "paper_leaflet"
+  | "radio_advertisement"
+  | "calling"
+  | "news_paper";
 /* ======================
    SUB TYPES
 ====================== */
@@ -87,6 +91,7 @@ export interface Enquiry {
     area?: "urban" | "semi_urban" | "rural";
     type?: "private" | "govt" | "semi_govt";
     category?: "top" | "mid" | "local";
+    medium?: "CBSE" | "SEMI-ENGLISH" | "ENGLISH" | "MARATHI" | "ICSE" | "IB/IGCSE";
   };
 
   source: {
@@ -155,10 +160,15 @@ const enquirySourceEnum = z.enum([
   "walk_in",
   "student_referral",
   "parent_referral",
-  "instagram",
+  "social_media",
   "whatsapp",
   "website",
   "teacher_reference",
+  "digital_banner",
+  "paper_leaflet",
+  "radio_advertisement",
+  "calling",
+  "news_paper"
 ]);
 
 
@@ -185,6 +195,14 @@ export const enquirySchema = z.object({
       "top",
       "mid",
       "local"
+    ]),
+    medium: z.enum([
+      "CBSE",
+      "SEMI-ENGLISH",
+      "ENGLISH",
+      "MARATHI",
+      "ICSE",
+      "IB/IGCSE",
     ])
   }),
 

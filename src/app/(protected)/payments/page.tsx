@@ -18,7 +18,7 @@ export default function PaymentsPage() {
       >
         <TabsList className="mb-4">
           <TabsTrigger value="transactions">Payments</TabsTrigger>
-          <TabsTrigger value="banks">Banks</TabsTrigger>
+          <TabsTrigger value="banks">Bank Accounts</TabsTrigger>
           {/* <TabsTrigger value="summary">Summary</TabsTrigger> */}
         </TabsList>
 
