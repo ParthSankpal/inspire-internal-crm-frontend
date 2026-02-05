@@ -40,7 +40,7 @@ export type EnquirySourceType =
 ====================== */
 
 export interface FollowUp {
-  date: string;
+  follow_up_date: string;
   mode: "call" | "whatsapp" | "in_person";
   outcome:
   | "interested"
@@ -131,6 +131,7 @@ export type FollowUpFormData = {
   | "not_interested";
   note?: string;
   nextFollowUpDate?: string;
+  follow_up_date:Date;
 };
 
 export type AdmissionFormData = {
@@ -239,3 +240,34 @@ export const enquirySchema = z.object({
 });
 
 export type EnquiryFormData = z.infer<typeof enquirySchema>;
+
+
+
+export const schoolOptions = [
+  { value: "Shantiniketan", label: "Shantiniketan" },
+  { value: "Poddar International School", label: "Poddar International School" },
+  { value: "Nagojirao Pathankar High School", label: "Nagojirao Pathankar High School" },
+  { value: "Don Bosco", label: "Don Bosco" },
+  { value: "Siddheswar High School", label: "Siddheswar High School" },
+  { value: "Mahaveer School", label: "Mahaveer School" },
+  { value: "Radhabai Shinde English Medium School", label: "Radhabai Shinde English Medium School" },
+  { value: "Mitiya English Medium School", label: "Mitiya English Medium School" },
+  { value: "Usharaje High School", label: "Usharaje High School" },
+  { value: "Vimla Goenka English Medium School", label: "Vimla Goenka English Medium School" },
+  { value: "New Model English School", label: "New Model English School" },
+  { value: "Holyden English Medium School, Kagal", label: "Holyden English Medium School, Kagal" },
+  { value: "V. J. Deshmukh High School", label: "V. J. Deshmukh High School" },
+  { value: "Chinchwad High School", label: "Chinchwad High School" },
+  { value: "SGI", label: "SGI" },
+  { value: "Vilasrao Kore International School", label: "Vilasrao Kore International School" },
+  { value: "Don Bosco High School & Jr. College", label: "Don Bosco High School & Jr. College" },
+  { value: "Mai Madhavrao Bagal High School", label: "Mai Madhavrao Bagal High School" },
+  { value: "Vivekanand College", label: "Vivekanand College" },
+  { value: "Warana Vidyalay Warnanagar", label: "Warana Vidyalay Warnanagar" },
+  { value: "Karveer High School", label: "Karveer High School" },
+  { value: "S. M. Lohiya", label: "S. M. Lohiya" },
+  { value: "Maisaheb Bavdekar Vidyalaya", label: "Maisaheb Bavdekar Vidyalaya" },
+  { value: "Xavier High School", label: "Xavier High School" },
+  { value: "Yashvant International English Academy", label: "Yashvant International English Academy" },
+  { value: "Maharashtra High School", label: "Maharashtra High School" }
+];

@@ -39,11 +39,15 @@ import {
 ====================== */
 import StatCard from "@/components/common/StatCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /* ======================
    PAGE
 ====================== */
 export default function EnquiryAnalytics() {
+  const router = useRouter();
   /* ---------- STATE ---------- */
   const [loading, setLoading] = useState(true);
 
@@ -120,6 +124,17 @@ export default function EnquiryAnalytics() {
 
   return (
     <div className="space-y-8 mb-10">
+      <div className="flex items-center gap-3">
+                      <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => router.back()}
+                      >
+                          <ArrowLeft className="h-5 w-5" />
+                      </Button>
+      
+                    
+                  </div>
 
       {/* =====================
          FUNNEL SUMMARY
@@ -211,7 +226,7 @@ export default function EnquiryAnalytics() {
         title="Follow-up Outcomes"
         headers={["Outcome", "Count"]}
         rows={followUpOutcomeWise.map(f => [
-          f.outcome.replace("_", " ").toUpperCase(),
+          f.outcome?.replace("_", " ").toUpperCase(),
           f.count,
         ])}
       />
@@ -220,7 +235,7 @@ export default function EnquiryAnalytics() {
         title="Lost Reasons"
         headers={["Reason", "Count"]}
         rows={lostReasons.map(l => [
-          l.reason.replace("_", " ").toUpperCase(),
+          l.reason?.replace("_", " ").toUpperCase(),
           l.count,
         ])}
       />

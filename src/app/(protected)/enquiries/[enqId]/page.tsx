@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -16,9 +16,11 @@ import FollowUpModal from "../FollowUpModal";
 import AdmitModal from "../AdmitModal";
 import LostModal from "../LostModal";
 import { IsoDate } from "@/components/common/IsoDate";
+import { ArrowLeft } from "lucide-react";
 
 
 export default function EnquiryDetailPage() {
+    const router = useRouter();
     const { enqId } = useParams();
     const [enquiry, setEnquiry] = useState<Enquiry | null>(null);
 
@@ -39,6 +41,19 @@ export default function EnquiryDetailPage() {
 
     return (
         <div className="p-6 space-y-6">
+            <div className="flex items-center gap-3">
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => router.back()}
+                >
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+
+                <h1 className="text-2xl font-semibold">
+                    {enquiry.studentName}
+                </h1>
+            </div>
             <div className="flex gap-3 justify-end">
                 <Button variant="outline" onClick={() => setFollowUpOpen(true)}>Add Follow-up</Button>
 
@@ -67,7 +82,7 @@ export default function EnquiryDetailPage() {
                         <div key={i} className="border-b  flex justify-between py-2">
                             <p>{f.outcome} ({f.mode})</p>
                             <p className="text-sm text-gray-500">{f.note}</p>
-                            <p className="text-sm text-gray-500"> <IsoDate value={f.date}  /></p>
+                            <p className="text-sm text-gray-500"> <IsoDate value={f.follow_up_date} /></p>
                         </div>
                     ))
                 ) : (
@@ -75,54 +90,54 @@ export default function EnquiryDetailPage() {
                 )}
             </div>
 
-            
-                  <FollowUpModal
-                    open={followUpOpen}
-                    onClose={() => setFollowUpOpen(false)}
-                    enquiry={enquiry}
-                    onSubmit={async (data) => {
-                      if (!enquiry?._id) return;
-            
-                      await addFollowUp(enquiry._id, {
+
+            <FollowUpModal
+                open={followUpOpen}
+                onClose={() => setFollowUpOpen(false)}
+                enquiry={enquiry}
+                onSubmit={async (data) => {
+                    if (!enquiry?._id) return;
+
+                    await addFollowUp(enquiry._id, {
                         ...data,
                         date: new Date(),
-                      });
-            
-                      await load(); // refresh table & follow-ups
-                    }}
-                  />
-            
-            
-                  <AdmitModal
-                    open={admitOpen}
-                    onClose={() => setAdmitOpen(false)}
-                    onSubmit={async (data) => {
-                      if (!enquiry?._id) return;
-            
-                      await markEnquiryAdmitted(enquiry._id, {
+                    });
+
+                    await load(); // refresh table & follow-ups
+                }}
+            />
+
+
+            <AdmitModal
+                open={admitOpen}
+                onClose={() => setAdmitOpen(false)}
+                onSubmit={async (data) => {
+                    if (!enquiry?._id) return;
+
+                    await markEnquiryAdmitted(enquiry._id, {
                         ...data,
                         admissionDate: new Date(),
-                      });
-            
-                      setAdmitOpen(false);
-                      load();
-                    }}
-                  />
-            
-                  <LostModal
-                    open={lostOpen}
-                    onClose={() => setLostOpen(false)}
-                    onSubmit={async (data) => {
-                      if (!enquiry?._id) return;
-            
-                      await markEnquiryLost(enquiry._id, {
+                    });
+
+                    setAdmitOpen(false);
+                    load();
+                }}
+            />
+
+            <LostModal
+                open={lostOpen}
+                onClose={() => setLostOpen(false)}
+                onSubmit={async (data) => {
+                    if (!enquiry?._id) return;
+
+                    await markEnquiryLost(enquiry._id, {
                         lostReason: data,
-                      });
-            
-                      setLostOpen(false);
-                      load();
-                    }}
-                  />
+                    });
+
+                    setLostOpen(false);
+                    load();
+                }}
+            />
 
         </div>
     );

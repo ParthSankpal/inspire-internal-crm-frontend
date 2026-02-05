@@ -103,7 +103,7 @@ export default function FinanceDashboardPage() {
   ========================= */
   const columns: Column<BatchStudentFinanceRow>[] = [
     { id: "student", label: "Student", accessor: s => `${s.firstName} ${s.lastName}` },
-    { id: "finalFees", label: "Final Fees",className: "text-blue-600", accessor: s => `₹ ${s.fees.finalFees}` },
+    { id: "finalFees", label: "Final Fees", className: "text-blue-600", accessor: s => `₹ ${s.fees.finalFees}` },
     { id: "collected", label: "Collected", className: "text-green-600", accessor: s => `₹ ${s.totalCollected}` },
     { id: "pending", label: "Pending", className: "text-red-600", accessor: s => `₹ ${s.totalPending}` },
     { id: "upcoming", label: "Upcoming", className: "text-yellow-600", accessor: s => s.upcomingInstallments.length },
@@ -124,8 +124,8 @@ export default function FinanceDashboardPage() {
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard label="Collected (This Month)" value={monthly?.collectedThisMonth ?? 0} loading={statsLoading} variant="info" />
-        <StatCard label="Upcoming (This Month)" value={monthly?.upcomingThisMonth ?? 0} loading={statsLoading} variant="success"/>
-        <StatCard label="Overdue Till Now" value={monthly?.overdueTotal ?? 0} loading={statsLoading} variant="danger"/>
+        <StatCard label="Upcoming (This Month)" value={monthly?.upcomingThisMonth ?? 0} loading={statsLoading} variant="success" />
+        <StatCard label="Overdue Till Now" value={monthly?.overdueTotal ?? 0} loading={statsLoading} variant="danger" />
       </div>
 
       {/* FILTER */}
@@ -144,14 +144,30 @@ export default function FinanceDashboardPage() {
           />
         </div>
 
-        {selectedBatch && (
+        <div className="flex gap-3">
           <Button
             variant="outline"
-            onClick={() => router.push(`/finance/batch/${selectedBatch}`)}
+            onClick={() => router.push("/finance/expenses")}
           >
-            View Batch Details →
+            View Expenses →
           </Button>
-        )}
+
+          <Button
+            variant="outline"
+            onClick={() => router.push("/finance/pnl")}
+          >
+            Monthly P&L →
+          </Button>
+          {selectedBatch && (
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/finance/batch/${selectedBatch}`)}
+            >
+              View Batch Details →
+            </Button>
+          )}
+        </div>
+
 
       </div>
 

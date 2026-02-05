@@ -2,7 +2,26 @@ import { z } from "zod";
 
 export type BankType = "bank" | "cash" | "wallet";
 export type PaymentType = "credit" | "debit";
-export type PaymentMode = "cash" | "online" | "cheque" | "upi" | "card" | "other";
+export type PaymentMode = "cash" | "online" | "cheque" | "upi" | "card" | "other"| "bank";
+export type LinkedType =
+  | "student"
+  | "enquiry"
+  | "batch"
+  | "expense"
+  | "other";
+
+export type ExpenseCategory =
+  | "salary"
+  | "rent"
+  | "electricity"
+  | "internet"
+  | "maintenance"
+  | "marketing"
+  | "stationery"
+  | "transport"
+  | "other";
+
+export type PayeeType = "staff" | "vendor" | "other";
 
 export interface BankAccount {
   _id?: string;
@@ -20,20 +39,42 @@ export interface BankAccount {
 
 export interface Payment {
   _id?: string;
+
   amount: number;
   currency?: string;
-  type: PaymentType;
+
+  type: "credit" | "debit";
   mode: PaymentMode;
   date: string;
-  batch: string;
-  student: string;
-  installmentNo?: string;
-  paymentRef?: string;
+
   bankAccount: BankAccount | string;
+
+  /* linking */
+  linkedType?: LinkedType;
+  linkedId?: string;
+
+  /* student (credit) */
+  batch?: string;
+  student?: string;
+  linkedInstallmentNo?: number;
+  appliedAmount?: number;
+
+  /* expense (debit) */
+  expenseCategory?: ExpenseCategory;
+  expenseSubType?: string;
+
+  payeeType?: PayeeType;
+  payeeName?: string;
+  payeeId?: string;
+
   payerName?: string;
   notes?: string;
+
   createdAt?: string;
 }
+
+
+
 export const bankSchema = z.object({
   name: z.string().min(1, "Bank name is required"),
   type: z.enum(["bank", "cash", "wallet"]),
@@ -43,58 +84,96 @@ export const bankSchema = z.object({
   branch: z.string().optional(),
 });
 
-export type BankFormData = z.infer<typeof bankSchema>;export const paymentSchema = z
+export type BankFormData = z.infer<typeof bankSchema>;
+
+export const paymentSchema = z
   .object({
     amount: z.number().positive("Amount must be positive"),
     type: z.enum(["credit", "debit"]),
-    batch: z.string().optional(),
-    student: z.string().optional(),
-    installmentNo: z.string().optional(),
-    mode: z.enum(["cash", "online", "cheque", "upi", "card", "other"]),
+
+    /* common */
+    mode: z.enum(["cash", "online", "cheque", "upi", "card", "bank", "other"]),
     date: z.string(),
     bankAccount: z.string().min(1, "Bank is required"),
-    payerName: z.string().optional(),
     notes: z.string().optional(),
+
+    /* student credit */
+    batch: z.string().optional(),
+    student: z.string().optional(),
+    linkedInstallmentNo: z.string().optional(),
+
+    /* expense debit */
+    expenseCategory: z
+      .enum([
+        "salary",
+        "rent",
+        "electricity",
+        "internet",
+        "maintenance",
+        "marketing",
+        "stationery",
+        "transport",
+        "other",
+      ])
+      .optional(),
+
+    expenseSubType: z.string().optional(),
+
+    payeeType: z.enum(["staff", "vendor", "other"]).optional(),
+    payeeName: z.string().optional(),
   })
-  .refine(
-    (d) => {
-      if (d.type === "credit") {
-        return d.batch && d.student && d.installmentNo;
+  .superRefine((d, ctx) => {
+    // CREDIT → student fees
+    if (d.type === "credit") {
+      if (!d.batch || !d.student || !d.linkedInstallmentNo) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Batch, Student & Installment are required for credit",
+          path: ["batch"],
+        });
       }
-      return true;
-    },
-    { message: "Batch, Student & Installment are required for credit payments" }
-  );
+    }
+
+    // DEBIT → expense
+    if (d.type === "debit") {
+      if (!d.expenseCategory) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Expense category is required",
+          path: ["expenseCategory"],
+        });
+      }
+      if (!d.payeeName) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Payee name is required",
+          path: ["payeeName"],
+        });
+      }
+    }
+  });
+
 
 export type PaymentFormData = z.infer<typeof paymentSchema>;
 
-export interface PaymentPayload extends PaymentFormData {
-  linkedType?: "student" | "other";
+export interface PaymentPayload {
+  amount: number;
+  type: "credit" | "debit";
+  mode: PaymentMode;
+  date: string;
+  bankAccount: string;
+
+  /* linking */
+  linkedType: LinkedType;
   linkedId?: string | null;
   linkedInstallmentNo?: number | null;
+
+  /* expense */
+  expenseCategory?: ExpenseCategory;
+  expenseSubType?: string;
+  payeeType?: PayeeType;
+  payeeName?: string;
+
+  /* optional */
+  notes?: string;
 }
-
-
-export interface SummaryFilters {
-  startDate: string;
-  endDate: string;
-  groupBy: "bank" | "day";
-  mode: "" | "cash" | "online" | "upi" | "card" | "cheque";
-  bankAccount: string;
-}
-
-export interface SummaryBankRow {
-  bank: { _id: string; name: string } | null;
-  totalIn: number;
-  totalOut: number;
-  balance: number;
-}
-
-export interface SummaryDayRow {
-  day: string;
-  totalIn: number;
-  totalOut: number;
-  balance: number;
-}
-
-export type SummaryRawResponse = SummaryBankRow[] | SummaryDayRow[];

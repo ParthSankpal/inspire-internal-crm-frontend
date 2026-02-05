@@ -125,7 +125,7 @@ export default function EnquiriesPage() {
         area: "urban",
         type: "private",
         category: "top",
-        medium:"CBSE"
+        medium: "CBSE"
       },
       parentNames: {
         fatherName: "",
@@ -154,10 +154,12 @@ export default function EnquiriesPage() {
 
   const handleUpdate = async (data: EnquiryFormData) => {
     if (!selected?._id) return;
+
     await update(selected._id, data);
     setEditOpen(false);
     reset();
   };
+
 
   const handleDelete = async () => {
     if (!selected?._id) return;
@@ -182,15 +184,66 @@ export default function EnquiriesPage() {
 
   const rowActions = (row: Enquiry) => (
     <div className="flex gap-2 flex-wrap">
-      {/* EDIT */}
+      {/* VIEW */}
       <Button
         size="sm"
         variant="outline"
         onClick={() => router.push(`/enquiries/${row._id}`)}
       >
-        view
+        View
       </Button>
 
+      {/* EDIT */}
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => {
+          setSelected(row);
+
+          reset({
+            studentName: row.studentName ?? "",
+            phoneNo: row.phoneNo ?? "",
+            email: row.email ?? "",
+            standard: row.standard ?? "",
+
+            school: {
+              name: row.school?.name ?? "",
+              area: row.school?.area ?? "urban",
+              type: row.school?.type ?? "private",
+              category: row.school?.category ?? "top",
+              medium: row.school?.medium ?? "CBSE",
+            },
+
+            parentNames: {
+              fatherName: row.parentNames?.fatherName ?? "",
+              fatherOccupation: row.parentNames?.fatherOccupation ?? "",
+              motherName: row.parentNames?.motherName ?? "",
+              motherOccupation: row.parentNames?.motherOccupation ?? "",
+            },
+
+            targetExams: row.targetExams ?? [],
+
+            source: {
+              type: row.source?.type ?? "walk_in",
+            },
+
+            enquiryQuality: row.enquiryQuality ?? "medium",
+            status: row.status ?? "new",
+
+            counselor: {
+              id: row.counselor?.id ?? "",
+              name: row.counselor?.name ?? "",
+            },
+
+            reference: row.reference ?? "",
+            referenceContact: row.referenceContact ?? "",
+          });
+
+          setEditOpen(true);
+        }}
+      >
+        Edit
+      </Button>
 
       {/* DELETE */}
       <Button
@@ -205,6 +258,7 @@ export default function EnquiriesPage() {
       </Button>
     </div>
   );
+
 
   // 🧭 Load counselors for dropdown
   const loadCounselors = useCallback(async () => {
@@ -261,7 +315,7 @@ export default function EnquiriesPage() {
         title="Add Enquiry"
         onSubmit={handleSubmit(handleCreate)}
       >
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <FormInput name="studentName" label="Student Name" control={control} />
           <FormInput name="phoneNo" label="Phone" control={control} />
           <FormInput name="email" label="Email" control={control} />
@@ -380,11 +434,117 @@ export default function EnquiriesPage() {
         submitLabel="Update"
         onSubmit={handleSubmit(handleUpdate)}
       >
-        <FormInput name="studentName" label="Student Name" control={control} />
-        <FormInput name="phoneNo" label="Phone" control={control} />
-        <FormInput name="school.name" label="School" control={control} />
-        <FormInput name="standard" label="Standard" control={control} />
+          <div className="grid md:grid-cols-3 gap-4">
+          <FormInput name="studentName" label="Student Name" control={control} />
+          <FormInput name="phoneNo" label="Phone" control={control} />
+          <FormInput name="email" label="Email" control={control} />
+          <FormInput name="school.name" label="School" control={control} />
+          <FormSelect
+            name="school.area"
+            label="School Area"
+            control={control}
+            options={[
+              { value: "urban", label: "Urban" },
+              { value: "semi_urban", label: "Semi Urban" },
+              { value: "rural", label: "Rural" },
+            ]}
+          />
+
+          <FormSelect
+            name="school.type"
+            label="School Type"
+            control={control}
+            options={[
+              { value: "private", label: "Private" },
+              { value: "govt", label: "Gov" },
+              { value: "semi_govt", label: "Semi Gov" },
+            ]}
+          />
+
+          <FormSelect
+            name="school.category"
+            label="School Category"
+            control={control}
+            options={[
+              { value: "top", label: "Top" },
+              { value: "mid", label: "Mid" },
+              { value: "local", label: "Local" },
+            ]}
+          />
+
+          <FormSelect
+            name="school.medium"
+            label="School Category"
+            control={control}
+            options={[
+              { value: "CBSE", label: "CBSE" },
+              { value: "SEMI-ENGLISH", label: "SEMI-ENGLISH" },
+              { value: "ENGLISH", label: "ENGLISH" },
+              { value: "MARATHI", label: "MARATHI" },
+              { value: "ICSE", label: "ICSE" },
+              { value: "IB/IGCSE", label: "IB/IGCSE" },
+            ]}
+          />
+          <FormInput name="standard" label="Standard" control={control} />
+          <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
+          <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
+          <FormInput name="parentNames.motherName" label="Mother Name" control={control} />
+          <FormInput name="parentNames.motherOccupation" label="Mother Occupation" control={control} />
+
+          <FormMultiSelect
+            name="targetExams"
+            label="Target Exams"
+            control={control}
+            options={[
+              { value: "NEET", label: "NEET" },
+              { value: "IIT-JEE", label: "IIT-JEE" },
+              { value: "Foundation", label: "Foundation" },
+            ]}
+          />
+
+          <FormSelect
+            name="source.type"
+            label="Source"
+            control={control}
+            options={[
+              { value: "walk_in", label: "Walk In" },
+              { value: "school_visit", label: "School Visit" },
+              { value: "ktse", label: "KTSE" },
+              { value: "seminar", label: "Seminar" },
+              { value: "student_referral", label: "Student Referral" },
+              { value: "social_media", label: "Social Media Post" },
+              { value: "whatsapp", label: "Whatsapp" },
+              { value: "teacher_reference", label: "Teacher Reference" },
+              { value: "digital_banner", label: "Digital Bbanner" },
+              { value: "paper_leaflet", label: "Paper Lleaflet" },
+              { value: "radio_advertisement", label: "Radio Advertisement" },
+              { value: "calling", label: "Calling" },
+              { value: "news_paper", label: "News Paper" },
+            ]}
+          />
+          <FormSelect
+            name="counselor.id"
+            label="Counselor"
+            control={control}
+            placeholder="Select counselor"
+            options={counselors.map((c) => ({ value: c._id, label: c.name }))}
+            onValueChange={(val) => {
+              const selected = counselors.find((c) => c._id === val);
+              reset((prev) => ({
+                ...prev,
+                counselor: {
+                  id: selected?._id || "",
+                  name: selected?.name || "",
+                },
+              }));
+            }}
+          />
+
+          <FormInput name="reference" label="Reference" control={control} />
+          <FormInput name="referenceContact" label="Reference Contact no" control={control} />
+        </div>
       </FormDialogWrapper>
+
 
 
       <FollowUpModal

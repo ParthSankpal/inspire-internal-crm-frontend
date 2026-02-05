@@ -8,6 +8,7 @@ import {
   StudentFinanceDetail,
 } from "./types";
 import { PaginatedResponse } from "../pagination";
+import { Payment } from "../payments/types";
 
 /* =========================
    MONTHLY
@@ -58,6 +59,47 @@ export async function getStudentFinanceDetail(
 ): Promise<StudentFinanceDetail> {
   const { data } = await axiosClient.get<{ data: StudentFinanceDetail }>(
     `/finance/student/${studentId}/fees`
+  );
+  return data.data;
+}
+
+/* =========================
+   EXPENSES
+========================= */
+
+export async function getExpenses(
+  page = 1,
+  limit = 10,
+  filters?: {
+    startDate?: string;
+    endDate?: string;
+    expenseCategory?: string;
+    payeeType?: string;
+  }
+):  Promise<PaginatedResponse<Payment>>{
+  const { data } = await axiosClient.get("/finance/expenses", {
+    params: { page, limit, ...filters },
+  });
+  return data;
+}
+
+/* =========================
+   MONTHLY P&L
+========================= */
+
+export type MonthlyPnL = {
+  month: number;
+  income: number;
+  expense: number;
+  profit: number;
+};
+
+export async function getMonthlyPnL(
+  year?: number
+): Promise<MonthlyPnL[]> {
+  const { data } = await axiosClient.get<{ data: MonthlyPnL[] }>(
+    "/finance/pnl",
+    { params: { year } }
   );
   return data.data;
 }

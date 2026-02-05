@@ -34,23 +34,43 @@ const columns = [
   {
     id: "date",
     label: "Date",
-    accessor: (p: Payment) => <IsoDate value={p.date}  />,
+    accessor: (p: Payment) => <IsoDate value={p.date} />,
   },
   {
     id: "amount",
     label: "Amount",
-    accessor: (p: Payment) => `₹ ${p.amount}`,
+    accessor: (p: Payment) =>
+      `${p.type === "debit" ? "−" : "+"} ₹ ${p.amount}`,
   },
-  { id: "type", label: "Type" },
-  { id: "mode", label: "Mode" },
-  { id: "payerName", label: "Payer" },
+  {
+    id: "type",
+    label: "Type",
+    accessor: (p: Payment) =>
+      p.type === "credit" ? "Income" : "Expense",
+  },
+  {
+    id: "category",
+    label: "Category",
+    accessor: (p: Payment) =>
+      p.type === "debit"
+        ? p.expenseCategory ?? "-"
+        : "Student Fees",
+  },
+  {
+    id: "person",
+    label: "Paid To / From",
+    accessor: (p: Payment) =>
+      p.type === "debit"
+        ? p.payeeName ?? "-"
+        : p.payerName ?? "-",
+  },
   {
     id: "bankAccount",
     label: "Bank",
     accessor: (p: Payment) =>
       typeof p.bankAccount === "object"
         ? p.bankAccount?.name ?? "-"
-        : p.bankAccount ?? "-",
+        : "-",
   },
 ];
 

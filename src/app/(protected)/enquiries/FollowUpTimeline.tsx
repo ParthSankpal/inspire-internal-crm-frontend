@@ -1,3 +1,4 @@
+import { IsoDate } from "@/components/common/IsoDate";
 import { FollowUp } from "@/features/enquiries/types";
 
 export default function FollowUpTimeline({
@@ -20,7 +21,7 @@ export default function FollowUpTimeline({
           </p>
           <p className="text-sm text-gray-500">{f.note}</p>
           <p className="text-xs text-gray-400">
-            {new Date(f.date).toDateString()}
+            <IsoDate value={f.follow_up_date}/>
           </p>
         </div>
       ))}
