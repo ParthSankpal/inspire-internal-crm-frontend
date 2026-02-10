@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export type BankType = "bank" | "cash" | "wallet";
 export type PaymentType = "credit" | "debit";
-export type PaymentMode = "cash" | "online" | "cheque" | "upi" | "card" | "other"| "bank";
+export type PaymentMode = "cash" | "online" | "cheque" | "upi" | "card" | "other" | "bank";
 export type LinkedType =
   | "student"
   | "enquiry"
@@ -75,14 +75,60 @@ export interface Payment {
 
 
 
-export const bankSchema = z.object({
-  name: z.string().min(1, "Bank name is required"),
-  type: z.enum(["bank", "cash", "wallet"]),
-  bankName: z.string().optional(),
-  accountNumber: z.string().optional(),
-  ifsc: z.string().optional(),
-  branch: z.string().optional(),
-});
+export const bankSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, "Account name is required"),
+
+    type: z
+      .enum(["bank", "cash", "wallet"])
+      .refine((val) => !!val, {
+        message: "Account type is required",
+      }),
+
+    bankName: z.string().trim().optional(),
+    accountNumber: z.string().trim().optional(),
+    ifsc: z.string().trim().optional(),
+    branch: z.string().trim().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // 🔥 If type is BANK → require full bank details
+    if (data.type === "bank") {
+      if (!data.bankName) {
+        ctx.addIssue({
+          path: ["bankName"],
+          code: z.ZodIssueCode.custom,
+          message: "Bank name is required",
+        });
+      }
+
+      if (!data.accountNumber) {
+        ctx.addIssue({
+          path: ["accountNumber"],
+          code: z.ZodIssueCode.custom,
+          message: "Account number is required",
+        });
+      }
+
+      if (!data.ifsc) {
+        ctx.addIssue({
+          path: ["ifsc"],
+          code: z.ZodIssueCode.custom,
+          message: "IFSC code is required",
+        });
+      }
+
+      if (!data.branch) {
+        ctx.addIssue({
+          path: ["branch"],
+          code: z.ZodIssueCode.custom,
+          message: "Branch is required",
+        });
+      }
+    }
+  });
 
 export type BankFormData = z.infer<typeof bankSchema>;
 

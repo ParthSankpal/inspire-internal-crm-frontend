@@ -59,6 +59,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
     formState: { errors },
   } = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema) as Resolver<StudentFormData>,
+    mode: "onChange",
     defaultValues: {
       firstName: "",
       middleName: "",

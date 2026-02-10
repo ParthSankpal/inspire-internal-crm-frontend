@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Control, Controller, FieldPath, FieldValues } from "react-hook-form";
+import { Control, Controller, FieldPath, FieldValues, useFormState } from "react-hook-form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { getNestedError } from "@/utils/getFieldError";
 
 interface FormDatePickerProps<T extends FieldValues> {
   name: FieldPath<T>;
@@ -18,16 +18,93 @@ interface FormDatePickerProps<T extends FieldValues> {
   error?: string;
 }
 
+// export function FormDatePicker<T extends FieldValues>({
+//   name,
+//   label,
+//   control,
+//   placeholder = "Select date",
+//   disabled = false,
+//   error,
+// }: FormDatePickerProps<T>) {
+//   const [open, setOpen] = React.useState(false);
+// const currentYear = new Date().getFullYear();
+//   return (
+//     <div className="space-y-1">
+//       <label className="text-sm font-medium">{label}</label>
+
+//       <Controller
+//         name={name}
+//         control={control}
+
+//         render={({ field }) => {
+//           const selectedDate = field.value ? new Date(field.value) : undefined;
+
+//           return (
+//             <>
+//               <Popover open={open} onOpenChange={setOpen}>
+//                 <PopoverTrigger asChild>
+//                   <Button
+//                     type="button"
+//                     variant="outline"
+//                     disabled={disabled}
+//                     className={cn(
+//                       "w-full justify-between font-normal",
+//                       error && "border-red-500 text-red-600"
+//                     )}
+//                   >
+//                     {selectedDate
+//                       ? format(selectedDate, "dd/MM/yyyy")
+//                       : placeholder}
+
+//                     <ChevronDownIcon className="h-4 w-4 opacity-60" />
+//                   </Button>
+//                 </PopoverTrigger>
+
+//                 <PopoverContent className="w-auto p-0" align="start">
+                  
+
+//                   <Calendar
+//                     mode="single"
+//                     captionLayout="dropdown"
+//                     fromYear={currentYear - 20}
+//                     toYear={currentYear + 5} // admissions / payments / planning
+//                     selected={selectedDate}
+//                     // disabled={{ before: new Date() }}
+//                     onSelect={(date) => {
+//                       field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+//                       setOpen(false);
+//                     }}
+//                   />
+
+//                 </PopoverContent>
+//               </Popover>
+
+//               {error && (
+//                 <p className="text-xs text-red-500 mt-1">{error}</p>
+//               )}
+//             </>
+//           );
+//         }}
+//       />
+//     </div>
+//   );
+// }
+
+
+
 export function FormDatePicker<T extends FieldValues>({
   name,
   label,
   control,
   placeholder = "Select date",
   disabled = false,
-  error,
 }: FormDatePickerProps<T>) {
+  const { errors } = useFormState({ control });
+  const fieldError = getNestedError(errors, name);
+
   const [open, setOpen] = React.useState(false);
-const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
+
   return (
     <div className="space-y-1">
       <label className="text-sm font-medium">{label}</label>
@@ -35,9 +112,10 @@ const currentYear = new Date().getFullYear();
       <Controller
         name={name}
         control={control}
-
         render={({ field }) => {
-          const selectedDate = field.value ? new Date(field.value) : undefined;
+          const selectedDate = field.value
+            ? new Date(field.value)
+            : undefined;
 
           return (
             <>
@@ -47,10 +125,7 @@ const currentYear = new Date().getFullYear();
                     type="button"
                     variant="outline"
                     disabled={disabled}
-                    className={cn(
-                      "w-full justify-between font-normal",
-                      error && "border-red-500 text-red-600"
-                    )}
+                    className={`w-full justify-between font-normal ${fieldError && "border-red-500 text-red-600"}`}
                   >
                     {selectedDate
                       ? format(selectedDate, "dd/MM/yyyy")
@@ -61,26 +136,26 @@ const currentYear = new Date().getFullYear();
                 </PopoverTrigger>
 
                 <PopoverContent className="w-auto p-0" align="start">
-                  
-
                   <Calendar
                     mode="single"
                     captionLayout="dropdown"
                     fromYear={currentYear - 20}
-                    toYear={currentYear + 5} // admissions / payments / planning
+                    toYear={currentYear + 5}
                     selected={selectedDate}
-                    // disabled={{ before: new Date() }}
                     onSelect={(date) => {
-                      field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                      field.onChange(
+                        date ? format(date, "yyyy-MM-dd") : ""
+                      );
                       setOpen(false);
                     }}
                   />
-
                 </PopoverContent>
               </Popover>
 
-              {error && (
-                <p className="text-xs text-red-500 mt-1">{error}</p>
+              {fieldError && (
+                <p className="text-xs text-red-500 mt-1">
+                  {fieldError}
+                </p>
               )}
             </>
           );

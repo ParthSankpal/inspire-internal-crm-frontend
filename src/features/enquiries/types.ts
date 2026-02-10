@@ -175,36 +175,64 @@ const enquirySourceEnum = z.enum([
 
 
 export const enquirySchema = z.object({
-  studentName: z.string().min(1),
-  phoneNo: z.string().regex(/^[0-9]{10}$/),
-  email: z.string().email().optional().or(z.literal("")),
-  standard: z.string().min(1),
+  studentName: z
+    .string()
+    .trim()
+    .min(1, "Student name is required"),
+
+  phoneNo: z
+    .string()
+    .trim()
+    .min(1, "Phone number is required")
+    .regex(/^[0-9]{10}$/, "Enter valid 10 digit phone number"),
+
+  email: z
+    .string()
+    .email("Enter valid email address")
+    .optional()
+    .or(z.literal("")),
+
+  standard: z
+    .string()
+    .trim()
+    .min(1, "Standard is required"),
 
   school: z.object({
-    name: z.string().min(1, "School name is required"),
-    area: z.enum([
-      "urban",
-      "semi_urban",
-      "rural"
-    ]),
-    type: z.enum([
-      "private",
-      "govt",
-      "semi_govt"
-    ]),
-    category: z.enum([
-      "top",
-      "mid",
-      "local"
-    ]),
-    medium: z.enum([
-      "CBSE",
-      "SEMI-ENGLISH",
-      "ENGLISH",
-      "MARATHI",
-      "ICSE",
-      "IB/IGCSE",
-    ])
+    name: z
+      .string()
+      .trim()
+      .min(1, "School name is required"),
+
+    area: z
+      .enum(["urban", "semi_urban", "rural"])
+      .refine((val) => !!val, {
+        message: "School area is required",
+      }),
+
+    type: z
+      .enum(["private", "govt", "semi_govt"])
+      .refine((val) => !!val, {
+        message: "School type is required",
+      }),
+
+    category: z
+      .enum(["top", "mid", "local"])
+      .refine((val) => !!val, {
+        message: "School category is required",
+      }),
+
+    medium: z
+      .enum([
+        "CBSE",
+        "SEMI-ENGLISH",
+        "ENGLISH",
+        "MARATHI",
+        "ICSE",
+        "IB/IGCSE",
+      ])
+      .refine((val) => !!val, {
+        message: "School medium is required",
+      }),
   }),
 
   parentNames: z.object({
@@ -213,31 +241,66 @@ export const enquirySchema = z.object({
     motherName: z.string().optional(),
     motherOccupation: z.string().optional(),
   }),
-  targetExams: z.array(z.string()).min(1),
+
+  targetExams: z
+    .array(z.string())
+    .min(1, "Select at least one target exam"),
 
   source: z.object({
-    type: enquirySourceEnum,
+    type: z
+      .enum([
+        "school_visit",
+        "seminar",
+        "ktse",
+        "walk_in",
+        "student_referral",
+        "parent_referral",
+        "social_media",
+        "whatsapp",
+        "website",
+        "teacher_reference",
+        "digital_banner",
+        "paper_leaflet",
+        "radio_advertisement",
+        "calling",
+        "news_paper",
+      ])
+      .refine((val) => !!val, {
+        message: "Source is required",
+      }),
+
     referenceName: z.string().optional(),
     referenceContact: z.string().optional(),
   }),
 
-  enquiryQuality: z.enum(["high", "medium", "low"]).default("medium"),
+  enquiryQuality: z
+    .enum(["high", "medium", "low"])
+    .default("medium"),
 
   counselor: z.object({
-    id: z.string().optional(),
+    id: z
+      .string()
+      .trim()
+      .min(1, "Counselor is required"),
     name: z.string().optional(),
   }),
+
   reference: z.string().optional(),
   referenceContact: z.string().optional(),
 
-  status: z.enum([
-    "new",
-    "follow_up",
-    "counseling_done",
-    "admitted",
-    "lost",
-  ]),
+  status: z
+    .enum([
+      "new",
+      "follow_up",
+      "counseling_done",
+      "admitted",
+      "lost",
+    ])
+    .refine((val) => !!val, {
+      message: "Status is required",
+    }),
 });
+
 
 export type EnquiryFormData = z.infer<typeof enquirySchema>;
 

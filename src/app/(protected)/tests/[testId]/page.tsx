@@ -89,6 +89,7 @@ export default function TestBuilderManualPage() {
       resolver: zodResolver(
         questionSchema.array()
       ) as unknown as Resolver<TestConfigForm>,
+      mode: "onChange",
       defaultValues: {
         classLevel: 11,
         questions: [],

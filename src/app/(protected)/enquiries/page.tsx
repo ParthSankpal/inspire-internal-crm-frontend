@@ -115,6 +115,7 @@ export default function EnquiriesPage() {
     reset,
   } = useForm<EnquiryFormData>({
     resolver: zodResolver(enquirySchema) as unknown as Resolver<EnquiryFormData>,
+    mode: "onChange",
     defaultValues: {
       studentName: "",
       phoneNo: "",
@@ -316,7 +317,7 @@ export default function EnquiriesPage() {
         onSubmit={handleSubmit(handleCreate)}
       >
         <div className="grid md:grid-cols-3 gap-4">
-          <FormInput name="studentName" label="Student Name" control={control} />
+          <FormInput name="studentName" label="Student Name" control={control}  />
           <FormInput name="phoneNo" label="Phone" control={control} />
           <FormInput name="email" label="Email" control={control} />
           <FormInput name="school.name" label="School" control={control} />

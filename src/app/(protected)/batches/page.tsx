@@ -48,6 +48,7 @@ export default function BatchesPage() {
     formState: { errors },
   } = useForm<BatchFormData>({
     resolver: zodResolver(batchSchema) as unknown as Resolver<BatchFormData>,
+    mode: "onChange",
     defaultValues: {
       name: "",
       startYear: new Date().getFullYear(),

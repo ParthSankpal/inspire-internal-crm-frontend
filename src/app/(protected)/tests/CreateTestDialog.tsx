@@ -35,6 +35,7 @@ export default function CreateTestDialog({
     formState: { errors },
   } = useForm<TestFormData>({
     resolver: zodResolver(testSchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       examType: "JEE",

@@ -36,6 +36,7 @@ export default function BankModals({
 }: Props) {
   const { control, handleSubmit, reset, formState } = useForm<BankFormData>({
     resolver: zodResolver(bankSchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       type: "bank",

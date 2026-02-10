@@ -57,6 +57,7 @@ export default function PaymentModals({
     formState,
   } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
+    mode: "onChange",
     defaultValues: {
       amount: 0,
       type: "credit",
