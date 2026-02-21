@@ -48,7 +48,9 @@ export interface Payment {
   date: string;
 
   bankAccount: BankAccount | string;
-
+  isRecieptGiven: boolean;
+  receiptNumber: string,
+  receiptGeneratedAt: Date;
   /* linking */
   linkedType?: LinkedType;
   linkedId?: string;

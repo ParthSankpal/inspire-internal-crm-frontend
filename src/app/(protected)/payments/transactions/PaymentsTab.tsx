@@ -9,6 +9,8 @@ import { useState } from "react";
 import { Payment } from "@/features/payments/types";
 import { Column } from "@/features/pagination";
 import { IsoDate } from "@/components/common/IsoDate";
+import { downloadStudentReceiptPdf } from "@/utils/downloadStudentReceiptPdf";
+import { useNotify } from "@/components/common/NotificationProvider";
 
 export default function PaymentsTab() {
   const {
@@ -22,84 +24,111 @@ export default function PaymentsTab() {
     editPayment,
     removePayment,
   } = usePayments();
+  const notify = useNotify();
 
-  
+
   const [selected, setSelected] = useState<Payment | null>(null);
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const bankOptions = banks.map((b) => ({ value: b._id!, label: b.name }));
 
-const columns = [
-  {
-    id: "date",
-    label: "Date",
-    accessor: (p: Payment) => <IsoDate value={p.date} />,
-  },
-  {
-    id: "amount",
-    label: "Amount",
-    accessor: (p: Payment) =>
-      `${p.type === "debit" ? "−" : "+"} ₹ ${p.amount}`,
-  },
-  {
-    id: "type",
-    label: "Type",
-    accessor: (p: Payment) =>
-      p.type === "credit" ? "Income" : "Expense",
-  },
-  {
-    id: "category",
-    label: "Category",
-    accessor: (p: Payment) =>
-      p.type === "debit"
-        ? p.expenseCategory ?? "-"
-        : "Student Fees",
-  },
-  {
-    id: "person",
-    label: "Paid To / From",
-    accessor: (p: Payment) =>
-      p.type === "debit"
-        ? p.payeeName ?? "-"
-        : p.payerName ?? "-",
-  },
-  {
-    id: "bankAccount",
-    label: "Bank",
-    accessor: (p: Payment) =>
-      typeof p.bankAccount === "object"
-        ? p.bankAccount?.name ?? "-"
-        : "-",
-  },
-];
+  const handleReceiptClick = async (row: Payment) => {
+    try {
+      await downloadStudentReceiptPdf(
+        row._id!,
+        row.receiptNumber // optional filename
+      );
+
+      notify("Transaction recipt generated successfully", "success");
+    } catch (error) {
+      notify("Failed to delete transaction", "error");
+    }
+  };
+
+  const columns = [
+    {
+      id: "date",
+      label: "Date",
+      accessor: (p: Payment) => <IsoDate value={p.date} />,
+    },
+    {
+      id: "amount",
+      label: "Amount",
+      accessor: (p: Payment) =>
+        `${p.type === "debit" ? "−" : "+"} ₹ ${p.amount}`,
+    },
+    {
+      id: "type",
+      label: "Type",
+      accessor: (p: Payment) =>
+        p.type === "credit" ? "Income" : "Expense",
+    },
+    {
+      id: "category",
+      label: "Category",
+      accessor: (p: Payment) =>
+        p.type === "debit"
+          ? p.expenseCategory ?? "-"
+          : "Student Fees",
+    },
+    {
+      id: "person",
+      label: "Paid To / From",
+      accessor: (p: Payment) =>
+        p.type === "debit"
+          ? p.payeeName ?? "-"
+          : p.payerName ?? "-",
+    },
+    {
+      id: "bankAccount",
+      label: "Bank",
+      accessor: (p: Payment) =>
+        typeof p.bankAccount === "object"
+          ? p.bankAccount?.name ?? "-"
+          : "-",
+    },
+  ];
+
 
 
 
   const rowActions = (row: Payment) => (
-    <div className="flex gap-2 justify-center">
+  <div className="flex gap-2 justify-center">
+    {/* Receipt Button (Only for Credit) */}
+    {row.type === "credit" && (
       <Button
         size="sm"
         variant="outline"
-        onClick={() => {
-          setSelected(row);
-          setOpen(true);
-        }}
+        onClick={() => handleReceiptClick(row)}
       >
-        Edit
+        {row.receiptNumber ? "Reprint Receipt" : "Generate Receipt"}
       </Button>
-      <Button
-        size="sm"
-        variant="destructive"
-        onClick={() => {
-          setSelected(row);
-          setDeleteOpen(true);
-        }}
-      >
-        Delete
-      </Button>
-    </div>
-  );
+    )}
+
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => {
+        setSelected(row);
+        setOpen(true);
+      }}
+    >
+      Edit
+    </Button>
+
+    <Button
+      size="sm"
+      variant="destructive"
+      onClick={() => {
+        setSelected(row);
+        setDeleteOpen(true);
+      }}
+    >
+      Delete
+    </Button>
+  </div>
+);
 
   return (
     <div>
