@@ -38,6 +38,9 @@ import { useNotify } from "@/components/common/NotificationProvider";
 import { getAllUsers } from "@/api/authApi";
 import { User } from "@/features/auth/types";
 import { Column } from "@/features/pagination";
+import { getAllSchools } from "@/api/schoolsApi";
+import { School } from "@/features/schools/types";
+import { FormCombobox } from "@/components/common/Forms/FormCombobox";
 
 export default function EnquiriesPage() {
   const router = useRouter();
@@ -101,7 +104,7 @@ export default function EnquiriesPage() {
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [selected, setSelected] = useState<Enquiry | null>(null);
-
+  const [schools, setSchools] = useState<School[]>([]);
   const [followUpOpen, setFollowUpOpen] = useState<boolean>(false);
   const [admitOpen, setAdmitOpen] = useState<boolean>(false);
   const [lostOpen, setLostOpen] = useState<boolean>(false);
@@ -274,6 +277,19 @@ export default function EnquiriesPage() {
 
 
   useEffect(() => {
+    const loadSchools = async () => {
+      try {
+        const res = await getAllSchools();
+        setSchools(res);
+      } catch {
+        notify("Failed to load schools", "error");
+      }
+    };
+
+    loadSchools();
+  }, [notify]);
+
+  useEffect(() => {
     load();
     loadCounselors();
   }, [load, loadCounselors]);
@@ -317,41 +333,53 @@ export default function EnquiriesPage() {
         onSubmit={handleSubmit(handleCreate)}
       >
         <div className="grid md:grid-cols-3 gap-4">
-          <FormInput name="studentName" label="Student Name" control={control}  />
+          <FormInput name="studentName" label="Student Name" control={control} />
           <FormInput name="phoneNo" label="Phone" control={control} />
           <FormInput name="email" label="Email" control={control} />
-          <FormInput name="school.name" label="School" control={control} />
           <FormSelect
+            name="school.name"
+            label="School"
+            control={control}
+            options={schools.map((s) => ({
+              value: s._id,
+              label: s.name,
+            }))}
+            onValueChange={(val) => {
+              const selected = schools.find((s) => s._id === val);
+              if (!selected) return;
+
+              reset((prev) => ({
+                ...prev,
+                school: {
+                  ...prev.school,
+                  name: selected._id,        // store ObjectId
+                  area: selected.area,       // auto-fill
+                  type: selected.type,
+                  category: selected.category,
+                  // medium stays manual
+                },
+              }));
+            }}
+          />
+          <FormInput
             name="school.area"
             label="School Area"
             control={control}
-            options={[
-              { value: "urban", label: "Urban" },
-              { value: "semi_urban", label: "Semi Urban" },
-              { value: "rural", label: "Rural" },
-            ]}
+            disabled
           />
 
-          <FormSelect
+          <FormInput
             name="school.type"
             label="School Type"
             control={control}
-            options={[
-              { value: "private", label: "Private" },
-              { value: "govt", label: "Gov" },
-              { value: "semi_govt", label: "Semi Gov" },
-            ]}
+            disabled
           />
 
-          <FormSelect
+          <FormInput
             name="school.category"
             label="School Category"
             control={control}
-            options={[
-              { value: "top", label: "Top" },
-              { value: "mid", label: "Mid" },
-              { value: "local", label: "Local" },
-            ]}
+            disabled
           />
 
           <FormSelect
@@ -435,42 +463,54 @@ export default function EnquiriesPage() {
         submitLabel="Update"
         onSubmit={handleSubmit(handleUpdate)}
       >
-          <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <FormInput name="studentName" label="Student Name" control={control} />
           <FormInput name="phoneNo" label="Phone" control={control} />
           <FormInput name="email" label="Email" control={control} />
-          <FormInput name="school.name" label="School" control={control} />
-          <FormSelect
+          <FormCombobox
+            name="school.name"
+            label="School"
+            control={control}
+            options={schools.map((s) => ({
+              value: s._id,
+              label: s.name,
+            }))}
+            placeholder="Search school..."
+            onValueChange={(val) => {
+              const selected = schools.find((s) => s._id === val);
+              if (!selected) return;
+
+              reset((prev) => ({
+                ...prev,
+                school: {
+                  ...prev.school,
+                  name: selected._id,
+                  area: selected.area,
+                  type: selected.type,
+                  category: selected.category,
+                },
+              }));
+            }}
+          />
+          <FormInput
             name="school.area"
             label="School Area"
             control={control}
-            options={[
-              { value: "urban", label: "Urban" },
-              { value: "semi_urban", label: "Semi Urban" },
-              { value: "rural", label: "Rural" },
-            ]}
+            disabled
           />
 
-          <FormSelect
+          <FormInput
             name="school.type"
             label="School Type"
             control={control}
-            options={[
-              { value: "private", label: "Private" },
-              { value: "govt", label: "Gov" },
-              { value: "semi_govt", label: "Semi Gov" },
-            ]}
+            disabled
           />
 
-          <FormSelect
+          <FormInput
             name="school.category"
             label="School Category"
             control={control}
-            options={[
-              { value: "top", label: "Top" },
-              { value: "mid", label: "Mid" },
-              { value: "local", label: "Local" },
-            ]}
+            disabled
           />
 
           <FormSelect

@@ -29,11 +29,15 @@ import { Batch } from "@/features/batches/types";
 import { useNotify } from "@/components/common/NotificationProvider";
 import { useRouter } from "next/navigation";
 import { FormDatePicker } from "@/components/common/Forms/FormDatePicker";
+import { getAllSchools } from "@/api/schoolsApi";
+import { School } from "@/features/schools/types";
+import { FormCombobox } from "@/components/common/Forms/FormCombobox";
 
 export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) => {
   const router = useRouter();
   const [items, setItems] = useState<Student[]>([]);
   const [batches, setBatches] = useState<{ value: string; label: string }[]>([]);
+  const [schools, setSchools] = useState<{ value: string; label: string }[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<string>("");
   const [selected, setSelected] = useState<Student | null>(null);
   const [openForm, setOpenForm] = useState(false);
@@ -71,14 +75,14 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       parent: {
         fatherName: "",
         motherName: "",
-        parentEmail:"",
+        parentEmail: "",
         fatherPhone: "",
         motherPhone: "",
         occupation: "",
       },
       address: { line1: "", line2: "", city: "", state: "", pincode: "" },
       academicInfo: {
-        schoolName: "",
+        school: "",
         grade10Marks: "",
         grade10PassingYear: "",
       },
@@ -130,40 +134,54 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
         notify("Failed to load batches", "error");
       }
     })();
+    (async () => {
+      try {
+        const res = await getAllSchools();
+
+        setSchools(
+          res?.map((s: School) => ({
+            value: s._id,
+            label: s.name,
+          }))
+        );
+      } catch {
+        notify("Failed to load schools", "error");
+      }
+    })();
   }, [notify]);
 
   // Load students
- const loadStudents = useCallback(async () => {
-  setLoading(true);
-  try {
-    const res = await getAllStudents({
-      page: pagination.page,
-      limit: pagination.limit,
-      search,
-      batchId: selectedBatch,
-      isArchived,
-    });
+  const loadStudents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getAllStudents({
+        page: pagination.page,
+        limit: pagination.limit,
+        search,
+        batchId: selectedBatch,
+        isArchived,
+      });
 
-    setItems(res.data);
-    setPagination((prev) => ({
-      ...prev,
-      totalItems: res.pagination.totalItems,
-      totalPages: res.pagination.totalPages,
-    }));
+      setItems(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.pagination.totalItems,
+        totalPages: res.pagination.totalPages,
+      }));
 
-  } catch {
-    notify("Failed to load students", "error");
-  } finally {
-    setLoading(false);
-  }
-}, [pagination.page, pagination.limit, search, selectedBatch, isArchived, notify]);
-
-
+    } catch {
+      notify("Failed to load students", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.page, pagination.limit, search, selectedBatch, isArchived, notify]);
 
 
-useEffect(() => {
-  loadStudents();
-}, [loadStudents]);
+
+
+  useEffect(() => {
+    loadStudents();
+  }, [loadStudents]);
 
 
   // Create student
@@ -225,22 +243,22 @@ useEffect(() => {
   };
 
   // Columns
-const columns = [
-  { id: "studentId", label: "ID" },
-  {
-    id: "firstName",
-    label: "Name",
-    accessor: (r: Student) => `${r.firstName} ${r.lastName}`,
-  },
-  { id: "course", label: "Course" },
-  { id: "targetExam", label: "Exam" },
-  {
-    id: "batch",
-    label: "Batch",
-    accessor: (r: Student) => r.batch?.name ?? "—",
-  },
-  { id: "status", label: "Status" },
-];
+  const columns = [
+    { id: "studentId", label: "ID" },
+    {
+      id: "firstName",
+      label: "Name",
+      accessor: (r: Student) => `${r.firstName} ${r.lastName}`,
+    },
+    { id: "course", label: "Course" },
+    { id: "targetExam", label: "Exam" },
+    {
+      id: "batch",
+      label: "Batch",
+      accessor: (r: Student) => r.batch?.name ?? "—",
+    },
+    { id: "status", label: "Status" },
+  ];
 
 
   const rowActions = (row: Student) => (
@@ -293,7 +311,10 @@ const columns = [
                 },
 
                 academicInfo: {
-                  schoolName: row.academicInfo?.schoolName ?? "",
+                  school:
+                    typeof row.academicInfo?.school === "object"
+                      ? row.academicInfo.school._id
+                      : row.academicInfo?.school ?? "",
                   grade10Marks: row.academicInfo?.grade10Marks ?? "",
                   grade10PassingYear: row.academicInfo?.grade10PassingYear ?? "",
                 },
@@ -341,8 +362,9 @@ const columns = [
         <Button size="sm" onClick={() => handleRestore(row._id!)}>
           Restore
         </Button>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 
   // The form JSX
@@ -410,7 +432,13 @@ const columns = [
       <AccordionItem value="academic">
         <AccordionTrigger>🎓 Academic Info</AccordionTrigger>
         <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="academicInfo.schoolName" label="School" control={control} error={errors.academicInfo?.schoolName?.message} />
+          <FormCombobox
+            name="academicInfo.school"
+            label="School"
+            control={control}
+            options={schools}
+            placeholder="Select School"
+          />
           <FormInput name="academicInfo.grade10Marks" label="10th Marks" control={control} error={errors.academicInfo?.grade10Marks?.message} />
           <FormInput name="academicInfo.grade10PassingYear" label="10th Passing Year" control={control} error={errors.academicInfo?.grade10PassingYear?.message} />
         </AccordionContent>

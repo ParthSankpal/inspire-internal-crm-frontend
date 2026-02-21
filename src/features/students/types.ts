@@ -56,7 +56,10 @@ export interface Student {
   };
 
   academicInfo: {
-    schoolName: string;
+    school: string | {
+    _id: string;
+    name: string;
+  };
     grade10Marks?: string;
     grade10PassingYear?: string;
   };
@@ -120,7 +123,7 @@ export const studentSchema = z.object({
   }),
 
   academicInfo: z.object({
-    schoolName: z.string().min(1, "School name required"),
+    school: z.string().min(1, "School name required"),
     grade10Marks: z.string().optional(),
     grade10PassingYear: z.string().optional(),
   }),

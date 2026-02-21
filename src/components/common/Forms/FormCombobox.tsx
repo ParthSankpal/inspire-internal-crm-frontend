@@ -30,6 +30,7 @@ type Props<T extends FieldValues> = {
   options: Option[];
   placeholder?: string;
   disabled?: boolean;
+  onValueChange?: (value: string) => void;
 };
 
 export function FormCombobox<T extends FieldValues>({
@@ -38,6 +39,7 @@ export function FormCombobox<T extends FieldValues>({
   control,
   options,
   placeholder = "Select...",
+  onValueChange,
   disabled = false,
 }: Props<T>) {
   const [open, setOpen] = React.useState(false);
@@ -47,7 +49,9 @@ export function FormCombobox<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field }) => {
-        const selected = options.find((o) => o.value === field.value);
+        const selected = options.find(
+          (o) => String(o.value) === String(field.value)
+        );
 
         return (
           <div className="flex flex-col gap-1 w-full">
@@ -85,6 +89,11 @@ export function FormCombobox<T extends FieldValues>({
                             key={opt.value}
                             onSelect={() => {
                               field.onChange(opt.value);
+
+                              if (onValueChange) {
+                                onValueChange(opt.value);
+                              }
+
                               setOpen(false);
                             }}
                           >

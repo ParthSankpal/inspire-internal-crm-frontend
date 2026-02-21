@@ -142,7 +142,12 @@ export default function StudentDetailsPage() {
                         <CardTitle>Academic Information</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-3 gap-4">
-                        <p><b>School:</b> {student.academicInfo.schoolName}</p>
+                        <p>
+                            <b>School:</b>{" "}
+                            {typeof student.academicInfo.school === "string"
+                                ? student.academicInfo.school
+                                : student.academicInfo.school?.name}
+                        </p>
                         <p><b>10th Marks:</b> {student.academicInfo.grade10Marks}</p>
                         <p><b>Passing Year:</b> {student.academicInfo.grade10PassingYear}</p>
                     </CardContent>
@@ -162,7 +167,7 @@ export default function StudentDetailsPage() {
                             <b>Total Paid:</b> ₹{totalPaid}
                         </p>
                         <p className="col-span-3  font-semibold">
-                            <b>Pending Amount:</b>₹ <span className=" text-red-600">{pending} </span> 
+                            <b>Pending Amount:</b>₹ <span className=" text-red-600">{pending} </span>
                         </p>
                     </CardContent>
                 </Card>

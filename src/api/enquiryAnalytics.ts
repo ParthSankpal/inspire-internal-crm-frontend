@@ -20,6 +20,7 @@ export interface SourceWiseAnalytics {
 }
 
 export interface SchoolWiseAnalytics {
+  schoolId: string;
   schoolName: string;
   enquiries: number;
   admissions: number;
