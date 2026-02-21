@@ -6,6 +6,7 @@ import InitialStateManager from "@/components/common/InitialStateManager";
 import { NotificationProvider } from "@/components/common/NotificationProvider";
 import ReactQueryProvider from '@/components/common/ReactQueryProvider';
 import { Metadata } from 'next';
+import { montserrat, fustat } from "@/app/fonts";
 
 // Load Google Fonts
 
@@ -77,7 +78,7 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${montserrat.variable} ${fustat.variable}`}>
       <body className={` antialiased`}>
         {/* Redux Provider ensures global state is available */}
         <ReduxProvider>
