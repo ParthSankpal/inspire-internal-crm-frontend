@@ -30,19 +30,23 @@ export default function PaymentsTab() {
   const [selected, setSelected] = useState<Payment | null>(null);
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
+  const [receiptLoading, setReceiptLoading] = useState(false);
   const bankOptions = banks.map((b) => ({ value: b._id!, label: b.name }));
 
   const handleReceiptClick = async (row: Payment) => {
     try {
+      setReceiptLoading(true);
+
       await downloadStudentReceiptPdf(
         row._id!,
-        row.receiptNumber // optional filename
+        row.receiptNumber
       );
 
-      notify("Transaction recipt generated successfully", "success");
+      notify("Transaction receipt generated successfully", "success");
     } catch (error) {
-      notify("Failed to delete transaction", "error");
+      notify("Failed to generate receipt", "error");
+    } finally {
+      setReceiptLoading(false);
     }
   };
 
@@ -94,47 +98,55 @@ export default function PaymentsTab() {
 
 
   const rowActions = (row: Payment) => (
-  <div className="flex gap-2 justify-center">
-    {/* Receipt Button (Only for Credit) */}
-    {row.type === "credit" && (
+    <div className="flex gap-2 justify-center">
+      {row.type === "credit" && (
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={receiptLoading}
+          onClick={() => handleReceiptClick(row)}
+        >
+          {receiptLoading
+            ? "Generating..."
+            : row.receiptNumber
+              ? "Reprint Receipt"
+              : "Generate Receipt"}
+        </Button>
+      )}
+
       <Button
         size="sm"
         variant="outline"
-        onClick={() => handleReceiptClick(row)}
+        disabled={receiptLoading}
+        onClick={() => {
+          setSelected(row);
+          setOpen(true);
+        }}
       >
-        {row.receiptNumber ? "Reprint Receipt" : "Generate Receipt"}
+        Edit
       </Button>
-    )}
 
-    <Button
-      size="sm"
-      variant="outline"
-      onClick={() => {
-        setSelected(row);
-        setOpen(true);
-      }}
-    >
-      Edit
-    </Button>
-
-    <Button
-      size="sm"
-      variant="destructive"
-      onClick={() => {
-        setSelected(row);
-        setDeleteOpen(true);
-      }}
-    >
-      Delete
-    </Button>
-  </div>
-);
+      <Button
+        size="sm"
+        variant="destructive"
+        disabled={receiptLoading}
+        onClick={() => {
+          setSelected(row);
+          setDeleteOpen(true);
+        }}
+      >
+        Delete
+      </Button>
+    </div>
+  );
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Payments</h2>
-        <Button onClick={() => setOpen(true)}>+ Add Payment</Button>
+        <Button disabled={receiptLoading} onClick={() => setOpen(true)}>
+          + Add Payment
+        </Button>
       </div>
 
       <DataTable
