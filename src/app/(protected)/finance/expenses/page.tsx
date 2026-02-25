@@ -14,6 +14,9 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const COLORS = [
   "#ef4444",
@@ -30,6 +33,7 @@ export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
   useEffect(() => {
     setLoading(true);
     getExpenses(1, 1000)
@@ -64,7 +68,18 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Expenses</h1>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+
+        <h1 className="text-2xl font-semibold">Expenses</h1>
+      </div>
+
 
       <ChartContainer
         config={chartConfig}
@@ -90,7 +105,7 @@ export default function ExpensesPage() {
       <DataTable
         data={expenses}
         columns={[
-          { id: "date", label: "Date", accessor: r => <IsoDate value={r.date}/> },
+          { id: "date", label: "Date", accessor: r => <IsoDate value={r.date} /> },
           { id: "amount", label: "Amount", accessor: r => `₹ ${r.amount}` },
           { id: "category", label: "Category", accessor: r => r.expenseCategory },
           { id: "payee", label: "Paid To", accessor: r => r.payeeName },

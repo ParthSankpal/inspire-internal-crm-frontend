@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { School } from "../schools/types";
 
 /* ======================
    ENUMS
@@ -86,14 +87,8 @@ export interface Enquiry {
   parentNames: ParentNames;
   targetExams: string[];
 
-  school: {
-    name: string;
-    area?: "urban" | "semi_urban" | "rural";
-    type?: "private" | "govt" | "semi_govt";
-    category?: "top" | "mid" | "local";
-    medium?: "CBSE" | "SEMI-ENGLISH" | "ENGLISH" | "MARATHI" | "ICSE" | "IB/IGCSE";
-  };
-
+  school: School;
+  medium: "CBSE" | "SEMI-ENGLISH" | "ENGLISH" | "MARATHI" | "ICSE" | "IB/IGCSE";
   source: {
     type: EnquirySourceType;
     sourceSchoolName?: string;
@@ -107,10 +102,7 @@ export interface Enquiry {
 
   status: EnquiryStatus;
 
-  counselor?: {
-    id?: string;
-    name?: string;
-  };
+  counselor: string;
   reference?: string;
   referenceContact?: string;
   followUps?: FollowUp[];
@@ -131,7 +123,7 @@ export type FollowUpFormData = {
   | "not_interested";
   note?: string;
   nextFollowUpDate?: string;
-  follow_up_date:Date;
+  follow_up_date: Date;
 };
 
 export type AdmissionFormData = {
@@ -173,6 +165,10 @@ const enquirySourceEnum = z.enum([
 ]);
 
 
+export type EnquiryCreateDTO = z.infer<typeof enquirySchema>;
+
+// 3️⃣ Update
+export type EnquiryUpdateDTO = Partial<EnquiryCreateDTO>;
 
 export const enquirySchema = z.object({
   studentName: z
@@ -197,43 +193,14 @@ export const enquirySchema = z.object({
     .trim()
     .min(1, "Standard is required"),
 
-  school: z.object({
-    name: z
-      .string()
-      .trim()
-      .min(1, "School name is required"),
+  school: z
+    .string()
+    .trim()
+    .min(1, "School is required"),
 
-    area: z
-      .enum(["urban", "semi_urban", "rural"])
-      .refine((val) => !!val, {
-        message: "School area is required",
-      }),
-
-    type: z
-      .enum(["private", "govt", "semi_govt"])
-      .refine((val) => !!val, {
-        message: "School type is required",
-      }),
-
-    category: z
-      .enum(["top", "mid", "local"])
-      .refine((val) => !!val, {
-        message: "School category is required",
-      }),
-
-    medium: z
-      .enum([
-        "CBSE",
-        "SEMI-ENGLISH",
-        "ENGLISH",
-        "MARATHI",
-        "ICSE",
-        "IB/IGCSE",
-      ])
-      .refine((val) => !!val, {
-        message: "School medium is required",
-      }),
-  }),
+  medium: z
+    .enum(["CBSE", "SEMI-ENGLISH", "ENGLISH", "MARATHI", "ICSE", "IB/IGCSE"])
+    .default("CBSE"),
 
   parentNames: z.object({
     fatherName: z.string().optional(),
@@ -277,13 +244,7 @@ export const enquirySchema = z.object({
     .enum(["high", "medium", "low"])
     .default("medium"),
 
-  counselor: z.object({
-    id: z
-      .string()
-      .trim()
-      .min(1, "Counselor is required"),
-    name: z.string().optional(),
-  }),
+  counselor: z.string().min(1, "Counselor is required"),
 
   reference: z.string().optional(),
   referenceContact: z.string().optional(),
@@ -302,7 +263,7 @@ export const enquirySchema = z.object({
 });
 
 
-export type EnquiryFormData = z.infer<typeof enquirySchema>;
+
 
 
 

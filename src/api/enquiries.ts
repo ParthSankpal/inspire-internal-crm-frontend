@@ -92,7 +92,7 @@
 
 
 
-import { Enquiry } from "@/features/enquiries/types";
+import { Enquiry, EnquiryCreateDTO, EnquiryUpdateDTO } from "@/features/enquiries/types";
 import { PaginatedResponse } from "@/features/pagination";
 import { axiosClient } from "@/lib/apiClient";
 
@@ -115,13 +115,16 @@ export async function getEnquiryById(id: string): Promise<Enquiry> {
 }
 
 // CREATE
-export async function createEnquiry(payload: Partial<Enquiry>) {
-  const { data } = await axiosClient.post(`/enquiries`, payload);
+export async function createEnquiry(payload: EnquiryCreateDTO) {
+  const { data } = await axiosClient.post("/enquiries", payload);
   return data.data;
 }
 
 // UPDATE
-export async function updateEnquiry(id: string, payload: Partial<Enquiry>) {
+export async function updateEnquiry(
+  id: string,
+  payload: EnquiryUpdateDTO
+) {
   const { data } = await axiosClient.put(`/enquiries/${id}`, payload);
   return data.data;
 }

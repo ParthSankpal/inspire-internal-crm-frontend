@@ -18,8 +18,9 @@ import {
 
 import {
   Enquiry,
-  EnquiryFormData,
+  EnquiryCreateDTO,
   enquirySchema,
+  EnquiryUpdateDTO,
 } from "@/features/enquiries/types";
 
 import { Resolver, useForm } from "react-hook-form";
@@ -84,8 +85,8 @@ export default function EnquiriesPage() {
     remove,
   } = useCrud<
     Enquiry,
-    EnquiryFormData,
-    EnquiryFormData,
+    EnquiryCreateDTO,
+    EnquiryUpdateDTO,
     Enquiry,
     Enquiry
   >({
@@ -104,7 +105,7 @@ export default function EnquiriesPage() {
   const [editOpen, setEditOpen] = useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [selected, setSelected] = useState<Enquiry | null>(null);
-  const [schools, setSchools] = useState<School[]>([]);
+  const [schools, setSchools] = useState<{ value: string; label: string }[]>([]);
   const [followUpOpen, setFollowUpOpen] = useState<boolean>(false);
   const [admitOpen, setAdmitOpen] = useState<boolean>(false);
   const [lostOpen, setLostOpen] = useState<boolean>(false);
@@ -116,21 +117,16 @@ export default function EnquiriesPage() {
     control,
     handleSubmit,
     reset,
-  } = useForm<EnquiryFormData>({
-    resolver: zodResolver(enquirySchema) as unknown as Resolver<EnquiryFormData>,
+  } = useForm<EnquiryCreateDTO>({
+    resolver: zodResolver(enquirySchema) as unknown as Resolver<EnquiryCreateDTO>,
     mode: "onChange",
     defaultValues: {
       studentName: "",
       phoneNo: "",
       email: "",
       standard: "",
-      school: {
-        name: "",
-        area: "urban",
-        type: "private",
-        category: "top",
-        medium: "CBSE"
-      },
+      school: "",
+      medium: "CBSE",
       parentNames: {
         fatherName: "",
         fatherOccupation: "",
@@ -141,7 +137,7 @@ export default function EnquiriesPage() {
       source: { type: "walk_in" },
       enquiryQuality: "medium",
       status: "new",
-      counselor: { id: "", name: "" },
+      counselor: "",
       reference: "",
       referenceContact: "",
     },
@@ -150,13 +146,13 @@ export default function EnquiriesPage() {
   /* ======================
      HANDLERS
   ====================== */
-  const handleCreate = async (data: EnquiryFormData) => {
+  const handleCreate = async (data: EnquiryCreateDTO) => {
     await create(data);
     setAddOpen(false);
     reset();
   };
 
-  const handleUpdate = async (data: EnquiryFormData) => {
+  const handleUpdate = async (data: EnquiryUpdateDTO) => {
     if (!selected?._id) return;
 
     await update(selected._id, data);
@@ -172,7 +168,8 @@ export default function EnquiriesPage() {
   };
 
   /* ======================
-     TABLE
+     TABLE typeof row.academicInfo?.school === "object"
+                      ? row.academicInfo.school._ide.school?.name ?? "-"
   ====================== */
   const columns: Column<Enquiry>[] = [
     { id: "studentName", label: "Student" },
@@ -180,7 +177,7 @@ export default function EnquiriesPage() {
     {
       id: "school",
       label: "School",
-      accessor: (e) => e.school?.name ?? "-",
+      accessor: (e) => e.school?.name ?? "-"
     },
     { id: "standard", label: "Class" },
     { id: "status", label: "Status" },
@@ -210,14 +207,11 @@ export default function EnquiriesPage() {
             email: row.email ?? "",
             standard: row.standard ?? "",
 
-            school: {
-              name: row.school?.name ?? "",
-              area: row.school?.area ?? "urban",
-              type: row.school?.type ?? "private",
-              category: row.school?.category ?? "top",
-              medium: row.school?.medium ?? "CBSE",
-            },
-
+            school:
+              row.school && typeof row.school === "object"
+                ? row.school?._id ?? ""
+                : row.school ?? "",
+            medium: row.medium ?? "",
             parentNames: {
               fatherName: row.parentNames?.fatherName ?? "",
               fatherOccupation: row.parentNames?.fatherOccupation ?? "",
@@ -234,10 +228,10 @@ export default function EnquiriesPage() {
             enquiryQuality: row.enquiryQuality ?? "medium",
             status: row.status ?? "new",
 
-            counselor: {
-              id: row.counselor?.id ?? "",
-              name: row.counselor?.name ?? "",
-            },
+            counselor:
+              typeof row.counselor === "object"
+                ? row.counselor
+                : row.counselor ?? "",
 
             reference: row.reference ?? "",
             referenceContact: row.referenceContact ?? "",
@@ -277,16 +271,20 @@ export default function EnquiriesPage() {
 
 
   useEffect(() => {
-    const loadSchools = async () => {
+    (async () => {
       try {
         const res = await getAllSchools();
-        setSchools(res);
+
+        setSchools(
+          res?.map((s: School) => ({
+            value: s._id,
+            label: s.name,
+          }))
+        );
       } catch {
         notify("Failed to load schools", "error");
       }
-    };
-
-    loadSchools();
+    })();
   }, [notify]);
 
   useEffect(() => {
@@ -336,55 +334,16 @@ export default function EnquiriesPage() {
           <FormInput name="studentName" label="Student Name" control={control} />
           <FormInput name="phoneNo" label="Phone" control={control} />
           <FormInput name="email" label="Email" control={control} />
-          <FormSelect
-            name="school.name"
+          <FormCombobox
+            name="school"
             label="School"
             control={control}
-            options={schools.map((s) => ({
-              value: s._id,
-              label: s.name,
-            }))}
-            onValueChange={(val) => {
-              const selected = schools.find((s) => s._id === val);
-              if (!selected) return;
-
-              reset((prev) => ({
-                ...prev,
-                school: {
-                  ...prev.school,
-                  name: selected._id,        // store ObjectId
-                  area: selected.area,       // auto-fill
-                  type: selected.type,
-                  category: selected.category,
-                  // medium stays manual
-                },
-              }));
-            }}
+            options={schools}
+            placeholder="Select School"
           />
-          <FormInput
-            name="school.area"
-            label="School Area"
-            control={control}
-            disabled
-          />
-
-          <FormInput
-            name="school.type"
-            label="School Type"
-            control={control}
-            disabled
-          />
-
-          <FormInput
-            name="school.category"
-            label="School Category"
-            control={control}
-            disabled
-          />
-
           <FormSelect
-            name="school.medium"
-            label="School Category"
+            name="medium"
+            label="Medium"
             control={control}
             options={[
               { value: "CBSE", label: "CBSE" },
@@ -395,6 +354,8 @@ export default function EnquiriesPage() {
               { value: "IB/IGCSE", label: "IB/IGCSE" },
             ]}
           />
+
+
           <FormInput name="standard" label="Standard" control={control} />
           <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
           <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
@@ -433,21 +394,14 @@ export default function EnquiriesPage() {
             ]}
           />
           <FormSelect
-            name="counselor.id"
+            name="counselor"
             label="Counselor"
             control={control}
             placeholder="Select counselor"
-            options={counselors.map((c) => ({ value: c._id, label: c.name }))}
-            onValueChange={(val) => {
-              const selected = counselors.find((c) => c._id === val);
-              reset((prev) => ({
-                ...prev,
-                counselor: {
-                  id: selected?._id || "",
-                  name: selected?.name || "",
-                },
-              }));
-            }}
+            options={counselors.map((c) => ({
+              value: c._id,
+              label: c.name,
+            }))}
           />
 
           <FormInput name="reference" label="Reference" control={control} />
@@ -468,54 +422,16 @@ export default function EnquiriesPage() {
           <FormInput name="phoneNo" label="Phone" control={control} />
           <FormInput name="email" label="Email" control={control} />
           <FormCombobox
-            name="school.name"
+            name="school"
             label="School"
             control={control}
-            options={schools.map((s) => ({
-              value: s._id,
-              label: s.name,
-            }))}
-            placeholder="Search school..."
-            onValueChange={(val) => {
-              const selected = schools.find((s) => s._id === val);
-              if (!selected) return;
-
-              reset((prev) => ({
-                ...prev,
-                school: {
-                  ...prev.school,
-                  name: selected._id,
-                  area: selected.area,
-                  type: selected.type,
-                  category: selected.category,
-                },
-              }));
-            }}
-          />
-          <FormInput
-            name="school.area"
-            label="School Area"
-            control={control}
-            disabled
-          />
-
-          <FormInput
-            name="school.type"
-            label="School Type"
-            control={control}
-            disabled
-          />
-
-          <FormInput
-            name="school.category"
-            label="School Category"
-            control={control}
-            disabled
+            options={schools}
+            placeholder="Select School"
           />
 
           <FormSelect
-            name="school.medium"
-            label="School Category"
+            name="medium"
+            label="Medium"
             control={control}
             options={[
               { value: "CBSE", label: "CBSE" },
@@ -526,6 +442,7 @@ export default function EnquiriesPage() {
               { value: "IB/IGCSE", label: "IB/IGCSE" },
             ]}
           />
+
           <FormInput name="standard" label="Standard" control={control} />
           <FormInput name="parentNames.fatherName" label="Father Name" control={control} />
           <FormInput name="parentNames.fatherOccupation" label="Father Occupation" control={control} />
@@ -564,21 +481,14 @@ export default function EnquiriesPage() {
             ]}
           />
           <FormSelect
-            name="counselor.id"
+            name="counselor"
             label="Counselor"
             control={control}
             placeholder="Select counselor"
-            options={counselors.map((c) => ({ value: c._id, label: c.name }))}
-            onValueChange={(val) => {
-              const selected = counselors.find((c) => c._id === val);
-              reset((prev) => ({
-                ...prev,
-                counselor: {
-                  id: selected?._id || "",
-                  name: selected?.name || "",
-                },
-              }));
-            }}
+            options={counselors.map((c) => ({
+              value: c._id,
+              label: c.name,
+            }))}
           />
 
           <FormInput name="reference" label="Reference" control={control} />

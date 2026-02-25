@@ -23,6 +23,7 @@ export default function PaymentsTab() {
     addPayment,
     editPayment,
     removePayment,
+    loadPayments,
   } = usePayments();
   const notify = useNotify();
 
@@ -42,6 +43,7 @@ export default function PaymentsTab() {
         row.receiptNumber
       );
 
+      await loadPayments();
       notify("Transaction receipt generated successfully", "success");
     } catch (error) {
       notify("Failed to generate receipt", "error");

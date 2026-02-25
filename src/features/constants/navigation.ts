@@ -59,8 +59,8 @@ export const AppNavigation = [
     scopes: [Scope.MANAGE_RECEIPTS],
   },
   {
-    name: "Timetable",
-    href: "/timetable",
+    name: "Schedules",
+    href: "/schedules",
     icon: Calendar,
     scopes: [Scope.UPLOAD_TIMETABLE],
   },

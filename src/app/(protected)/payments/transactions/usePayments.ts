@@ -140,7 +140,7 @@ const buildPayload = (d: PaymentFormData): PaymentPayload => {
       const payload = buildPayload(d);
       await createPayment(payload);
       notify("Transaction added successfully", "success");
-      loadPayments();
+      await loadPayments();
     } catch {
       notify("Failed to add transaction", "error");
     }
@@ -154,7 +154,7 @@ const buildPayload = (d: PaymentFormData): PaymentPayload => {
       const payload = buildPayload(d);
       await updatePayment(id, payload);
       notify("Transaction updated", "success");
-      loadPayments();
+      await loadPayments();
     } catch {
       notify("Failed to update transaction", "error");
     }
@@ -167,7 +167,7 @@ const buildPayload = (d: PaymentFormData): PaymentPayload => {
     try {
       await deletePayment(id);
       notify("Transaction deleted", "info");
-      loadPayments();
+      await loadPayments();
     } catch {
       notify("Failed to delete transaction", "error");
     }
@@ -183,5 +183,6 @@ const buildPayload = (d: PaymentFormData): PaymentPayload => {
     addPayment,
     editPayment,
     removePayment,
+    loadPayments,
   };
 }

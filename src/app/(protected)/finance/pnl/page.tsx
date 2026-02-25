@@ -7,6 +7,9 @@ import { useForm } from "react-hook-form";
 import { FormSelect } from "@/components/common/Forms/FormSelect";
 import { getMonthlyPnL } from "@/features/finance/apis";
 import type { MonthlyPnLChartRow } from "@/components/common/MonthlyPnLChart";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /* =========================
    DYNAMIC IMPORT (SSR OFF)
@@ -38,6 +41,8 @@ export default function MonthlyPnLPage() {
   const [rawData, setRawData] = useState<MonthlyPnLApiRow[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     setLoading(true);
     getMonthlyPnL(Number(year))
@@ -64,7 +69,18 @@ export default function MonthlyPnLPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Monthly Profit & Loss</h1>
+      <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => router.back()}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+      
+              <h1 className="text-2xl font-semibold">Monthly Profit & Loss</h1>
+            </div>
+      
 
       {/* FILTER */}
       <div className="w-40">
