@@ -230,7 +230,7 @@ export default function EnquiriesPage() {
 
             counselor:
               typeof row.counselor === "object"
-                ? row.counselor
+                ? row.counselor?._id
                 : row.counselor ?? "",
 
             reference: row.reference ?? "",

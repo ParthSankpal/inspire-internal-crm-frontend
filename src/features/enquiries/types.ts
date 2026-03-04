@@ -102,7 +102,11 @@ export interface Enquiry {
 
   status: EnquiryStatus;
 
-  counselor: string;
+  counselor: string | {
+    _id: string;
+    name: string;
+    email?: string;
+  };
   reference?: string;
   referenceContact?: string;
   followUps?: FollowUp[];
