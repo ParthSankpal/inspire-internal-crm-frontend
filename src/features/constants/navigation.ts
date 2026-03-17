@@ -53,6 +53,12 @@ export const AppNavigation = [
     scopes: [Scope.HANDLE_FEES],
   },
   {
+    name: "Installmens",
+    href: "/installments",
+    icon: Receipt,
+    scopes: [Scope.HANDLE_FEES],
+  },
+  {
     name: "Receipts",
     href: "/receipts",
     icon: FileText,

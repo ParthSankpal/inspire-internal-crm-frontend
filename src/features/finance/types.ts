@@ -102,3 +102,18 @@ export interface MonthlyFinanceSummary {
   upcomingThisMonth: number;
   overdueTotal: number;
 }
+
+
+export interface InstallmentRow {
+  _id: string;
+
+  studentId: string;
+  firstName: string;
+  lastName: string;
+
+  installment: {
+    amount: number;
+    pendingAmount: number;
+    dueDate: string;
+  };
+}

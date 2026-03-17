@@ -1,6 +1,7 @@
 import { BankAccount, Payment, PaymentPayload } from "@/features/payments/types";
 import { PaginatedResponse } from "@/features/pagination";
 import { axiosClient } from "@/lib/apiClient";
+import { InstallmentRow } from "@/features/finance/types";
 
 /* =========================
    BANKS
@@ -97,5 +98,31 @@ export async function transferBetweenAccounts(payload: {
     "/payments/transfer",
     payload
   );
+  return data;
+}
+
+
+export async function getInstallments(
+  page = 1,
+  limit = 10,
+  filters: Partial<{
+    startDate: string;
+    endDate: string;
+    batchId: string;
+    type: "upcoming" | "overdue";
+  }> = {}
+): Promise<PaginatedResponse<InstallmentRow>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    ...Object.fromEntries(
+      Object.entries(filters).filter(([, v]) => v)
+    ),
+  });
+
+  const { data } = await axiosClient.get(
+    `/finance/installments?${params.toString()}`
+  );
+
   return data;
 }
