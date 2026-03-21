@@ -150,6 +150,35 @@ export default function FinanceDashboardPage() {
             id: "dueDate",
             label: "Due Date",
             accessor: (s) => <IsoDate value={s.installment.dueDate} /> as any,
+        },
+
+        // ✅ NEW STATUS COLUMN
+        {
+            id: "status",
+            label: "Status",
+            accessor: (s) => {
+                const status = s.installment.status;
+
+                const colorMap = {
+                    Overdue: "text-red-600 font-semibold",
+                    Partial: "text-blue-600",
+                    Pending: "text-yellow-600",
+                    Paid: "text-green-600",
+                };
+
+                return <span className={colorMap[status]}>{status}</span>;
+            },
+        },
+        {
+            id: "urgency",
+            label: "Priority",
+            accessor: (s) => {
+                const status = s.installment.status;
+
+                if (status === "Overdue") return "🔥 Urgent";
+                if (status === "Partial") return "⚠️ Follow-up";
+                return "Normal";
+            },
         }
     ];
 

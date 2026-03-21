@@ -115,5 +115,6 @@ export interface InstallmentRow {
     amount: number;
     pendingAmount: number;
     dueDate: string;
+    status: InstallmentStatus; // ✅ added
   };
 }
