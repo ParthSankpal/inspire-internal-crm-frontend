@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { IsoDate } from "@/components/common/IsoDate";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 // import html2pdf from "html2pdf.js";
 
 export default function StudentDetailsPage() {
@@ -16,7 +18,7 @@ export default function StudentDetailsPage() {
 
     const { id } = useParams();
     const [student, setStudent] = useState<Student | null>(null);
-
+    const user = useSelector((state: RootState) => state.auth.user);
     const pdfRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -153,42 +155,49 @@ export default function StudentDetailsPage() {
                     </CardContent>
                 </Card>
 
-                {/* FEES SUMMARY */}
-                <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Fees Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-3 gap-4">
-                        <p><b>Base Fees:</b> ₹{student.fees.baseFees}</p>
-                        <p><b>Discount:</b> ₹{student.fees.discountValue}</p>
-                        <p><b>Final Fees:</b> ₹{student.fees.finalFees}</p>
 
-                        <p className="col-span-3">
-                            <b>Total Paid:</b> ₹{totalPaid}
-                        </p>
-                        <p className="col-span-3  font-semibold">
-                            <b>Pending Amount:</b>₹ <span className=" text-red-600">{pending} </span>
-                        </p>
-                    </CardContent>
-                </Card>
+                {user?.role === "super_admin" && (
+                    <>
+                        {/* FEES SUMMARY */}
+                        <Card className="shadow-sm">
+                            <CardHeader>
+                                <CardTitle>Fees Summary</CardTitle>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-3 gap-4">
+                                <p><b>Base Fees:</b> ₹{student.fees.baseFees}</p>
+                                <p><b>Discount:</b> ₹{student.fees.discountValue}</p>
+                                <p><b>Final Fees:</b> ₹{student.fees.finalFees}</p>
 
-                {/* INSTALLMENTS */}
-                <Card className="shadow-sm">
-                    <CardHeader>
-                        <CardTitle>Installments</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {student.fees.installments.map((ins) => (
-                            <div key={ins.installmentNo} className="border rounded-md p-4 grid grid-cols-5 gap-4">
-                                <p><b>No:</b> {ins.installmentNo}</p>
-                                <p><b>Payment Date:</b> <IsoDate value={ins.paidDate} /> </p>
-                                <p><b>Due Date:</b> <IsoDate value={ins.dueDate} /></p>
-                                <p><b>Amount:</b> ₹{ins.amount}</p>
-                                <p><b>Status:</b> {ins.status}</p>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
+                                <p className="col-span-3">
+                                    <b>Total Paid:</b> ₹{totalPaid}
+                                </p>
+                                <p className="col-span-3  font-semibold">
+                                    <b>Pending Amount:</b>₹ <span className=" text-red-600">{pending} </span>
+                                </p>
+                            </CardContent>
+                        </Card>
+
+
+                        {/* INSTALLMENTS */}
+                        <Card className="shadow-sm">
+                            <CardHeader>
+                                <CardTitle>Installments</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {student.fees.installments.map((ins) => (
+                                    <div key={ins.installmentNo} className="border rounded-md p-4 grid grid-cols-5 gap-4">
+                                        <p><b>No:</b> {ins.installmentNo}</p>
+                                        <p><b>Payment Date:</b> <IsoDate value={ins.paidDate} /> </p>
+                                        <p><b>Due Date:</b> <IsoDate value={ins.dueDate} /></p>
+                                        <p><b>Amount:</b> ₹{ins.amount}</p>
+                                        <p><b>Status:</b> {ins.status}</p>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </>
+
+                )}
 
             </div>
         </div>

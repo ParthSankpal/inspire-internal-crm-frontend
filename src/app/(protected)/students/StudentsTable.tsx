@@ -32,6 +32,8 @@ import { FormDatePicker } from "@/components/common/Forms/FormDatePicker";
 import { getAllSchools } from "@/api/schoolsApi";
 import { School } from "@/features/schools/types";
 import { FormCombobox } from "@/components/common/Forms/FormCombobox";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) => {
   const router = useRouter();
@@ -43,6 +45,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
   const [openForm, setOpenForm] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.user);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -480,99 +483,105 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
         </AccordionContent>
       </AccordionItem>
 
-      {/* Fees */}
-      <AccordionItem value="fees">
-        <AccordionTrigger>💰 Fees Details</AccordionTrigger>
-        <AccordionContent className="grid grid-cols-3 gap-4">
-          <FormInput name="fees.baseFees" label="Base Fees" control={control} type="number" error={errors.fees?.baseFees?.message} />
-          <FormSelect
-            name="fees.discountType"
-            label="Discount Type"
-            control={control}
-            error={errors.fees?.discountType?.message}
-            options={[
-              { value: "None", label: "None" },
-              { value: "Onetime", label: "Onetime" },
-              { value: "Installments", label: "Installments" },
-            ]}
-          />
-          <FormInput name="fees.discountValue" label="Discount Value" control={control} type="number" error={errors.fees?.discountValue?.message} />
-          <FormInput name="fees.finalFees" label="Final Fees" control={control} type="number" readOnly error={errors.fees?.finalFees?.message} />
+ {user?.role === "super_admin" && (
 
-          {/* Installment block */}
-          {watch("fees.discountType") === "Installments" && (
-            <div className="col-span-3 mt-4">
-              <h3 className="font-semibold mb-2">Installment Details</h3>
+  <>
+  
+          {/* Fees */}
+          <AccordionItem value="fees">
+            <AccordionTrigger>💰 Fees Details</AccordionTrigger>
+            <AccordionContent className="grid grid-cols-3 gap-4">
+              <FormInput name="fees.baseFees" label="Base Fees" control={control} type="number" error={errors.fees?.baseFees?.message} />
+              <FormSelect
+                name="fees.discountType"
+                label="Discount Type"
+                control={control}
+                error={errors.fees?.discountType?.message}
+                options={[
+                  { value: "None", label: "None" },
+                  { value: "Onetime", label: "Onetime" },
+                  { value: "Installments", label: "Installments" },
+                ]}
+              />
+              <FormInput name="fees.discountValue" label="Discount Value" control={control} type="number" error={errors.fees?.discountValue?.message} />
+              <FormInput name="fees.finalFees" label="Final Fees" control={control} type="number" readOnly error={errors.fees?.finalFees?.message} />
 
-              {installments.length > 0 ? (
-                <div className="space-y-3">
-                  {installments.map((field, index) => (
-                    <div
-                      key={field.id}
-                      className="grid grid-cols-5 gap-3 items-end border p-3 rounded-lg bg-muted/10"
-                    >
-                      <FormInput
-                        name={`fees.installments.${index}.installmentNo`}
-                        label="No."
-                        control={control}
-                        type="number"
-                      />
-                      <FormDatePicker
-                        name={`fees.installments.${index}.dueDate`}
-                        label="Due Date"
-                        control={control}
-                      />
-                      <FormInput
-                        name={`fees.installments.${index}.amount`}
-                        label="Amount"
-                        control={control}
-                        type="number"
-                      />
-                      <FormSelect
-                        name={`fees.installments.${index}.status`}
-                        label="Status"
-                        control={control}
-                        options={[
-                          { value: "Pending", label: "Pending" },
-                          { value: "Paid", label: "Paid" },
-                          { value: "Overdue", label: "Overdue" },
-                        ]}
-                      />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        type="button"
-                        onClick={() => remove(index)}
-                      >
-                        Remove
-                      </Button>
+              {/* Installment block */}
+              {watch("fees.discountType") === "Installments" && (
+                <div className="col-span-3 mt-4">
+                  <h3 className="font-semibold mb-2">Installment Details</h3>
+
+                  {installments.length > 0 ? (
+                    <div className="space-y-3">
+                      {installments.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className="grid grid-cols-5 gap-3 items-end border p-3 rounded-lg bg-muted/10"
+                        >
+                          <FormInput
+                            name={`fees.installments.${index}.installmentNo`}
+                            label="No."
+                            control={control}
+                            type="number"
+                          />
+                          <FormDatePicker
+                            name={`fees.installments.${index}.dueDate`}
+                            label="Due Date"
+                            control={control}
+                          />
+                          <FormInput
+                            name={`fees.installments.${index}.amount`}
+                            label="Amount"
+                            control={control}
+                            type="number"
+                          />
+                          <FormSelect
+                            name={`fees.installments.${index}.status`}
+                            label="Status"
+                            control={control}
+                            options={[
+                              { value: "Pending", label: "Pending" },
+                              { value: "Paid", label: "Paid" },
+                              { value: "Overdue", label: "Overdue" },
+                            ]}
+                          />
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            type="button"
+                            onClick={() => remove(index)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 mb-2">No installments added yet.</p>
-              )}
+                  ) : (
+                    <p className="text-sm text-gray-500 mb-2">No installments added yet.</p>
+                  )}
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() =>
-                  append({
-                    installmentNo: installments.length + 1,
-                    dueDate: "",
-                    amount: 0,
-                    status: "Pending",
-                  })
-                }
-              >
-                + Add Installment
-              </Button>
-            </div>
-          )}
-        </AccordionContent>
-      </AccordionItem>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() =>
+                      append({
+                        installmentNo: installments.length + 1,
+                        dueDate: "",
+                        amount: 0,
+                        status: "Pending",
+                      })
+                    }
+                  >
+                    + Add Installment
+                  </Button>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+  </>
+ )}
     </Accordion>
   );
 
