@@ -131,10 +131,27 @@ export async function getInstallments(
 export async function getBankSummary(
   id: string,
   page = 1,
-  limit = 10
+  limit = 10,
+  search = ""
 ): Promise<BankDetailsResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    qName: search, // 🔥 SAME as backend filter
+  });
+
   const { data } = await axiosClient.get(
-    `/payments/banks/${id}/summary?page=${page}&limit=${limit}`
+    `/payments/banks/${id}/summary?${params.toString()}`
   );
-  return data;
+
+  return {
+    bank: data.bank,
+    summary: data.summary,
+    transactions: data.data,
+    pagination: {
+      totalItems: data.pagination.totalItems,
+      page: data.pagination.currentPage,
+      limit: data.pagination.limit,
+    },
+  };
 }

@@ -244,7 +244,7 @@ export interface BankDetailsResponse {
   transactions: Payment[];
 
   pagination: {
-    total: number;
+    totalItems: number;   // ✅ IMPORTANT (DataTable needs this)
     page: number;
     limit: number;
   };
