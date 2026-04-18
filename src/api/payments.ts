@@ -1,4 +1,4 @@
-import { BankAccount, Payment, PaymentPayload } from "@/features/payments/types";
+import { BankAccount, BankDetailsResponse, Payment, PaymentPayload } from "@/features/payments/types";
 import { PaginatedResponse } from "@/features/pagination";
 import { axiosClient } from "@/lib/apiClient";
 import { InstallmentRow } from "@/features/finance/types";
@@ -124,5 +124,17 @@ export async function getInstallments(
     `/finance/installments?${params.toString()}`
   );
 
+  return data;
+}
+
+
+export async function getBankSummary(
+  id: string,
+  page = 1,
+  limit = 10
+): Promise<BankDetailsResponse> {
+  const { data } = await axiosClient.get(
+    `/payments/banks/${id}/summary?page=${page}&limit=${limit}`
+  );
   return data;
 }

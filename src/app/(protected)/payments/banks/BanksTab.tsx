@@ -7,8 +7,11 @@ import { DataTable } from "@/components/common/DataTable";
 import BankModals from "./BankModals";
 import { useState } from "react";
 import { BankAccount } from "@/features/payments/types";
+import { useRouter } from "next/navigation";
 
 export default function BanksTab() {
+    const router = useRouter();
+  
   const { banks, loading, addBank, editBank, removeBank } = useBanks();
   const [selected, setSelected] = useState<BankAccount | null>(null);
   const [openAdd, setOpenAdd] = useState(false);
@@ -25,6 +28,13 @@ export default function BanksTab() {
 
   const rowActions = (row: BankAccount) => (
     <div className="flex gap-2 justify-center">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => router.push(`/payments/banks/${row._id}`)}
+      >
+        View
+      </Button>
       <Button
         size="sm"
         variant="outline"

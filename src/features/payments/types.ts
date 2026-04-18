@@ -225,3 +225,27 @@ export interface PaymentPayload {
   /* optional */
   notes?: string;
 }
+
+
+
+// =========================
+// BANK SUMMARY
+// =========================
+
+export interface BankSummary {
+  totalCredit: number;
+  totalDebit: number;
+  balance: number;
+}
+
+export interface BankDetailsResponse {
+  bank: BankAccount;
+  summary: BankSummary;
+  transactions: Payment[];
+
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
