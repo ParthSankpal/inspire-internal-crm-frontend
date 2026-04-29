@@ -91,6 +91,7 @@ export default function BankDetailsPage() {
         },
         { id: "mode", label: "Mode" },
         { id: "payerName", label: "Payer" },
+        { id: "payeeName", label: "Paid To" },
         { id: "notes", label: "Notes" },
     ];
 

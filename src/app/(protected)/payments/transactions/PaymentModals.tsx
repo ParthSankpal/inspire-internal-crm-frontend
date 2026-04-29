@@ -157,7 +157,11 @@ export default function PaymentModals({
     }
 
     const loadStudents = async () => {
-      const res = await getAllStudents({ batchId: selectedBatch });
+      const res = await getAllStudents({ 
+        batchId: selectedBatch,
+        page: 1,
+        limit: 100
+       });
 
       const mapped = res.data
         .filter((s: Student) => !!s._id)
