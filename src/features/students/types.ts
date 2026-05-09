@@ -66,7 +66,7 @@ export interface Student {
 
   course: string;
   batch?: { _id?: string; name?: string };
-  targetExam: "IIT JEE" | "NEET" | "MHT-CET" | "Foundation" | "Other";
+  targetExam: "JEE" | "NEET" | "MHT-CET" | "Foundation" | "Other";
   admissionDate: string; // ISO date
   status: StudentStatus;
   remarks?: string;
@@ -130,7 +130,7 @@ export const studentSchema = z.object({
 
   course: z.string().min(1, "Course is required"),
   batch: z.string().min(1, "Batch is required"),
-  targetExam: z.enum(["IIT JEE", "NEET", "MHT-CET", "Foundation", "Other"]),
+  targetExam: z.enum(["JEE", "NEET", "MHT-CET", "Foundation", "Other"]),
   admissionDate: z.string().min(1, "Admission date is required"),
   status: z.enum(["Active", "Left", "Completed", "Hold"]),
   remarks: z.string().optional(),

@@ -14,6 +14,7 @@ import {
   updateStudent,
   deleteStudent,
   restoreStudent,
+  exportStudentsCsv,
 } from "@/api/students";
 import { getAllBatches } from "@/api/batchApi";
 import { Student, StudentFormData, studentSchema } from "@/features/students/types";
@@ -91,7 +92,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
       },
       course: "",
       batch: "",
-      targetExam: "IIT JEE",
+      targetExam: "JEE",
       admissionDate: "",
       status: "Active",
       remarks: "",
@@ -459,7 +460,7 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
             control={control}
             error={errors.targetExam?.message}
             options={[
-              { value: "IIT JEE", label: "IIT JEE" },
+              { value: "JEE", label: "JEE" },
               { value: "NEET", label: "NEET" },
               { value: "MHT-CET", label: "MHT-CET" },
               { value: "Foundation", label: "Foundation" },
@@ -483,10 +484,10 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
         </AccordionContent>
       </AccordionItem>
 
- {user?.role === "super_admin" && (
+      {user?.role === "super_admin" && (
 
-  <>
-  
+        <>
+
           {/* Fees */}
           <AccordionItem value="fees">
             <AccordionTrigger>💰 Fees Details</AccordionTrigger>
@@ -580,8 +581,8 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
               )}
             </AccordionContent>
           </AccordionItem>
-  </>
- )}
+        </>
+      )}
     </Accordion>
   );
 
@@ -600,9 +601,28 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
           />
 
         </div>
-        {!isArchived && (
-          <Button onClick={() => setOpenForm(true)}>+ New Admission</Button>
-        )}
+
+
+        <div className=" flex gap-2 items-center">
+
+          <Button
+            variant="outline"
+            onClick={() =>
+              exportStudentsCsv({
+                search,
+                batchId: selectedBatch,
+                status,
+                isArchived,
+              })
+            }
+          >
+            Export CSV
+          </Button>
+
+          {!isArchived && (
+            <Button onClick={() => setOpenForm(true)}>+ New Admission</Button>
+          )}
+        </div>
       </div>
 
 

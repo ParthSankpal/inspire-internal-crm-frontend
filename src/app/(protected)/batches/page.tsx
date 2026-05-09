@@ -59,28 +59,28 @@ export default function BatchesPage() {
   });
 
   // ✅ Fetch paginated batches
-const fetchBatches = useCallback(async () => {
-  try {
-    setLoading(true);
-    const res = await getAllBatches(pagination.page, pagination.limit);
-    setBatches(res.data);
-    setPagination((prev) => ({
-      ...prev,
-      totalItems: res.pagination.totalItems,
-      totalPages: res.pagination.totalPages,
-    }));
-  } catch (err) {
-    console.error(err);
-    notify("Failed to fetch batches", "error");
-  } finally {
-    setLoading(false);
-  }
-}, [pagination.page, pagination.limit, notify]);
+  const fetchBatches = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getAllBatches(pagination.page, pagination.limit);
+      setBatches(res.data);
+      setPagination((prev) => ({
+        ...prev,
+        totalItems: res.pagination.totalItems,
+        totalPages: res.pagination.totalPages,
+      }));
+    } catch (err) {
+      console.error(err);
+      notify("Failed to fetch batches", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.page, pagination.limit, notify]);
 
 
- useEffect(() => {
-  fetchBatches();
-}, [fetchBatches]);
+  useEffect(() => {
+    fetchBatches();
+  }, [fetchBatches]);
 
   // ---- CRUD Actions ----
   const handleCreate: SubmitHandler<BatchFormData> = async (data) => {
@@ -109,14 +109,19 @@ const fetchBatches = useCallback(async () => {
   };
 
   const columns = [
-  { id: "name", label: "Batch Name" },
-  { id: "class", label: "Class" },
-  { id: "startYear", label: "Start Year" },
-  { id: "endYear", label: "End Year" },
-  { id: "durationYears", label: "Duration (Years)" },
-  { id: "totalStudents", label: "Total Students" },
-  { id: "remarks", label: "Remarks" },
-];
+    { id: "name", label: "Batch Name" },
+    { id: "class", label: "Class" },
+    { id: "startYear", label: "Start Year" },
+    { id: "endYear", label: "End Year" },
+    { id: "durationYears", label: "Duration (Years)" },
+    {
+      id: "totalStudents",
+      label: "JEE / NEET",
+      accessor: (r: Batch) =>
+        `${r.studentTargets?.jee ?? "—"} / ${r.studentTargets?.neet ?? "—"}`,
+    },
+    { id: "remarks", label: "Remarks" },
+  ];
 
 
   const rowActions = (row: Batch) => (
@@ -130,7 +135,7 @@ const fetchBatches = useCallback(async () => {
             name: row.name,
             startYear: row.startYear,
             durationYears: row.durationYears,
-            class: row.class,        
+            class: row.class,
             remarks: row.remarks ?? "",
           });
           setEditOpen(true);

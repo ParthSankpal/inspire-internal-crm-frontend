@@ -61,3 +61,71 @@ export async function restoreStudent(id: string): Promise<{ message: string }> {
   const { data } = await axiosClient.patch(`/students/${id}/restore`);
   return data;
 }
+
+
+
+export async function exportStudentsCsv(
+  params: GetStudentsParams = {}
+): Promise<void> {
+  try {
+    const {
+      page = 1,
+      limit = 1000,
+      search = "",
+      batchId = "",
+      status = "",
+      isArchived = false,
+    } = params;
+
+    const query = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      search,
+      status,
+      batchId,
+      isArchived: String(isArchived),
+    });
+
+    const response = await axiosClient.get(
+      `/students/export/studnetCSV?${query}`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    // Create CSV Blob
+    const blob = new Blob(
+      [response.data],
+      {
+        type: "text/csv;charset=utf-8;",
+      }
+    );
+
+    const url =
+      window.URL.createObjectURL(blob);
+
+    // Create temporary download link
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.download = `students-export-${Date.now()}.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    // Cleanup
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error(
+      "❌ Student CSV export failed:",
+      error
+    );
+
+    throw error;
+  }
+}
