@@ -605,19 +605,22 @@ export const StudentsTable = ({ isArchived = false }: { isArchived?: boolean }) 
 
         <div className=" flex gap-2 items-center">
 
-          <Button
-            variant="outline"
-            onClick={() =>
-              exportStudentsCsv({
-                search,
-                batchId: selectedBatch,
-                status,
-                isArchived,
-              })
-            }
-          >
-            Export CSV
-          </Button>
+          {user?.role === "super_admin" && (
+
+            <Button
+              variant="outline"
+              onClick={() =>
+                exportStudentsCsv({
+                  search,
+                  batchId: selectedBatch,
+                  status,
+                  isArchived,
+                })
+              }
+            >
+              Export CSV
+            </Button>
+          )}
 
           {!isArchived && (
             <Button onClick={() => setOpenForm(true)}>+ New Admission</Button>
