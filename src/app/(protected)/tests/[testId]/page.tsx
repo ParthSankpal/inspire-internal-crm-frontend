@@ -21,6 +21,7 @@ import { IsoDate } from "@/components/common/IsoDate";
 import UploadResultsDialog from "../UploadResultsDialog";
 import QuestionRow from "./QuestionRow";
 import { FormInput } from "@/components/common/Forms/FormInput";
+import { ArrowLeft } from "lucide-react";
 
 
 /* ----------------------------------------------------
@@ -168,9 +169,11 @@ export default function TestBuilderManualPage() {
     watchedQuestions.length > 0 &&
     watchedQuestions.every(isQuestionConfigured);
 
-  const canSaveOrPublish = isFixed
+  const canPublish = isFixed
     ? watchedQuestions.length === requiredCount && allQuestionsConfigured
     : allQuestionsConfigured;
+
+  const canSaveDraft = watchedQuestions.length > 0;
 
   /* ----------------------------------------------------
      Save / Publish
@@ -212,6 +215,17 @@ export default function TestBuilderManualPage() {
   return (
     <div className="p-6 space-y-6">
       {/* ================= Test Details ================= */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+
+
+      </div>
       <div className="border rounded-lg p-4 bg-muted/30">
         <div className="flex justify-between">
           <div>
@@ -267,25 +281,25 @@ export default function TestBuilderManualPage() {
         </div>
       </div>
 
-        {/* ================= Subject-wise Marks ================= */}
-          <div className="border rounded-lg p-4 bg-muted/30">
-            <h3 className="text-lg font-semibold mb-3">
-              Subject-wise Maximum Marks
-            </h3>
+      {/* ================= Subject-wise Marks ================= */}
+      <div className="border rounded-lg p-4 bg-muted/30">
+        <h3 className="text-lg font-semibold mb-3">
+          Subject-wise Maximum Marks
+        </h3>
 
-            <div className="grid grid-cols-3 gap-4">
-              {test.subjectsIncluded.map((subject) => (
-                <FormInput
-                  key={subject}
-                  name={`subjectWiseMaxMarks.${subject}`}
-                  label={`${subject} Marks`}
-                  type="number"
-                  control={control}
-                  disabled={!editable}
-                />
-              ))}
-            </div>
-          </div>
+        <div className="grid grid-cols-3 gap-4">
+          {test.subjectsIncluded.map((subject) => (
+            <FormInput
+              key={subject}
+              name={`subjectWiseMaxMarks.${subject}`}
+              label={`${subject} Marks`}
+              type="number"
+              control={control}
+              disabled={!editable}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* ================= Add Question ================= */}
       {!isFixed && editable && (
@@ -314,7 +328,7 @@ export default function TestBuilderManualPage() {
 
 
       {/* ================= Config Table ================= */}
-      <div className="border rounded-lg overflow-auto max-h-[70vh]">
+      <div className="border rounded-lg overflow-auto ">
         <table className="w-full text-sm">
           <thead className="bg-muted sticky top-0">
             <tr>
@@ -356,14 +370,14 @@ export default function TestBuilderManualPage() {
         <div className="flex justify-end gap-3">
           <Button
             variant="outline"
-            disabled={saving || !canSaveOrPublish}
+            disabled={saving || !canSaveDraft}
             onClick={saveConfig}
           >
             Save Draft
           </Button>
 
           <Button
-            disabled={saving || !canSaveOrPublish}
+            disabled={saving || !canPublish}
             onClick={publish}
           >
             Publish Test
