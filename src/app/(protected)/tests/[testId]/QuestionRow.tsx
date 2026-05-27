@@ -1,227 +1,66 @@
-// "use client";
-
-// import { useEffect, useMemo, useRef } from "react";
-// import { Control, UseFormWatch, UseFormSetValue, useWatch } from "react-hook-form";
-
-// import { FormInput } from "@/components/common/Forms/FormInput";
-// import { FormSelect } from "@/components/common/Forms/FormSelect";
-// import { FormCombobox } from "@/components/common/Forms/FormCombobox";
-
-// import { getChapters, getTopics } from "@/utils/syllabusHelpers";
-
-// interface Props {
-//   index: number;
-//   control: Control<any>;
-//   watch: UseFormWatch<any>;
-//   setValue: UseFormSetValue<any>;
-//   editable: boolean;
-//   isFixed: boolean;
-//   remove: (index: number) => void;
-// }
-
-// export default function QuestionRow({
-//   index,
-//   control,
-//   setValue,
-//   editable,
-//   isFixed,
-//   remove,
-// }: Props) {
-
-//   const subject = useWatch({
-//     control,
-//     name: `questions.${index}.subject`,
-//   });
-
-//   const chapter = useWatch({
-//     control,
-//     name: `questions.${index}.chapter`,
-//   });
-
-//   const topic = useWatch({
-//     control,
-//     name: `questions.${index}.topic`,
-//   });
-
-//   // ✅ Memoized options
-//   const chapterOptions = useMemo(
-//     () =>
-//       getChapters(subject).map(c => ({ value: c, label: c })),
-//     [subject]
-//   );
-
-//   const topicOptions = useMemo(
-//     () =>
-//       getTopics(subject, chapter).map(t => ({ value: t, label: t })),
-//     [subject, chapter]
-//   );
-
-//   const prevSubjectRef = useRef(subject);
-// const prevChapterRef = useRef(chapter);
-
-// // Subject → reset chapter & topic ONLY if subject changed
-// useEffect(() => {
-//   if (prevSubjectRef.current && prevSubjectRef.current !== subject) {
-//     setValue(`questions.${index}.chapter`, "");
-//     setValue(`questions.${index}.topic`, "");
-//   }
-//   prevSubjectRef.current = subject;
-// }, [subject, index, setValue]);
-
-// // Chapter → reset topic ONLY if topic is invalid
-// useEffect(() => {
-//   if (prevChapterRef.current && prevChapterRef.current !== chapter) {
-//     const validTopics = getTopics(subject, chapter);
-//     if (!validTopics.includes(topic)) {
-//       setValue(`questions.${index}.topic`, "");
-//     }
-//   }
-//   prevChapterRef.current = chapter;
-// }, [chapter, subject, topic, index, setValue]);
-
- 
-
-//   const isChapterMissing = !chapter;
-//   const isTopicMissing = chapter && !topic;
-
-  
-
-//   return (
-//     <tr className={isChapterMissing || isTopicMissing ? "bg-red-50" : "" + " text-center"}>
-//       <td className=" p-2 border">{index + 1}</td>
-
-//       <td className=" p-2 border">
-//         <FormSelect
-//           name={`questions.${index}.subject`}
-//           control={control}
-//           disabled={!editable}
-//           options={[
-//             { value: "Physics", label: "Physics" },
-//             { value: "Chemistry", label: "Chemistry" },
-//             { value: "Maths", label: "Maths" },
-//             { value: "Biology", label: "Biology" },
-//           ]}
-//         />
-//       </td>
-
-//       <td className=" p-2 border">
-//         <FormCombobox
-//           name={`questions.${index}.chapter`}
-//           control={control}
-//           options={chapterOptions}
-//           disabled={!subject}
-//         />
-//       </td>
-
-//       <td className=" p-2 border">
-
-//         <FormCombobox
-//           name={`questions.${index}.topic`}
-//           control={control}
-//           options={topicOptions}
-//           disabled={!chapter}
-//         />
-
-//       </td>
-
-
-//       <td className=" p-2 border">
-//         <FormSelect
-//           name={`questions.${index}.difficulty`}
-//           control={control}
-//           disabled={!editable}
-//           options={[
-//             { value: "Easy", label: "Easy" },
-//             { value: "Medium", label: "Medium" },
-//             { value: "Hard", label: "Hard" },
-//           ]}
-//         />
-//       </td>
-
-//       <td className=" p-2 border">
-//         <FormSelect
-//           name={`questions.${index}.cognitiveType`}
-//           control={control}
-//           disabled={!editable}
-//           options={[
-//             { value: "Conceptual", label: "Conceptual" },
-//             { value: "Application", label: "Application" },
-//             { value: "Mixed", label: "Mixed" },
-//           ]}
-//         />
-//       </td>
-
-//       <td className=" p-2 border">
-//         <FormSelect
-//           name={`questions.${index}.correctOption`}
-//           control={control}
-//           disabled={!editable}
-//           options={[
-//             { value: "A", label: "A" },
-//             { value: "B", label: "B" },
-//             { value: "C", label: "C" },
-//             { value: "D", label: "D" },
-//           ]}
-//         />
-//       </td>
-
-//       <td className=" p-2 border">
-//         <FormInput
-//           name={`questions.${index}.marks`}
-//           type="number"
-//           control={control}
-//           disabled={!editable}
-//         />
-//       </td>
-
-//       <td className=" p-2 border">
-//         <FormInput
-//           name={`questions.${index}.negativeMarks`}
-//           type="number"
-//           control={control}
-//           disabled={!editable}
-//         />
-//       </td>
-
-//       {!isFixed && editable && (
-//         <td className=" p-2 border">
-//           <button
-//             type="button"
-//             onClick={() => remove(index)}
-//             className="text-red-500 hover:text-red-700 font-bold"
-//           >
-//             ✕
-//           </button>
-//         </td>
-//       )}
-//     </tr>
-//   );
-// }
-
-
-
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { Control, UseFormSetValue, useWatch } from "react-hook-form";
+import { Control, UseFormSetValue, UseFormWatch, useWatch } from "react-hook-form";
 
-import { FormInput } from "@/components/common/Forms/FormInput";
+import { Trash2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+
 import { FormSelect } from "@/components/common/Forms/FormSelect";
-import { FormCombobox } from "@/components/common/Forms/FormCombobox";
 
 import {
-  useChapters,
-  useTopics,
-} from "@/features/syllabus/syllabus.hooks";
+  QuestionFormData,
+} from "@/features/question/types";
 
-interface Props {
+/* ----------------------------------------------------
+   Local Syllabus Data
+---------------------------------------------------- */
+
+import { PHYSICS_SYLLABUS } from "@/features/data/physicsSyllabus";
+
+import { CHEMISTRY_SYLLABUS } from "@/features/data/chemistrySyllabus";
+
+import { MATHS_SYLLABUS } from "@/features/data/mathsSyllabus";
+
+import { BIOLOGY_SYLLABUS } from "@/features/data/biologySyllabus";
+
+/* ----------------------------------------------------
+   Syllabus Map
+---------------------------------------------------- */
+
+const SYLLABUS_MAP = {
+  Physics: PHYSICS_SYLLABUS,
+
+  Chemistry: CHEMISTRY_SYLLABUS,
+
+  Maths: MATHS_SYLLABUS,
+
+  Biology: BIOLOGY_SYLLABUS,
+};
+
+/* ----------------------------------------------------
+   Types
+---------------------------------------------------- */
+
+type Props = {
   index: number;
+
   control: Control<any>;
+
   setValue: UseFormSetValue<any>;
+
+  watch?: UseFormWatch<any>;
+
   editable: boolean;
+
   isFixed: boolean;
+
   remove: (index: number) => void;
-}
+};
+
+/* ----------------------------------------------------
+   Component
+---------------------------------------------------- */
 
 export default function QuestionRow({
   index,
@@ -231,169 +70,310 @@ export default function QuestionRow({
   isFixed,
   remove,
 }: Props) {
-  const subject = useWatch({
-    control,
-    name: `questions.${index}.subject`,
-  });
+  /* ----------------------------------------------------
+     Current Values
+  ---------------------------------------------------- */
 
-  const chapter = useWatch({
-    control,
-    name: `questions.${index}.chapter`,
-  });
 
-  const topic = useWatch({
-    control,
-    name: `questions.${index}.topic`,
-  });
+  const question = useWatch({
+  control,
+  name: `questions.${index}`,
+});
 
-  // 🔥 API-based syllabus
-  const { data: chapters = [] } = useChapters(subject);
-  const { data: topics = [] } = useTopics(subject, chapter);
+const subject = question?.subject;
 
-  // ✅ Memoized options (UNCHANGED behavior)
-  const chapterOptions = useMemo(
-    () => chapters.map((c: string) => ({ value: c, label: c })),
-    [chapters]
+const chapter = question?.chapter;
+
+const topic = question?.topic;
+
+  /* ----------------------------------------------------
+     Syllabus Data
+  ---------------------------------------------------- */
+
+  const syllabusData =
+    SYLLABUS_MAP[
+      subject as keyof typeof SYLLABUS_MAP
+    ] || [];
+
+  /* ----------------------------------------------------
+     Chapter Options
+  ---------------------------------------------------- */
+
+  const chapterOptions = syllabusData.map(
+    (c: any) => ({
+      label: c.chapter,
+      value: c.chapter,
+    })
   );
 
-  const topicOptions = useMemo(
-    () => topics.map((t: string) => ({ value: t, label: t })),
-    [topics]
-  );
+  /* ----------------------------------------------------
+     Selected Chapter
+  ---------------------------------------------------- */
 
-  const prevSubjectRef = useRef(subject);
-  const prevChapterRef = useRef(chapter);
+  const selectedChapter =
+    syllabusData.find(
+      (c: any) => c.chapter === chapter
+    );
 
-  // Subject → reset chapter & topic ONLY if subject changed
-  useEffect(() => {
-    if (prevSubjectRef.current && prevSubjectRef.current !== subject) {
-      setValue(`questions.${index}.chapter`, "");
-      setValue(`questions.${index}.topic`, "");
-    }
-    prevSubjectRef.current = subject;
-  }, [subject, index, setValue]);
+  /* ----------------------------------------------------
+     Topic Options
+  ---------------------------------------------------- */
 
-  // Chapter → reset topic ONLY if topic invalid
-  useEffect(() => {
-    if (prevChapterRef.current && prevChapterRef.current !== chapter) {
-      if (!topics.includes(topic)) {
-        setValue(`questions.${index}.topic`, "");
-      }
-    }
-    prevChapterRef.current = chapter;
-  }, [chapter, topic, topics, index, setValue]);
+  const topicOptions =
+    selectedChapter?.topics.map((t: any) => ({
+      label: t.name,
+      value: t.name,
+    })) || [];
 
-  const isChapterMissing = !chapter;
-  const isTopicMissing = chapter && !topic;
+  /* ----------------------------------------------------
+     Subject Options
+  ---------------------------------------------------- */
+
+  const subjectOptions = [
+    {
+      label: "Physics",
+      value: "Physics",
+    },
+
+    {
+      label: "Chemistry",
+      value: "Chemistry",
+    },
+
+    {
+      label: "Maths",
+      value: "Maths",
+    },
+
+    {
+      label: "Biology",
+      value: "Biology",
+    },
+  ];
+
+  /* ----------------------------------------------------
+     Difficulty Options
+  ---------------------------------------------------- */
+
+  const difficultyOptions = [
+    {
+      label: "Easy",
+      value: "Easy",
+    },
+
+    {
+      label: "Medium",
+      value: "Medium",
+    },
+
+    {
+      label: "Hard",
+      value: "Hard",
+    },
+  ];
+
+  /* ----------------------------------------------------
+     Cognitive Options
+  ---------------------------------------------------- */
+
+  const cognitiveOptions = [
+    {
+      label: "Conceptual",
+      value: "Conceptual",
+    },
+
+    {
+      label: "Application",
+      value: "Application",
+    },
+
+    {
+      label: "Mixed",
+      value: "Mixed",
+    },
+  ];
+
+  /* ----------------------------------------------------
+     Correct Option Choices
+  ---------------------------------------------------- */
+
+  const correctOptions = [
+    {
+      label: "A",
+      value: "A",
+    },
+
+    {
+      label: "B",
+      value: "B",
+    },
+
+    {
+      label: "C",
+      value: "C",
+    },
+
+    {
+      label: "D",
+      value: "D",
+    },
+  ];
+
+  /* ----------------------------------------------------
+     UI
+  ---------------------------------------------------- */
 
   return (
-    <tr
-      className={
-        (isChapterMissing || isTopicMissing ? "bg-red-50 " : "") +
-        "text-center"
-      }
-    >
-      <td className="p-2 border">{index + 1}</td>
+    <tr>
+      {/* Q No */}
 
-      <td className="p-2 border">
+      <td className="p-2 border text-center font-medium">
+        {index + 1}
+      </td>
+
+      {/* Subject */}
+
+      <td className="p-2 border max-w-[100px]">
         <FormSelect
           name={`questions.${index}.subject`}
           control={control}
           disabled={!editable}
-          options={[
-            { value: "Physics", label: "Physics" },
-            { value: "Chemistry", label: "Chemistry" },
-            { value: "Maths", label: "Maths" },
-            { value: "Biology", label: "Biology" },
-          ]}
+          options={subjectOptions}
+          onValueChange={(value) => {
+            setValue(
+              `questions.${index}.subject`,
+              value
+            );
+
+            /* Reset dependent fields */
+
+            setValue(
+              `questions.${index}.chapter`,
+              ""
+            );
+
+            setValue(
+              `questions.${index}.topic`,
+              ""
+            );
+          }}
         />
       </td>
 
-      <td className="p-2 border">
-        <FormCombobox
+      {/* Chapter */}
+
+      <td className="p-2 border max-w-[200px]">
+        <FormSelect
           name={`questions.${index}.chapter`}
           control={control}
+          disabled={!editable || !subject}
           options={chapterOptions}
-          disabled={!subject}
+          onValueChange={(value) => {
+            setValue(
+              `questions.${index}.chapter`,
+              value
+            );
+
+            /* Reset topic */
+
+            setValue(
+              `questions.${index}.topic`,
+              ""
+            );
+          }}
         />
       </td>
 
-      <td className="p-2 border">
-        <FormCombobox
+      {/* Topic */}
+
+      <td className="p-2 border max-w-[200px]">
+        <FormSelect
           name={`questions.${index}.topic`}
           control={control}
+          disabled={!editable || !chapter}
           options={topicOptions}
-          disabled={!chapter}
         />
       </td>
 
-      <td className="p-2 border">
+      {/* Difficulty */}
+
+      <td className="p-2 border max-w-[120px]">
         <FormSelect
           name={`questions.${index}.difficulty`}
           control={control}
           disabled={!editable}
-          options={[
-            { value: "Easy", label: "Easy" },
-            { value: "Medium", label: "Medium" },
-            { value: "Hard", label: "Hard" },
-          ]}
+          options={difficultyOptions}
         />
       </td>
 
-      <td className="p-2 border">
+      {/* Cognitive */}
+
+      <td className="p-2 border max-w-[120px]">
         <FormSelect
           name={`questions.${index}.cognitiveType`}
           control={control}
           disabled={!editable}
-          options={[
-            { value: "Conceptual", label: "Conceptual" },
-            { value: "Application", label: "Application" },
-            { value: "Mixed", label: "Mixed" },
-          ]}
+          options={cognitiveOptions}
         />
       </td>
 
-      <td className="p-2 border">
+      {/* Correct Option */}
+
+      <td className="p-2 border max-w-[40px]">
         <FormSelect
           name={`questions.${index}.correctOption`}
           control={control}
           disabled={!editable}
-          options={[
-            { value: "A", label: "A" },
-            { value: "B", label: "B" },
-            { value: "C", label: "C" },
-            { value: "D", label: "D" },
-          ]}
+          options={correctOptions}
         />
       </td>
 
-      <td className="p-2 border">
-        <FormInput
-          name={`questions.${index}.marks`}
+      {/* Marks */}
+
+      <td className="p-2 border text-center">
+        <input
           type="number"
-          control={control}
+         value={question?.marks ?? 4}
           disabled={!editable}
+          onChange={(e) =>
+            setValue(
+              `questions.${index}.marks`,
+              Number(e.target.value)
+            )
+          }
+          className="w-20 rounded border px-2 py-1 text-center"
         />
       </td>
 
-      <td className="p-2 border">
-        <FormInput
-          name={`questions.${index}.negativeMarks`}
+      {/* Negative Marks */}
+
+      <td className="p-2 border text-center">
+        <input
           type="number"
-          control={control}
+          value={question?.negativeMarks ?? -1}
           disabled={!editable}
+          onChange={(e) =>
+            setValue(
+              `questions.${index}.negativeMarks`,
+              Number(e.target.value)
+            )
+          }
+          className="w-20 rounded border px-2 py-1 text-center"
         />
       </td>
 
-      {!isFixed && editable && (
-        <td className="p-2 border">
-          <button
-            type="button"
+      {/* Remove */}
+
+      {!isFixed && (
+        <td className="p-2 border text-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={!editable}
             onClick={() => remove(index)}
-            className="text-red-500 hover:text-red-700 font-bold"
           >
-            ✕
-          </button>
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
         </td>
       )}
     </tr>
