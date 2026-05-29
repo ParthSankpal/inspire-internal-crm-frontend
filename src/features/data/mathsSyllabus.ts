@@ -355,6 +355,52 @@ export const MATHS_SYLLABUS: MathsChapter[] = [
     ====================================================== */
 
     {
+        chapter: "Logarithm and Its Properties",
+        topics: [
+            {
+                name: "Exponential Function",
+                subtopics: [
+                    "Definition & Properties",
+                    "Graph for Different Bases",
+                ],
+            },
+            {
+                name: "Logarithmic Function",
+                subtopics: [
+                    "Definition",
+                    "Graph for Different Bases",
+                ],
+            },
+            {
+                name: "Laws of Logarithm",
+                subtopics: [
+                    "Addition & Subtraction",
+                    "Exponents & Base Change",
+                    "Reciprocal of Logarithm",
+                ],
+            },
+            {
+                name: "Exponential Form",
+                subtopics: [
+                    "Change of Base",
+                ],
+            },
+            {
+                name: "Inequalities",
+                subtopics: [
+                    "Logarithmic Inequalities",
+                ],
+            },
+             {
+                name: "Tables",
+                subtopics: [
+                    "Finding Logarithm",
+                    "Antilogarithm",
+                ],
+            },
+        ],
+    },
+    {
         chapter: "Trigonometric Functions",
         topics: [
             {
