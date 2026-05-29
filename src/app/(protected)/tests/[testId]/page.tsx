@@ -280,7 +280,7 @@ export default function TestBuilderManualPage() {
         setLoading(false);
       }
     })();
-  }, [testId, saving, reset, notify]);
+  }, [testId, reset, notify]);
 
   /* ----------------------------------------------------
      Loader
@@ -341,7 +341,7 @@ export default function TestBuilderManualPage() {
   const handleBulkImport = async () => {
     try {
       setImporting(true);
-setSaving(true) 
+      setSaving(true)
       setBulkErrors([]);
 
       if (!bulkText.trim()) {
@@ -519,6 +519,7 @@ setSaving(true)
 
       if (errors.length) {
         setBulkErrors(errors);
+        setSaving(false)
 
         notify(
           `${errors.length} validation errors found`,
@@ -535,6 +536,7 @@ setSaving(true)
       ------------------------------- */
 
       setValue("questions", parsedQuestions);
+      setSaving(false)
 
       notify(
         `${parsedQuestions.length} questions imported successfully ✅`,
@@ -542,6 +544,7 @@ setSaving(true)
       );
     } catch (error) {
       console.error(error);
+      setSaving(false)
 
       notify(
         "Failed to import questions",
@@ -549,6 +552,8 @@ setSaving(true)
       );
     } finally {
       setImporting(false);
+      setSaving(false)
+
     }
   };
 
