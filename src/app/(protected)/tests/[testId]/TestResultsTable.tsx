@@ -61,6 +61,7 @@ export default function TestResultsTable({ testId }: Props) {
 
   /* ---------------- Columns ---------------- */
 
+  
   const columns = [
     {
       id: "studentId",
@@ -83,11 +84,17 @@ export default function TestResultsTable({ testId }: Props) {
       label: "Chemistry",
       accessor: (r: TestResponse) => r.subjectWiseMarks?.Chemistry ?? 0,
     },
-    {
+     {
       id: "Maths",
       label: "Maths",
       accessor: (r: TestResponse) => r.subjectWiseMarks?.Maths ?? 0,
     },
+    {
+      id: "Biology",
+      label: "Biology",
+      accessor: (r: TestResponse) => r.subjectWiseMarks?.Biology ?? 0,
+    },
+     
     {
       id: "correct",
       label: "✔ Correct",

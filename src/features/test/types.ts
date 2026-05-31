@@ -220,10 +220,27 @@ export const testSchema = z.object({
 export type TestFormData = z.infer<typeof testSchema>;
 
 
+export interface QuestionMismatch {
+  questionNo: number;
+  subject: string;
+  selectedOption: string;
+  correctOption: string;
+  excelMarks: number;
+  softwareMarks: number;
+}
+
+export interface StudentMismatch {
+  rollNo: number;
+  studentName: string;
+  mismatches: QuestionMismatch[];
+}
+
 export interface ImportTestResultsResponse {
   success: boolean;
   total: number;
   verified: number;
   rejected: number;
   message: string;
+
+  mismatches?: StudentMismatch[];
 }
