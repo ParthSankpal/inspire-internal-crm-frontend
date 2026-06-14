@@ -391,7 +391,7 @@ export const MATHS_SYLLABUS: MathsChapter[] = [
                     "Logarithmic Inequalities",
                 ],
             },
-             {
+            {
                 name: "Tables",
                 subtopics: [
                     "Finding Logarithm",
@@ -877,6 +877,66 @@ export const MATHS_SYLLABUS: MathsChapter[] = [
                     "Limits at Infinity",
                 ],
             },
+        ],
+    },
+
+
+    {
+        chapter: "Relations and Functions",
+        topics: [
+            {
+                name: "Real Numbers",
+                subtopics: [
+                    "Intervals as Subset of ℝ",
+                ],
+            },
+            {
+                name: "Inequalities",
+                subtopics: [
+                    "Inequalities",
+                    "Sign Scheme Method",
+                ],
+            },
+            {
+                name: "Modulus",
+                subtopics: [
+                    "Modulus of Real Number",
+                ],
+            },
+            {
+                name: "Relation",
+                subtopics: [
+                    "Definition of Relation",
+                    "Domain, Range, Codomain",
+                    "Types of Relations",
+                ],
+            },
+            {
+                name: "Functions",
+                subtopics: [
+                    "Function as Mapping",
+                    "Domain & Range of Function",
+                    "Vertical Line Test",
+                    "Even & Odd Functions",
+                    "Periodic Functions",
+                    "Composite Functions",
+                    "Inverse Functions",
+                ],
+            },
+            {
+                name: "Graphs",
+                subtopics: [
+                    "Transformation of Graphs",
+                ],
+            },
+            {
+                name: "Special Functions",
+                subtopics: [
+                    "Greatest Integer Function",
+                    "Fractional Part Function",
+                ],
+            },
+            
         ],
     },
 
