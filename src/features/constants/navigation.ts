@@ -1,6 +1,6 @@
 
 
-import { Home, Users, FileText,School, Calendar, Group,Receipt, Upload, BookOpen, ClipboardList, NotebookPen, AlertTriangle } from "lucide-react";
+import { Home, Users, FileText,School, Calendar, Group,Receipt, Upload, BookOpen, ClipboardList, NotebookPen, AlertTriangle, BanknoteArrowDown } from "lucide-react";
 import { Scope } from "./scope";
 
 export const AppNavigation = [
@@ -63,6 +63,12 @@ export const AppNavigation = [
     href: "/receipts",
     icon: FileText,
     scopes: [Scope.MANAGE_RECEIPTS],
+  },
+   {
+    name: "Monthly Expenses",
+    href: "/monthlyExpenses",
+    icon: BanknoteArrowDown,
+    scopes: [Scope.HANDLE_FEES],
   },
   {
     name: "Schedules",
